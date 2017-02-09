@@ -8,8 +8,22 @@ export default class SlideControls extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { sliderValue: 100 };
+    this.state = { sliderValue: 100, orientationType: screen.orientation.type };
     this.handleValuesChange = this.handleValuesChange.bind(this);
+    this.handleOrientationChange = this.handleOrientationChange.bind(this);
+  }
+
+  componentDidMount() {
+    window.addEventListener("orientationchange", this.handleOrientationChange);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("orientationchange", this.handleOrientationChange);
+  }
+
+  handleOrientationChange() {
+    console.log(screen.orientation.type);
+    this.setState({orientationType: screen.orientation.type});
   }
 
   handleValuesChange(event) {
@@ -50,8 +64,11 @@ export default class SlideControls extends Component {
       actions,
     } = this.props;
 
+    let orientationStyle = (this.state.orientationType === 'portrait-primary')
+      ? styles.slideControlsWrapperPortrait : styles.slideControlsWrapper;
+
     return (
-      <div id="slideControlsWrapper" className={styles.slideControlsWrapper}>
+      <div id="slideControlsWrapper" className={orientationStyle}>
         {this.renderAriaLabelsDescs()}
 
         {/*Previous Slide button*/}

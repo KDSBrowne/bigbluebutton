@@ -4,6 +4,7 @@
 $controls-color: #212121 !default;
 $controls-background: #F0F2F6 !default;
 
+.slideControlsWrapperPortrait,
 .slideControlsWrapper,
 .zoomWrapper {
   order: 2;
@@ -13,6 +14,11 @@ $controls-background: #F0F2F6 !default;
   align-items: center;
 }
 
+.slideControlsWrapperPortrait{
+  margin-bottom: 12% !important;
+}
+
+.slideControlsWrapperPortrait,
 .slideControlsWrapper {
   flex: 1;
   justify-content: center;
