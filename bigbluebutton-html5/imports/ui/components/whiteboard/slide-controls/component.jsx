@@ -22,7 +22,6 @@ export default class SlideControls extends Component {
   }
 
   handleOrientationChange() {
-    console.log(screen.orientation.type);
     this.setState({orientationType: screen.orientation.type});
   }
 
