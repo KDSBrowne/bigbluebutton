@@ -1,7 +1,7 @@
 import React from 'react';
 import Icon from '/imports/ui/components/icon/component';
 import Button from '/imports/ui/components/button/component';
-import ModalBase from '../modal/base/component';
+import Modal from '../modal/audio/component';
 import { clearModal } from '/imports/ui/components/app/service';
 import classNames from 'classnames';
 import ReactDOM from 'react-dom';
@@ -51,17 +51,18 @@ export default class Audio extends React.Component {
   }
 
   render() {
-    return (
-      <ModalBase
-        isTransparent={true}
-        isOpen={true}
-        onHide={null}
-        onShow={null}
-        className={styles.inner}>
-        <div>
+    return(
+      <Modal
+        dismiss={{
+          callback: (() => {
+            this.setState({ activeSubmenu: 0, focusSubmenu: 0 });
+            console.log('SHOULD DISCART SETTINGS CHANGES');
+          }),
+          label: 'Cancel',
+          description: 'Discart the changes and close the settings menu',
+        }}>
           {this.createMenu()}
-        </div>
-      </ModalBase>
+      </Modal>
     );
   }
 };

@@ -44,14 +44,6 @@ class JoinAudio extends React.Component {
     return (
       <div>
         <div className={styles.center}>
-          <Button className={styles.closeBtn}
-            label={intl.formatMessage(intlMessages.closeLabel)}
-            icon={'close'}
-            size={'lg'}
-            circle={true}
-            hideLabel={true}
-            onClick={this.handleClose}
-          />
           <div>
             <FormattedMessage
               id="app.audioModal.audioChoiceLabel"
