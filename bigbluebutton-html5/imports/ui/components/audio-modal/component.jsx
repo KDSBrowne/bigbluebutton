@@ -54,10 +54,7 @@ export default class Audio extends React.Component {
     return(
       <Modal
         dismiss={{
-          callback: (() => {
-            this.setState({ activeSubmenu: 0, focusSubmenu: 0 });
-            console.log('SHOULD DISCART SETTINGS CHANGES');
-          }),
+          callback: (() => {}),
           label: 'Cancel',
           description: 'Discart the changes and close the settings menu',
         }}>
