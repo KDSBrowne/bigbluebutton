@@ -39,9 +39,9 @@ export default class App extends Component {
 
     if (navbar) {
       return (
-        <header className={styles.navbar}>
+        <div role="navigation" className={styles.navbar}>
           {navbar}
-        </header>
+        </div>
       );
     }
 
@@ -74,9 +74,9 @@ export default class App extends Component {
       });
 
       return (
-        <nav className={cx(styles.userList, userListStyle)}>
+        <div role="region" aria-label="Participants" className={cx(styles.userList, userListStyle)}>
           {userList}
-        </nav>
+        </div>
       );
     }
 
@@ -88,9 +88,9 @@ export default class App extends Component {
 
     if (chat) {
       return (
-        <section className={styles.chat} role="log">
+        <div role="region" aria-label="Chat" className={styles.chat}>
           {chat}
-        </section>
+        </div>
       );
     }
 
@@ -102,9 +102,9 @@ export default class App extends Component {
 
     if (media) {
       return (
-        <section className={styles.media}>
+        <div role="region" aria-label="Media" className={styles.media}>
           {media}
-        </section>
+        </div>
       );
     }
 
@@ -128,9 +128,9 @@ export default class App extends Component {
 
     if (actionsbar) {
       return (
-        <section className={styles.actionsbar}>
+        <div role="region"  aria-label="Actions Bar" className={styles.actionsbar}>
           {actionsbar}
-        </section>
+        </div>
       );
     }
 
