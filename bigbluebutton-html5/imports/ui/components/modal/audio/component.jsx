@@ -76,7 +76,6 @@ export default class Modal extends Component {
           {this.props.children}
         </div>
         <div id="modalDismissDescription" hidden>{dismiss.description}</div>
-        <div id="modalConfirmDescription" hidden>{confirm.description}</div>
       </ModalBase>
     );
   }
