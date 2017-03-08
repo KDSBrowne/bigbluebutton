@@ -62,7 +62,7 @@ export default class Modal extends Component {
         onShow={this.props.onShow}
         isTransparent={true}
       >
-        <div className={styles.actions}>
+        <div>
           <Button className={styles.closeBtn}
             label={dismiss.label}
             icon={'close'}
