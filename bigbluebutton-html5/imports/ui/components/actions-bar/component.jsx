@@ -30,9 +30,6 @@ export default class ActionsBar extends Component {
           {/*<JoinVideo />*/}
           <EmojiContainer />
         </div>
-        <div className={styles.hidden}>
-          <ActionsDropdown {...{isUserPresenter}}/>
-        </div>
       </div>
     );
   }
