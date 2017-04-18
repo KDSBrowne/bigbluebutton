@@ -163,7 +163,7 @@ class UserListItem extends Component {
       if (!isDropdownVisible) {
         const offsetPageTop =
           (dropdownTrigger.offsetTop + dropdownTrigger.offsetHeight - scrollContainer.scrollTop);
-          
+
         nextState.dropdownOffset = window.innerHeight - offsetPageTop;
         nextState.dropdownDirection = 'bottom';
       }
@@ -174,7 +174,7 @@ class UserListItem extends Component {
 
   /**
   * Check if the dropdown is visible and is opened by the user
-  * 
+  *
   * @return True if is visible and opened by the user.
   */
   isDropdownActivedByUser() {
@@ -184,8 +184,8 @@ class UserListItem extends Component {
 
   /**
    * Return true if the content fit on the screen, false otherwise.
-   * 
-   * @param {number} contentOffSetTop 
+   *
+   * @param {number} contentOffSetTop
    * @param {number} contentOffsetHeight
    * @return True if the content fit on the screen, false otherwise.
    */
@@ -231,6 +231,8 @@ class UserListItem extends Component {
       <li
         role="button"
         aria-haspopup="true"
+        aria-live="assertive"
+        aria-relevant="additions"
         className={cx(styles.userListItem, userItemContentsStyle)}>
         {this.renderUserContents()}
       </li>
@@ -282,6 +284,7 @@ class UserListItem extends Component {
                   className={styles.actionsHeader}
                   key={_.uniqueId('action-header')}
                   label={user.name}
+                  isTitle={true}
                   style={{ fontWeight: 600 }}
                   defaultMessage={user.name} />),
                 (<DropdownListSeparator key={_.uniqueId('action-separator')} />),
