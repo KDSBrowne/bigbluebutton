@@ -42,10 +42,10 @@
   &[aria-selected="true"] {
     border-right: 0.2rem solid $color-primary !important;
     padding-right: 1rem !important;
-    color: $color-link !important;
+    color: $color-primary !important;
 
     &>.icon {
-      color: $color-link !important;
+      color: $color-primary !important;
     }
   }
 }
