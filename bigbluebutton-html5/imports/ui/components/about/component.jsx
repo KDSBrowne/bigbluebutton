@@ -35,6 +35,16 @@ const intlMessages = defineMessages({
 });
 
 class AboutComponent extends Component {
+
+  componentDidMount() {
+    document.getElementsByTagName('body')[0].removeAttribute('aria-hidden');
+    document.getElementById('app').setAttribute("aria-hidden", "true");
+  }
+
+  componentWillUnmount() {
+    document.getElementById('app').setAttribute("aria-hidden", "false");
+  }
+
   render() {
     const { intl, clientBuild, copyright } = this.props;
 

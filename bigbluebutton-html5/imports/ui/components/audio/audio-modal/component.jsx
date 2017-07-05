@@ -23,6 +23,15 @@ export default class AudioModal extends React.Component {
     this.submenus.push({ componentName: AudioSettings });
   }
 
+  componentDidMount() {
+    document.getElementsByTagName('body')[0].removeAttribute('aria-hidden');
+    document.getElementById('app').setAttribute("aria-hidden", "true");
+  }
+
+  componentWillUnmount() {
+    document.getElementById('app').setAttribute("aria-hidden", "false");
+  }
+  
   handleSubmenuChange(i) {
     this.setState({ activeSubmenu: i });
   }

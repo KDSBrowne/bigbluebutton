@@ -94,6 +94,19 @@ class Settings extends Component {
     });
   }
 
+  componentDidMount() {
+    setTimeout((function() {
+        return function() {
+            document.getElementsByTagName('body')[0].removeAttribute("aria-hidden");
+            document.getElementById('app').setAttribute("aria-hidden", "true");
+        }
+    })(), 35);
+  }
+
+  componentWillUnmount() {
+    document.getElementById('app').setAttribute("aria-hidden", "false");
+  }
+
   setHtmlFontSize(size) {
     document.getElementsByTagName('html')[0].style.fontSize = size;
   }
