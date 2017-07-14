@@ -41,6 +41,7 @@ export default class DropdownContent extends Component {
         style={style}
         aria-expanded={this.props['aria-expanded']}
         className={cx(styles.content, styles[placementName], className)}
+        role="menu"
       >
         <div className={styles.scrollable}>
           {boundChildren}

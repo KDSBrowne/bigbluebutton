@@ -48,6 +48,7 @@ class ModalSimple extends Component {
         <header className={styles.header}>
           <h1 className={styles.title}>{title}</h1>
           <Button
+            color={'primary'}
             className={styles.dismiss}
             label={dismiss.label}
             icon={'close'}

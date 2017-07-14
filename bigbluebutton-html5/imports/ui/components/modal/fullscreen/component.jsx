@@ -58,6 +58,7 @@ class ModalFullscreen extends Component {
           <h1 className={styles.title}>{title}</h1>
           <div className={styles.actions}>
             <Button
+              color={'primary'}
               className={styles.dismiss}
               label={dismiss.label}
               onClick={this.handleAction.bind(this, 'dismiss')}
