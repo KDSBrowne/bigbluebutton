@@ -58,12 +58,26 @@ $controls-background: #F0F2F6 !default;
   border-right: 0 !important;
 }
 
-.prevSlide {
+.prevSlide,
+.nextSlide {
   border-radius: 5px 0 0 5px;
+
+  &:focus,
+  &:hover{
+    i{
+      color: $color-white !important;
+    }
+  }
 }
 
 .skipSlide {
   padding: 0 0.8%;
+
+  &:focus,
+  &:hover{
+      color: $color-white !important;
+      background-color: $color-primary-hover;
+  }
 }
 
 .zoomSlider {

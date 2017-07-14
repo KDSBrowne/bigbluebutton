@@ -71,7 +71,7 @@ class PresentationToolbar extends Component {
           aria-labelledby="prevSlideLabel"
           aria-describedby="prevSlideDescrip"
           disabled={!(currentSlideNum > 1)}
-          color={'default'}
+          color={'primary'}
           icon={'left_arrow'}
           size={'md'}
           onClick={actions.previousSlideHandler}
@@ -99,12 +99,13 @@ class PresentationToolbar extends Component {
           aria-labelledby="nextSlideLabel"
           aria-describedby="nextSlideDescrip"
           disabled={!(currentSlideNum < numberOfSlides)}
-          color={'default'}
+          color={'primary'}
           icon={'right_arrow'}
           size={'md'}
           onClick={actions.nextSlideHandler}
           label={intl.formatMessage(intlMessages.nextSlideLabel)}
           hideLabel
+          className={styles.nextSlide}
         />
 
         {/* Fit to width button

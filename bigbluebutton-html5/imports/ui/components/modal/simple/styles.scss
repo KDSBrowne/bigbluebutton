@@ -34,7 +34,14 @@
     border-color: transparent;
     background-color: transparent;
 
-    > i { color: $color-white; }
+    i{ color: $color-gray; }
+  }
+
+  &:focus,
+  &:hover{
+    i{
+      color: $color-white !important;
+    }
   }
 }
 

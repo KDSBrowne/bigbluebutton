@@ -57,7 +57,7 @@ class JoinAudio extends React.Component {
             icon={'close'}
             size={'lg'}
             hideLabel
-            onClick={this.handleClose}
+            onClick={this.handleClose}    
           />
         </div>
 
