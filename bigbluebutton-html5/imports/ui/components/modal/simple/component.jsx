@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import ModalBase, { withModalState } from '../base/component';
-import Button from '/imports/ui/components/button/component';
-import styles from './styles.scss';
 import cx from 'classnames';
+import Button from '/imports/ui/components/button/component';
+import ModalBase, { withModalState } from '../base/component';
+import styles from './styles.scss';
 
 const propTypes = {
   title: PropTypes.string.isRequired,
@@ -34,27 +34,29 @@ class ModalSimple extends Component {
       dismiss,
       className,
       modalisOpen,
-      ...otherProps,
+      ...otherProps
     } = this.props;
 
     return (
       <ModalBase
         isOpen={modalisOpen}
         className={cx(className, styles.modal)}
-        onRequestClose={this.handleDismiss.bind(this)}
+        onRequestClose={() => this.handleDismiss()}
         contentLabel={title}
         {...otherProps}
       >
         <header className={styles.header}>
           <h1 className={styles.title}>{title}</h1>
           <Button
+            color={'primary'}
             className={styles.dismiss}
             label={dismiss.label}
             icon={'close'}
-            circle={true}
-            hideLabel={true}
-            onClick={this.handleDismiss.bind(this)}
-            aria-describedby={'modalDismissDescription'} />
+            circle
+            hideLabel
+            onClick={() => this.handleDismiss()}
+            aria-describedby={'modalDismissDescription'}
+          />
         </header>
         <div className={styles.content}>
           {this.props.children}
@@ -63,7 +65,7 @@ class ModalSimple extends Component {
       </ModalBase>
     );
   }
-};
+}
 
 ModalSimple.propTypes = propTypes;
 ModalSimple.defaultProps = defaultProps;

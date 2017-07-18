@@ -10,6 +10,7 @@ const PLACEMENTS = [
   'left bottom', 'left', 'left top',
 ];
 
+
 const propTypes = {
   /**
    * Placements of the dropdown and its caret
@@ -24,6 +25,7 @@ const defaultProps = {
 };
 
 export default class DropdownContent extends Component {
+
   render() {
     const { placement, className, children, style } = this.props;
     const { dropdownToggle, dropdownShow, dropdownHide } = this.props;
@@ -41,6 +43,7 @@ export default class DropdownContent extends Component {
         style={style}
         aria-expanded={this.props['aria-expanded']}
         className={cx(styles.content, styles[placementName], className)}
+        role="menu"
       >
         <div className={styles.scrollable}>
           {boundChildren}
