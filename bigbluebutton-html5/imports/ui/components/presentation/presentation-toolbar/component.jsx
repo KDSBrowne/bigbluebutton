@@ -67,7 +67,6 @@ class PresentationToolbar extends Component {
 
         {/* Previous Slide button*/}
         <Button
-          role="button"
           aria-labelledby="prevSlideLabel"
           aria-describedby="prevSlideDescrip"
           disabled={!(currentSlideNum > 1)}
@@ -105,6 +104,7 @@ class PresentationToolbar extends Component {
           onClick={actions.nextSlideHandler}
           label={intl.formatMessage(intlMessages.nextSlideLabel)}
           hideLabel
+          className={styles.nextSlide}
         />
 
         {/* Fit to width button

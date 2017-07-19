@@ -76,6 +76,13 @@
   > [class*=" icon-bbb-"] {
     color: $color-gray-light;
   }
+
+  &:hover,
+  &:focus {
+    > [class*=" icon-bbb-"] {
+      color: $color-white;
+    } 
+  }
 }
 
 .info {

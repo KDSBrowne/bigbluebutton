@@ -35,6 +35,11 @@
     background-color: transparent;
 
     > i { color: $color-text; }
+
+    &:hover,
+    &:focus {
+      > i { color: $color-white; }
+    }
   }
 }
 
