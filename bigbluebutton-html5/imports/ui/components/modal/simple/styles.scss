@@ -28,17 +28,37 @@
   font-weight: 400;
 }
 
-.dismiss {
-  flex: 0;
-  > span:first-child {
-    border-color: transparent;
-    background-color: transparent;
-
-    > i { color: $color-text; }
-  }
-}
-
 .overlay {
   @extend .overlay;
   background-color: rgba(0, 0, 0, .5);
+}
+
+.dismiss {
+  flex: 0;
+  border: none;
+  overflow: visible;
+  position: relative;
+  display: inline-block;
+  transition: background-color .2s linear;
+  border-radius: 50%;
+
+  i { color: $color-text; }
+
+  &,
+  &:active {
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &:focus::before {
+    position: absolute;
+    top: calc(.1em - .25em - .25em);
+    left: calc(.1em - .25em - .25em);
+    right: calc(.1em - .25em - .25em);
+    bottom: calc(.1em - .25em - .25em);
+    border: 3px solid $color-primary;
+    border-radius: 50%;
+    content: '';
+  }
 }
