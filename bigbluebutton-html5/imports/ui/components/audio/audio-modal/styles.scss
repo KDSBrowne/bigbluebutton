@@ -22,24 +22,74 @@
 }
 
 .closeBtn {
-  background-color: $color-white;
   border: none;
+  overflow: visible;
+  position: relative;
+  display: inline-block;
+  background-color: $color-white;
+  background-image: $color-white;
+  transition: background-color .2s linear;
+  cursor: pointer;
+
   i {
     color: $color-gray-light;
   }
 
-  &:focus,
   &:hover{
-    background-color: #0a5eac;
+    border-color: $color-primary;
+    background: $color-primary;
+    background-color: $color-primary;
+
     i{
       color: $color-white;
     }
   }
+
+  &,
+  &:active {
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &:active {
+    border-color: $color-primary;
+    background: $color-primary !important;
+    background-image: $color-primary !important;
+    box-shadow: inset 0 1px 1px 1px darken($color-primary, 10%);
+  }
+
+  &:focus::before {
+    position: absolute;
+    top: calc(.1em - .2em - .2em);
+    left: calc(.1em - .2em - .2em);
+    right: calc(.1em - .2em - .2em);
+    bottom: calc(.1em - .2em - .2em);
+    border: 3px solid $color-primary;
+    border-radius: calc(.1em + .2em + .2em);
+    content: '';
+  }
 }
 
-Button.audioBtn {
+.audioBtn {
   i{
     color: #3c5764;
+  }
+
+  > span:first-child {
+    margin-bottom: .5em;
+  }
+
+  &:focus {
+    outline: none;
+    > span:first-child {
+      transform: scale(1.1);
+      border: 5px solid $color-primary;  
+    }
+  }
+
+  &:active {
+    outline: none !important;
   }
 }
 
@@ -52,8 +102,7 @@ Button.audioBtn span:first-child {
 }
 
 // When hovering over a button of class audioBtn, change the border colour of first span-child
-Button.audioBtn:hover span:first-child, 
-Button.audioBtn:focus span:first-child {
+Button.audioBtn:hover span:first-child {
   border: 5px solid $color-primary;
   background-color: #f1f8ff;
 }
@@ -75,9 +124,80 @@ Button.audioBtn:last-of-type {
 
 .backBtn {
   border: none;
+
   i {
     color: $color-link;
   }
+
+  overflow: visible;
+  position: relative;
+  display: inline-block;
+  background-color: $color-white;
+  background-image: $color-white;
+  transition: background-color .2s linear;
+  cursor: pointer;
+
+  &:hover{
+    border-color: $color-primary !important;
+    background: $color-primary !important;
+    background-color: $color-primary !important;
+
+    i{
+      color: $color-white;
+    }
+  }
+
+  &:focus {
+    &:hover {
+      border-color: $color-primary !important;
+      background: $color-primary !important;
+      background-color: $color-primary !important;
+      color: $color-white !important;
+      i {
+        color: $color-white !important;
+      }
+    }
+  }
+
+  &:focus {
+    border-color: $color-white !important;
+    background: $color-white !important;
+    background-color: $color-white !important;
+    color: $color-primary !important;
+    i {
+      color: $color-primary !important;
+    }
+  }
+
+  &,
+  &:active {
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &:active {
+    border-color: $color-primary;
+    background: lighten($color-primary, 10%) !important;
+    background-image: $color-primary !important;
+    box-shadow: inset 0 1px 1px 1px darken($color-primary, 10%);
+    color: $color-white !important;
+    i {
+      color: $color-white !important;
+    }
+  }
+
+  &:focus::before {
+    position: absolute;
+    top: calc(.1em - .25em - .25em);
+    left: calc(.1em - .25em - .25em);
+    right: calc(.1em - .25em - .25em);
+    bottom: calc(.1em - .25em - .25em);
+    border: 3px solid $color-primary;
+    border-radius: calc(.1em + .2em + .2em);
+    content: '';
+  }
+
 }
 
 .topRow {
@@ -177,4 +297,62 @@ Button.audioBtn:last-of-type {
   position:absolute;
   left:50%;
   transform: translate(-50%, 0);
+}
+
+
+.enterBtn {
+  border: none;
+  overflow: visible;
+  position: relative;
+  display: inline-block;
+  background-color: $color-primary;
+  background-image: $color-primary;
+  transition: background-color .2s linear;
+  cursor: pointer;
+
+  i {
+    color: $color-white;
+  }
+
+  &:hover{
+    border-color: darken($color-primary, 10%);
+    background: darken($color-primary, 10%);
+    background-color: darken($color-primary, 10%);
+  }
+
+  &:focus {
+    &:hover {
+      border-color: darken($color-primary, 10%);
+      background: darken($color-primary, 10%);
+      background-color: darken($color-primary, 10%);
+    }
+  }
+
+  &,
+  &:active {
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      background: $color-primary;
+      background-color: $color-primary;
+    }
+  }
+
+  &:active {
+    border-color: lighten($color-primary, 10%);
+    background: lighten($color-primary, 10%) !important;
+    background-image: lighten($color-primary, 10%) !important;
+    box-shadow: inset 0 1px 1px 1px darken($color-primary, 10%);
+  }
+
+  &:focus::before {
+    position: absolute;
+    top: calc(.1em - .25em - .25em);
+    left: calc(.1em - .25em - .25em);
+    right: calc(.1em - .25em - .25em);
+    bottom: calc(.1em - .25em - .25em);
+    border: 3px solid $color-primary;
+    border-radius: calc(.1em + .2em + .2em);
+    content: '';
+  }
 }
