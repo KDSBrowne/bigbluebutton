@@ -79,3 +79,33 @@
 .dropdownBreakout {
   cursor: pointer;
 }
+
+
+.btn,
+.btnWithNotificationDot,
+.btnSettings {
+  border: none;
+  overflow: visible;
+  position: relative;
+  display: inline-block;
+  transition: background-color .2s linear;
+
+    &,
+  &:active {
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &:focus::before {
+    position: absolute;
+    top: calc(.1em - .25em - .25em);
+    left: calc(.1em - .25em - .25em);
+    right: calc(.1em - .25em - .25em);
+    bottom: calc(.1em - .25em - .25em);
+    border: 3px solid $color-primary;
+    border-radius: 50%;
+    content: '';
+  }
+
+}
