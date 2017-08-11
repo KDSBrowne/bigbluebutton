@@ -124,3 +124,62 @@
   border: 1px solid #f1f1f1;
   overflow: auto;
 }
+
+.circleBtn {
+  border: none;
+  overflow: visible;
+  position: relative;
+  display: inline-block;
+  background-color: $color-primary;
+  background-image: $color-primary;
+  transition: background-color .2s linear;
+  cursor: pointer;
+  border-radius: 50%;
+
+  i {
+    color: $color-white;
+  }
+
+  &:hover{
+    border-color: darken($color-primary, 10%);
+    background: darken($color-primary, 10%);
+    background-color: darken($color-primary, 10%);
+  }
+
+  &:focus {
+    &:hover {
+      border-color: darken($color-primary, 10%);
+      background: darken($color-primary, 10%);
+      background-color: darken($color-primary, 10%);
+    }
+  }
+
+  &,
+  &:active {
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      background: $color-primary;
+      background-color: $color-primary;
+    }
+  }
+
+  &:active {
+    border-color: lighten($color-primary, 10%);
+    background: lighten($color-primary, 10%) !important;
+    background-image: lighten($color-primary, 10%) !important;
+    box-shadow: inset 0 1px 1px 1px darken($color-primary, 10%);
+  }
+
+  &:focus::before {
+    position: absolute;
+    top: calc(.1em - .25em - .25em);
+    left: calc(.1em - .25em - .25em);
+    right: calc(.1em - .25em - .25em);
+    bottom: calc(.1em - .25em - .25em);
+    border: 3px solid $color-primary;
+    border-radius: 50%;
+    content: '';
+  }
+
+}

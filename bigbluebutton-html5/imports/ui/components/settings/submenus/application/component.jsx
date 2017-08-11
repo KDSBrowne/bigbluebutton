@@ -223,6 +223,7 @@ class ApplicationMenu extends BaseMenu {
                 <div className={styles.pullContentRight}>
                   <div className={styles.col}>
                     <Button
+                      className={styles.circleBtn}
                       onClick={() => this.handleIncreaseFontSize()}
                       color={'primary'}
                       icon={'add'}
@@ -233,6 +234,7 @@ class ApplicationMenu extends BaseMenu {
                   </div>
                   <div className={styles.col}>
                     <Button
+                      className={styles.circleBtn}
                       onClick={() => this.handleDecreaseFontSize()}
                       color={'primary'}
                       icon={'substract'}
