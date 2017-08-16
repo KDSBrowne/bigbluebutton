@@ -4,6 +4,7 @@ import Button from '/imports/ui/components/button/component';
 import { withRouter } from 'react-router';
 import { defineMessages, injectIntl } from 'react-intl';
 import AudioManager from '/imports/api/2.0/audio/client/manager';
+import styles from '../../actions-bar/styles.scss';
 
 const intlMessages = defineMessages({
   joinAudio: {
@@ -37,6 +38,7 @@ class JoinAudioOptions extends React.Component {
             icon={'audio_off'}
             size={'lg'}
             circle
+            className={styles.brandedFocus}
           />
         );
       }
@@ -50,6 +52,7 @@ class JoinAudioOptions extends React.Component {
         icon={'audio_on'}
         size={'lg'}
         circle
+        className={styles.brandedFocus}
       />
     );
   }

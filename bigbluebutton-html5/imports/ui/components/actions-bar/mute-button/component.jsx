@@ -33,11 +33,7 @@ class MuteAudio extends React.Component {
     const label = !isMuted ? muteLabel : unmuteLabel;
     const icon = !isMuted ? 'unmute' : 'mute';
     const tabIndex = !isInAudio ? -1 : 0;
-    let className = null;
-
-    if (isInAudio && isTalking) {
-      className = styles.circleGlow;
-    }
+    let className = (isInAudio && isTalking) ? styles.circleGlow : styles.brandedFocus;
 
     return (
       <Button

@@ -9,6 +9,8 @@ import DropdownContent from '/imports/ui/components/dropdown/content/component';
 import DropdownList from '/imports/ui/components/dropdown/list/component';
 import DropdownListItem from '/imports/ui/components/dropdown/list/item/component';
 
+import styles from '../styles.scss';
+
 const intlMessages = defineMessages({
   actionsLabel: {
     id: 'app.actionsBar.actionsDropdown.actionsLabel',
@@ -67,6 +69,7 @@ class ActionsDropdown extends Component {
             size="lg"
             circle
             onClick={() => null}
+            className={styles.brandedFocus}
           />
         </DropdownTrigger>
         <DropdownContent placement="top left">

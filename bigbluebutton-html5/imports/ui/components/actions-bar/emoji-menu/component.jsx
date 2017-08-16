@@ -10,6 +10,8 @@ import DropdownList from '/imports/ui/components/dropdown/list/component';
 import DropdownListItem from '/imports/ui/components/dropdown/list/item/component';
 import DropdownListSeparator from '/imports/ui/components/dropdown/list/separator/component';
 
+import styles from '../styles.scss';
+
 const propTypes = {
   // Emoji status of the current user
   userEmojiStatus: PropTypes.string.isRequired,
@@ -42,7 +44,7 @@ class EmojiMenu extends Component {
             hideLabel={false}
             color="primary"
             size="lg"
-
+            className={styles.brandedFocus}
             // FIXME: Without onClick react proptypes keep warning
             // even after the DropdownTrigger inject an onClick handler
             onClick={() => null}

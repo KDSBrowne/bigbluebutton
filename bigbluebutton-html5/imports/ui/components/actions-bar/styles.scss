@@ -28,3 +28,29 @@
 .circleGlow > :first-child{
     box-shadow: 0 0 .15rem #FFF !important;
 }
+
+.circleGlow {
+  @extend .brandedFocus;
+}
+
+.brandedFocus {
+  position: relative;
+
+  &,
+  &:active {
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &:focus::before {
+    position: absolute;
+    content: '';  
+    border: 3px solid $color-primary;
+    top: calc(.1em - .25em - .25em);
+    left: calc(.1em - .25em - .25em);
+    right: calc(.1em - .25em - .25em);
+    bottom: calc(.1em - .25em - .25em);
+    border-radius: calc(.1em + .2em + .2em);
+  }
+}
