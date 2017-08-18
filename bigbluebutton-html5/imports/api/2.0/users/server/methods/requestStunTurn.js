@@ -15,8 +15,8 @@ export default function requestStunTurn(meetingId, requesterUserId) {
     meeting_id: meetingId,
     requester_id: requesterUserId,
   };
-
+  
   Logger.verbose(`User '${requesterUserId}' requested stun/turn from meeting '${meetingId}'`);
 
-  return RedisPubSub.publish(CHANNEL, EVENT_NAME, payload);
+  return RedisPubSub.publishMeetingMessage(CHANNEL, EVENT_NAME, meetingId, payload);
 }
