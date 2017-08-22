@@ -164,6 +164,7 @@ export default class MessageListItem extends Component {
                   chatAreaId={this.props.chatAreaId}
                   lastReadMessageTime={this.props.lastReadMessageTime}
                   handleReadMessage={this.props.handleReadMessage}
+                  scrollArea={this.props.scrollArea}
                 />
               ))}
             </div>
