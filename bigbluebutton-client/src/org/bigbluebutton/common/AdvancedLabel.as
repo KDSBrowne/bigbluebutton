@@ -1,13 +1,13 @@
 /**
  * BigBlueButton open source conferencing system - http://www.bigbluebutton.org/
- * 
- * Copyright (c) 2012 BigBlueButton Inc. and by respective authors (see below).
+ *
+ * Copyright (c) 2017 BigBlueButton Inc. and by respective authors (see below).
  *
  * This program is free software; you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License as published by the Free Software
  * Foundation; either version 3.0 of the License, or (at your option) any later
  * version.
- * 
+ *
  * BigBlueButton is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
@@ -16,15 +16,15 @@
  * with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.bigbluebutton.modules.whiteboard.views
-{
-    import org.bigbluebutton.modules.whiteboard.views.models.WhiteboardTool;
+package org.bigbluebutton.common {
+	import mx.managers.IFocusManagerComponent;
 
-    public interface IDrawListener
-    {
-        function onMouseDown(mouseX:Number, mouseY:Number, tool:WhiteboardTool, wbId:String):void;
-        function onMouseMove(mouseX:Number, mouseY:Number, tool:WhiteboardTool):void;
-        function onMouseUp(mouseX:Number, mouseY:Number, tool:WhiteboardTool):void;
-        function stopDrawing(mouseX:Number, mouseY:Number):void;
-    }
+	import spark.components.Label;
+
+	public class AdvancedLabel extends Label implements IFocusManagerComponent {
+		public function AdvancedLabel() {
+			super();
+		}
+
+	}
 }
