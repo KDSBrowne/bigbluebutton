@@ -1,7 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 import RedisPubSub from '/imports/startup/server/redis2x';
-import { buildMessageHeader } from '/imports/api/common/server/helpers';
 
 export default function clearPublicChatHistory(credentials) {
   const REDIS_CONFIG = Meteor.settings.redis;
@@ -16,7 +15,5 @@ export default function clearPublicChatHistory(credentials) {
 
   const payload = {};
 
-  const header = buildMessageHeader(EVENT_NAME, meetingId, requesterUserId);
-
-  return RedisPubSub.publish(CHANNEL, eventName, meetingId, payload, header);
+  return RedisPubSub.publish(CHANNEL, eventName, meetingId, payload, { requesterUserId });
 }
