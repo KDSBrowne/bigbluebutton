@@ -1,0 +1,12 @@
+@import "/imports/ui/components/user-list/styles.scss";
+@import "/imports/ui/stylesheets/variables/_all";
+
+.content {
+  @extend %flex-column;
+  flex-grow: 9;
+  overflow: hidden;
+}
+
+.scrollableList {
+  @extend .customListFocus;
+}
