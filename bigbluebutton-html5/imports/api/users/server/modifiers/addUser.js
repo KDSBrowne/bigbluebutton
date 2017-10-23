@@ -6,6 +6,7 @@ import stringHash from 'string-hash';
 import flat from 'flat';
 
 import addVoiceUser from '/imports/api/voice-users/server/modifiers/addVoiceUser';
+import changeRole from './changeRole';
 
 const COLOR_LIST = [
   '#d32f2f', '#c62828', '#b71c1c', '#d81b60', '#c2185b', '#ad1457', '#880e4f',
@@ -61,12 +62,6 @@ export default function addUser(meetingId, user) {
     userRole = ROLE_VIEWER;
   }
 
-  const userRoles = [
-    'viewer',
-    user.presenter ? 'presenter' : false,
-    userRole === ROLE_MODERATOR ? 'moderator' : false,
-  ].filter(Boolean);
-
   /* While the akka-apps dont generate a color we just pick one
     from a list based on the userId */
   const color = COLOR_LIST[stringHash(user.intId) % COLOR_LIST.length];
@@ -76,7 +71,7 @@ export default function addUser(meetingId, user) {
       {
         meetingId,
         connectionStatus: 'online',
-        roles: userRoles,
+        roles: [],
         sortName: user.name.trim().toLowerCase(),
         color,
       },
@@ -100,6 +95,16 @@ export default function addUser(meetingId, user) {
   const cb = (err, numChanged) => {
     if (err) {
       return Logger.error(`Adding user to collection: ${err}`);
+    }
+
+    changeRole('VIEWER', true, userId, meetingId, 'system');
+
+    if (user.presenter) {
+      changeRole('PRESENTER', true, userId, meetingId, 'system');
+    }
+
+    if (userRole === ROLE_MODERATOR) {
+      changeRole('MODERATOR', true, userId, meetingId, 'system');
     }
 
     const { insertedId } = numChanged;
