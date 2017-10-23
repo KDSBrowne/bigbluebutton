@@ -107,6 +107,8 @@ class ReceivedJsonMsgHandlerActor(
       // Voice
       case RecordingStartedVoiceConfEvtMsg.NAME =>
         routeVoiceMsg[RecordingStartedVoiceConfEvtMsg](envelope, jsonNode)
+      case VoiceConfRunningEvtMsg.NAME =>
+        routeVoiceMsg[VoiceConfRunningEvtMsg](envelope, jsonNode)
       case UserJoinedVoiceConfEvtMsg.NAME =>
         routeVoiceMsg[UserJoinedVoiceConfEvtMsg](envelope, jsonNode)
       case UserLeftVoiceConfEvtMsg.NAME =>
@@ -185,6 +187,10 @@ class ReceivedJsonMsgHandlerActor(
         routeGenericMsg[ResizeAndMovePagePubMsg](envelope, jsonNode)
       case RemovePresentationPubMsg.NAME =>
         routeGenericMsg[RemovePresentationPubMsg](envelope, jsonNode)
+      case PresentationUploadTokenReqMsg.NAME =>
+        routeGenericMsg[PresentationUploadTokenReqMsg](envelope, jsonNode)
+      case GetAllPresentationPodsReqMsg.NAME =>
+        routeGenericMsg[GetAllPresentationPodsReqMsg](envelope, jsonNode)
       case PreuploadedPresentationsSysPubMsg.NAME =>
         routeGenericMsg[PreuploadedPresentationsSysPubMsg](envelope, jsonNode)
       case PresentationConversionUpdateSysPubMsg.NAME =>
@@ -197,6 +203,12 @@ class ReceivedJsonMsgHandlerActor(
         routeGenericMsg[PresentationConversionCompletedSysPubMsg](envelope, jsonNode)
       case AssignPresenterReqMsg.NAME =>
         routeGenericMsg[AssignPresenterReqMsg](envelope, jsonNode)
+
+      // Presentation Pods
+      case CreateNewPresentationPodPubMsg.NAME =>
+        routeGenericMsg[CreateNewPresentationPodPubMsg](envelope, jsonNode)
+      case RemovePresentationPodPubMsg.NAME =>
+        routeGenericMsg[RemovePresentationPodPubMsg](envelope, jsonNode)
 
       // Caption
       case EditCaptionHistoryPubMsg.NAME =>
@@ -263,6 +275,16 @@ class ReceivedJsonMsgHandlerActor(
         routeVoiceMsg[ScreenshareStartedVoiceConfEvtMsg](envelope, jsonNode)
       case ScreenshareStoppedVoiceConfEvtMsg.NAME =>
         routeVoiceMsg[ScreenshareStoppedVoiceConfEvtMsg](envelope, jsonNode)
+
+      // GroupChats
+      case GetGroupChatsReqMsg.NAME =>
+        routeGenericMsg[GetGroupChatsReqMsg](envelope, jsonNode)
+      case SendGroupChatMessageMsg.NAME =>
+        routeGenericMsg[SendGroupChatMessageMsg](envelope, jsonNode)
+      case GetGroupChatMsgsReqMsg.NAME =>
+        routeGenericMsg[GetGroupChatMsgsReqMsg](envelope, jsonNode)
+      case CreateGroupChatReqMsg.NAME =>
+        routeGenericMsg[CreateGroupChatReqMsg](envelope, jsonNode)
 
       case _ =>
         log.error("Cannot route envelope name " + envelope.name)

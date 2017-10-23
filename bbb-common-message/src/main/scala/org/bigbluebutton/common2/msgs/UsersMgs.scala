@@ -61,7 +61,7 @@ object UserJoinedMeetingEvtMsg {
 case class UserJoinedMeetingEvtMsg(header: BbbClientMsgHeader,
                                    body: UserJoinedMeetingEvtMsgBody) extends BbbCoreMsg
 case class UserJoinedMeetingEvtMsgBody(intId: String, extId: String, name: String, role: String,
-                                       guest: Boolean, authed: Boolean, waitingForAcceptance: Boolean, emoji: String,
+                                       guest: Boolean, authed: Boolean, guestStatus: String, emoji: String,
                                        presenter: Boolean, locked: Boolean, avatar: String)
 
 /**
@@ -127,7 +127,7 @@ case class UserEmojiChangedEvtMsgBody(userId: String, emoji: String)
   */
 object UserEjectedFromMeetingEvtMsg { val NAME = "UserEjectedFromMeetingEvtMsg" }
 case class UserEjectedFromMeetingEvtMsg(header: BbbClientMsgHeader, body: UserEjectedFromMeetingEvtMsgBody) extends StandardMsg
-case class UserEjectedFromMeetingEvtMsgBody(userId: String, ejectedBy: String)
+case class UserEjectedFromMeetingEvtMsgBody(userId: String, ejectedBy: String, reason: String)
 
 object AssignPresenterReqMsg { val NAME = "AssignPresenterReqMsg"}
 case class AssignPresenterReqMsg(header: BbbClientMsgHeader, body: AssignPresenterReqMsgBody) extends StandardMsg
@@ -260,7 +260,7 @@ object GetUsersMeetingRespMsg {
 case class GetUsersMeetingRespMsg(header: BbbClientMsgHeader, body: GetUsersMeetingRespMsgBody) extends BbbCoreMsg
 case class GetUsersMeetingRespMsgBody(users: Vector[WebUser])
 case class WebUser(intId: String, extId: String, name: String, role: String,
-                   guest: Boolean, authed: Boolean, waitingForAcceptance: Boolean, emoji: String, locked: Boolean,
+                   guest: Boolean, authed: Boolean, guestStatus: String, emoji: String, locked: Boolean,
                    presenter: Boolean, avatar: String)
 
 object SyncGetUsersMeetingRespMsg { val NAME = "SyncGetUsersMeetingRespMsg"}

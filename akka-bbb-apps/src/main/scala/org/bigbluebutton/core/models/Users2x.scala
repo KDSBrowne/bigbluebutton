@@ -151,7 +151,7 @@ class Users2x {
 }
 
 case class UserState(intId: String, extId: String, name: String, role: String,
-                     guest: Boolean, authed: Boolean, waitingForAcceptance: Boolean, emoji: String, locked: Boolean,
+                     guest: Boolean, authed: Boolean, guestStatus: String, emoji: String, locked: Boolean,
                      presenter: Boolean, avatar: String)
 
 case class UserIdAndName(id: String, name: String)
@@ -167,4 +167,5 @@ object Roles {
   val PRESENTER_ROLE = "PRESENTER"
   val VIEWER_ROLE = "VIEWER"
   val GUEST_ROLE = "GUEST"
+  val AUTHENTICATED_ROLE = "AUTHENTICATED"
 }
