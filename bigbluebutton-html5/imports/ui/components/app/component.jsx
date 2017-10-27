@@ -68,13 +68,18 @@ class App extends Component {
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'm') {
-        alert('Toggle Mute');
+        console.log('Toggle Mute');
         this.props.toggleSelfVoice();
       }
 
       if (event.key === 'u') {
-        alert('Open User List');
+        console.log('Open User List');
         this.props.toggleUserList();
+      }
+
+      if (event.key === 'p') {
+        console.log('Open Public Chat');
+        this.props.togglePublicChat();
       }
 
     });

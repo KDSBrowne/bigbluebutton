@@ -61,6 +61,7 @@ const AppContainer = (props) => {
     media,
     toggleSelfVoice,
     toggleUserList,
+    togglePublicChat,
     ...otherProps
   } = props;
 
@@ -73,6 +74,7 @@ const AppContainer = (props) => {
       media={media}
       toggleSelfVoice={toggleSelfVoice}
       toggleUserList={toggleUserList}
+      togglePublicChat={togglePublicChat}
       {...otherProps}
     />
   );
@@ -129,6 +131,13 @@ export default withRouter(injectIntl(withModalMounter(createContainer((
         router.push('/');
       } else {
         router.push('/users');
+      }
+    },
+    togglePublicChat: () => {
+      if (location.pathname.indexOf('/public') !== -1) {
+        router.push('/');
+      } else {
+        router.push('/users/chat/public');
       }
     },
   };
