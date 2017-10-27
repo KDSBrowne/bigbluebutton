@@ -10,6 +10,8 @@ import Meetings from '/imports/api/meetings';
 
 import ClosedCaptionsContainer from '/imports/ui/components/closed-captions/container';
 
+import MuteService from '../actions-bar/service';  
+
 import {
   getFontSize,
   getCaptionsStatus,
@@ -57,6 +59,7 @@ const AppContainer = (props) => {
     navbar,
     actionsbar,
     media,
+    toggleSelfVoice,
     ...otherProps
   } = props;
 
@@ -67,6 +70,7 @@ const AppContainer = (props) => {
       navbar={navbarWithLocation}
       actionsbar={actionsbar}
       media={media}
+      toggleSelfVoice={toggleSelfVoice}
       {...otherProps}
     />
   );
@@ -117,6 +121,7 @@ export default withRouter(injectIntl(withModalMounter(createContainer((
   return {
     closedCaption: getCaptionsStatus() ? <ClosedCaptionsContainer /> : null,
     fontSize: getFontSize(),
+    toggleSelfVoice: MuteService.toggleSelfVoice,
   };
 }, AppContainer))));
 

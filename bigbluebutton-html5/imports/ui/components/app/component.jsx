@@ -12,6 +12,7 @@ import AudioContainer from '../audio/container';
 import ChatNotificationContainer from '../chat/notification/container';
 import styles from './styles';
 
+
 const intlMessages = defineMessages({
   userListLabel: {
     id: 'app.userList.label',
@@ -64,6 +65,19 @@ class App extends Component {
     Modal.setAppElement('#app');
     document.getElementsByTagName('html')[0].lang = locale;
     document.getElementsByTagName('html')[0].style.fontSize = this.props.fontSize;
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'm'){
+        alert("Toggle Mute");
+        this.props.toggleSelfVoice();
+      }
+
+      if (event.key === 'k'){
+        alert("Open public chat");
+
+      }
+
+    });
   }
 
   renderNavBar() {
@@ -175,23 +189,25 @@ class App extends Component {
     const { params } = this.props;
 
     return (
-      <main className={styles.main}>
-        <AudioNotificationContainer />
-        <NotificationsBarContainer />
-        <section className={styles.wrapper}>
-          {this.renderUserList()}
-          {this.renderChat()}
-          <div className={styles.content}>
-            {this.renderNavBar()}
-            {this.renderMedia()}
-            {this.renderActionsBar()}
-          </div>
-          {this.renderSidebar()}
-        </section>
-        <ModalContainer />
-        <AudioContainer />
-        <ToastContainer />
-        <ChatNotificationContainer currentChatID={params.chatID} />
+      <main 
+        className={styles.main}
+        ref={(ref) => { this.main = ref; }}>
+          <AudioNotificationContainer />
+          <NotificationsBarContainer />
+          <section className={styles.wrapper}>
+            {this.renderUserList()}
+            {this.renderChat()}
+            <div className={styles.content}>
+              {this.renderNavBar()}
+              {this.renderMedia()}
+              {this.renderActionsBar()}
+            </div>
+            {this.renderSidebar()}
+          </section>
+          <ModalContainer />
+          <AudioContainer />
+          <ToastContainer />
+          <ChatNotificationContainer currentChatID={params.chatID} />
       </main>
     );
   }
