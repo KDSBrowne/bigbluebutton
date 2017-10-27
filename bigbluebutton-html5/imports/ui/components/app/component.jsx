@@ -66,15 +66,15 @@ class App extends Component {
     document.getElementsByTagName('html')[0].lang = locale;
     document.getElementsByTagName('html')[0].style.fontSize = this.props.fontSize;
 
-    document.addEventListener('keydown', event => {
-      if (event.key === 'm'){
-        alert("Toggle Mute");
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'm') {
+        alert('Toggle Mute');
         this.props.toggleSelfVoice();
       }
 
-      if (event.key === 'k'){
-        alert("Open public chat");
-
+      if (event.key === 'u') {
+        alert('Open User List');
+        this.props.toggleUserList();
       }
 
     });
@@ -189,25 +189,26 @@ class App extends Component {
     const { params } = this.props;
 
     return (
-      <main 
+      <main
         className={styles.main}
-        ref={(ref) => { this.main = ref; }}>
-          <AudioNotificationContainer />
-          <NotificationsBarContainer />
-          <section className={styles.wrapper}>
-            {this.renderUserList()}
-            {this.renderChat()}
-            <div className={styles.content}>
-              {this.renderNavBar()}
-              {this.renderMedia()}
-              {this.renderActionsBar()}
-            </div>
-            {this.renderSidebar()}
-          </section>
-          <ModalContainer />
-          <AudioContainer />
-          <ToastContainer />
-          <ChatNotificationContainer currentChatID={params.chatID} />
+        ref={(ref) => { this.main = ref; }}
+      >
+        <AudioNotificationContainer />
+        <NotificationsBarContainer />
+        <section className={styles.wrapper}>
+          {this.renderUserList()}
+          {this.renderChat()}
+          <div className={styles.content}>
+            {this.renderNavBar()}
+            {this.renderMedia()}
+            {this.renderActionsBar()}
+          </div>
+          {this.renderSidebar()}
+        </section>
+        <ModalContainer />
+        <AudioContainer />
+        <ToastContainer />
+        <ChatNotificationContainer currentChatID={params.chatID} />
       </main>
     );
   }

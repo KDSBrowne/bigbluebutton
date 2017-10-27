@@ -10,7 +10,7 @@ import Meetings from '/imports/api/meetings';
 
 import ClosedCaptionsContainer from '/imports/ui/components/closed-captions/container';
 
-import MuteService from '../actions-bar/service';  
+import MuteService from '../actions-bar/service';
 
 import {
   getFontSize,
@@ -60,6 +60,7 @@ const AppContainer = (props) => {
     actionsbar,
     media,
     toggleSelfVoice,
+    toggleUserList,
     ...otherProps
   } = props;
 
@@ -71,6 +72,7 @@ const AppContainer = (props) => {
       actionsbar={actionsbar}
       media={media}
       toggleSelfVoice={toggleSelfVoice}
+      toggleUserList={toggleUserList}
       {...otherProps}
     />
   );
@@ -122,6 +124,13 @@ export default withRouter(injectIntl(withModalMounter(createContainer((
     closedCaption: getCaptionsStatus() ? <ClosedCaptionsContainer /> : null,
     fontSize: getFontSize(),
     toggleSelfVoice: MuteService.toggleSelfVoice,
+    toggleUserList: () => {
+      if (location.pathname.indexOf('/users') !== -1) {
+        router.push('/');
+      } else {
+        router.push('/users');
+      }
+    },
   };
 }, AppContainer))));
 
