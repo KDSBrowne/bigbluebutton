@@ -82,6 +82,10 @@ class App extends Component {
         this.props.togglePublicChat();
       }
 
+      if (event.key === 'o') {
+        console.log('FullScreen Toggle');
+        this.props.toggleFullScreen();
+      }
     });
   }
 

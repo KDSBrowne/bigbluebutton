@@ -10,7 +10,8 @@ import Meetings from '/imports/api/meetings';
 
 import ClosedCaptionsContainer from '/imports/ui/components/closed-captions/container';
 
-import MuteService from '../actions-bar/service';
+import MuteService from '/imports/ui/components/actions-bar/service';
+import FullscreenService from '/imports/ui/components/nav-bar/settings-dropdown/service';
 
 import {
   getFontSize,
@@ -62,6 +63,7 @@ const AppContainer = (props) => {
     toggleSelfVoice,
     toggleUserList,
     togglePublicChat,
+    toggleFullScreen,
     ...otherProps
   } = props;
 
@@ -75,6 +77,7 @@ const AppContainer = (props) => {
       toggleSelfVoice={toggleSelfVoice}
       toggleUserList={toggleUserList}
       togglePublicChat={togglePublicChat}
+      toggleFullScreen={toggleFullScreen}
       {...otherProps}
     />
   );
@@ -126,6 +129,7 @@ export default withRouter(injectIntl(withModalMounter(createContainer((
     closedCaption: getCaptionsStatus() ? <ClosedCaptionsContainer /> : null,
     fontSize: getFontSize(),
     toggleSelfVoice: MuteService.toggleSelfVoice,
+    toggleFullScreen: FullscreenService.toggleFullScreen,
     toggleUserList: () => {
       if (location.pathname.indexOf('/users') !== -1) {
         router.push('/');
