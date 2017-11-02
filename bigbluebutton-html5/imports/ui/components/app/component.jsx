@@ -70,32 +70,26 @@ class App extends Component {
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'm') {
-        console.log('Toggle Mute');
         this.props.toggleSelfVoice();
       }
 
       if (event.key === 'u') {
-        console.log('Open User List');
         this.props.toggleUserList();
       }
 
       if (event.key === 'p') {
-        console.log('Open Public Chat');
         this.props.togglePublicChat();
       }
 
       if (event.key === 'o') {
-        console.log('FullScreen Toggle');
         this.props.toggleFullScreen();
       }
 
       if (event.key === 's') {
-        console.log('Open Settings modal');
         this.props.mountModal(<SettingsMenuContainer />);
       }
 
       if (event.key === 'a') {
-        console.log('About app modal');
         this.props.mountModal(<AboutContainer />);
       }
     });
