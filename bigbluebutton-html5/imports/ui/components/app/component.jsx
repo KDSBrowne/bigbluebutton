@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 import cx from 'classnames';
 import { withModalMounter } from '/imports/ui/components/modal/service';
 import SettingsMenuContainer from '/imports/ui/components/settings/container';
+import AboutContainer from '/imports/ui/components/about/container';
 
 import ToastContainer from '../toast/container';
 import ModalContainer from '../modal/container';
@@ -91,6 +92,11 @@ class App extends Component {
       if (event.key === 's') {
         console.log('Open Settings modal');
         this.props.mountModal(<SettingsMenuContainer />);
+      }
+
+      if (event.key === 'a') {
+        console.log('About app modal');
+        this.props.mountModal(<AboutContainer />);
       }
     });
   }
