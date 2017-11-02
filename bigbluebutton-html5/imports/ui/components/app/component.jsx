@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { defineMessages, injectIntl } from 'react-intl';
 import Modal from 'react-modal';
 import cx from 'classnames';
+import { withModalMounter } from '/imports/ui/components/modal/service';
+import SettingsMenuContainer from '/imports/ui/components/settings/container';
 
 import ToastContainer from '../toast/container';
 import ModalContainer from '../modal/container';
@@ -11,7 +13,6 @@ import AudioNotificationContainer from '../audio/audio-notification/container';
 import AudioContainer from '../audio/container';
 import ChatNotificationContainer from '../chat/notification/container';
 import styles from './styles';
-
 
 const intlMessages = defineMessages({
   userListLabel: {
@@ -85,6 +86,11 @@ class App extends Component {
       if (event.key === 'o') {
         console.log('FullScreen Toggle');
         this.props.toggleFullScreen();
+      }
+
+      if (event.key === 's') {
+        console.log('Open Settings modal');
+        this.props.mountModal(<SettingsMenuContainer />);
       }
     });
   }
@@ -225,4 +231,4 @@ class App extends Component {
 
 App.propTypes = propTypes;
 App.defaultProps = defaultProps;
-export default injectIntl(App);
+export default withModalMounter(injectIntl(App));
