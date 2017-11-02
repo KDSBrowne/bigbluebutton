@@ -6,7 +6,7 @@ import cx from 'classnames';
 import { withModalMounter } from '/imports/ui/components/modal/service';
 import SettingsMenuContainer from '/imports/ui/components/settings/container';
 import AboutContainer from '/imports/ui/components/about/container';
-import ShortcutKeysContainer from '/imports/ui/components/shortcut-keys/container';
+import ShortcutKeysComponent from '/imports/ui/components/shortcut-keys/component';
 
 import ToastContainer from '../toast/container';
 import ModalContainer from '../modal/container';
@@ -96,7 +96,7 @@ class App extends Component {
       }
 
       if (event.key === 'b') {
-        this.props.mountModal(<ShortcutKeysContainer />);
+        this.props.mountModal(<ShortcutKeysComponent />);
       }
     });
   }
