@@ -6,6 +6,7 @@ import cx from 'classnames';
 import { withModalMounter } from '/imports/ui/components/modal/service';
 import SettingsMenuContainer from '/imports/ui/components/settings/container';
 import AboutContainer from '/imports/ui/components/about/container';
+import ShortcutKeysContainer from '/imports/ui/components/shortcut-keys/container';
 
 import ToastContainer from '../toast/container';
 import ModalContainer from '../modal/container';
@@ -68,8 +69,9 @@ class App extends Component {
     document.getElementsByTagName('html')[0].lang = locale;
     document.getElementsByTagName('html')[0].style.fontSize = this.props.fontSize;
 
+
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'm') {
+      if (event.ctrlKey && event.key === 'm') {
         this.props.toggleSelfVoice();
       }
 
@@ -77,7 +79,7 @@ class App extends Component {
         this.props.toggleUserList();
       }
 
-      if (event.key === 'p') {
+      if (event.key === 'y') {
         this.props.togglePublicChat();
       }
 
@@ -91,6 +93,10 @@ class App extends Component {
 
       if (event.key === 'a') {
         this.props.mountModal(<AboutContainer />);
+      }
+
+      if (event.key === 'b') {
+        this.props.mountModal(<ShortcutKeysContainer />);
       }
     });
   }

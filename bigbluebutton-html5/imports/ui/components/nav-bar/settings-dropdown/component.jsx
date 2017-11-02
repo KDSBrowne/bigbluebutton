@@ -7,6 +7,7 @@ import { withModalMounter } from '/imports/ui/components/modal/service';
 import LogoutConfirmationContainer from '/imports/ui/components/logout-confirmation/container';
 import AboutContainer from '/imports/ui/components/about/container';
 import SettingsMenuContainer from '/imports/ui/components/settings/container';
+import ShortcutKeysContainer from '/imports/ui/components/shortcut-keys/container';
 
 import Button from '/imports/ui/components/button/component';
 import Dropdown from '/imports/ui/components/dropdown/component';
@@ -142,6 +143,12 @@ class SettingsDropdown extends Component {
               label={intl.formatMessage(intlMessages.aboutLabel)}
               description={intl.formatMessage(intlMessages.aboutDesc)}
               onClick={() => mountModal(<AboutContainer />)}
+            />
+            <DropdownListItem
+              icon="none"
+              label={'Shortcut Keys'}
+              description={'listing of available shotcut keys'}
+              onClick={() => mountModal(<ShortcutKeysContainer />)}
             />
             <DropdownListSeparator />
             <DropdownListItem
