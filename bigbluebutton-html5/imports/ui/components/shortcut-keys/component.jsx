@@ -6,43 +6,43 @@ import styles from './styles';
 const intlMessages = defineMessages({
   shortcutTitleLabel: {
     id: 'app.shortcutKeys.shortcutTitleLabel',
-    description: '',
+    description: 'shorcut modal title',
   },
   shortcutLabel: {
     id: 'app.shortcutKeys.shortcutLabel',
-    description: 'heading for shortcut keys table',
+    description: 'heading for the shortcut column',
   },
   functionLabel: {
     id: 'app.shortcutKeys.functionLabel',
-    description: 'heading for shortcut keys table',
+    description: 'heading for the function column',
   },
   toggleUserListLabel: {
     id: 'app.shortcutKeys.toggleUserListLabel',
-    description: '',
+    description: 'label for the userlist toggle shortcut',
   },
   togglePubChatLabel: {
     id: 'app.shortcutKeys.togglePubChatLabel',
-    description: '',
+    description: 'label for then public chat toggle shortcut',
   },
   toggleFullscreenLabel: {
     id: 'app.shortcutKeys.toggleFullscreenLabel',
-    description: '',
+    description: 'label for then fullscreen toggle shortcut',
   },
   openSettingsLabel: {
     id: 'app.shortcutKeys.openSettingsLabel',
-    description: '',
+    description: 'label for the open settings shortcut',
   },
   openAboutLabel: {
     id: 'app.shortcutKeys.openAboutLabel',
-    description: '',
+    description: 'label for the open about shortcut',
   },
   openShortcutsLabel: {
     id: 'app.shortcutKeys.openShortcutsLabel',
-    description: '',
+    description: 'label for the open shortcuts help modal',
   },
   toggleMuteLabel: {
     id: 'app.shortcutKeys.toggleMuteLabel',
-    description: '',
+    description: 'label for the toggle mute shortcut',
   },
 });
 
