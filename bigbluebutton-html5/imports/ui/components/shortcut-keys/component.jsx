@@ -70,7 +70,7 @@ const intlMessages = defineMessages({
   },
   openHelpShortcut: {
     id: 'app.shortcutKeys.openHelpShortcut',
-    description: '',
+    description: 'key combination to open shortcut key list',
   },
 });
 
