@@ -1,12 +1,18 @@
+@import "../../stylesheets/variables/_all";
+
+.table{
+  margin-left:auto; 
+  margin-right:auto;
+}
+
 .table, .th, .td {
-  border: 1px solid black;
+  border: $border-size solid $color-gray-lighter;
+  padding: $sm-padding-x;
   border-collapse: collapse;
 }
 
 .th {
-  text-align: left;
+  text-align: center;
+  padding: $sm-padding-x;
 }
 
-.td {
-  padding-right: 1em;
-}

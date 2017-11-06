@@ -75,31 +75,31 @@ const ShortcutKeysComponent = ({ intl }) => (
         <tr>
           <td className={styles.td}>Ctrl + Alt + 3</td>
           <td className={styles.td}>
-            {intl.formatMessage(intlMessages.toggleFullscreenLabel)}
+            {intl.formatMessage(intlMessages.openSettingsLabel)}
           </td>
         </tr>
         <tr>
           <td className={styles.td}>Ctrl + Alt + 4</td>
           <td className={styles.td}>
-            {intl.formatMessage(intlMessages.openSettingsLabel)}
+            {intl.formatMessage(intlMessages.toggleFullscreenLabel)}
           </td>
         </tr>
         <tr>
-          <td className={styles.td}>Ctrl + Alt + 5</td>
+          <td className={styles.td}>Ctrl + Alt + M</td>
+          <td className={styles.td}>
+            {intl.formatMessage(intlMessages.toggleMuteLabel)}
+          </td>
+        </tr>
+        <tr>
+          <td className={styles.td}>Ctrl + Alt + I</td>
           <td className={styles.td}>
             {intl.formatMessage(intlMessages.openAboutLabel)}
           </td>
         </tr>
         <tr>
-          <td className={styles.td}>Ctrl + Alt + 6</td>
+          <td className={styles.td}>Ctrl + Alt + H</td>
           <td className={styles.td}>
             {intl.formatMessage(intlMessages.openShortcutsLabel)}
-          </td>
-        </tr>
-        <tr>
-          <td className={styles.td}>Ctrl + Alt + 7</td>
-          <td className={styles.td}>
-            {intl.formatMessage(intlMessages.toggleMuteLabel)}
           </td>
         </tr>
       </tbody>

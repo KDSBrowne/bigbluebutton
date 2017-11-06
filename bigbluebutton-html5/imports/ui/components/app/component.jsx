@@ -69,33 +69,32 @@ class App extends Component {
     document.getElementsByTagName('html')[0].lang = locale;
     document.getElementsByTagName('html')[0].style.fontSize = this.props.fontSize;
 
-
     document.addEventListener('keydown', (event) => {
-      if (event.ctrlKey && event.key === 'm') {
+      if (event.ctrlKey && event.altKey && event.key === 'm') {
         this.props.toggleSelfVoice();
       }
 
-      if (event.key === 'u') {
+      if (event.ctrlKey && event.altKey && event.key === '1') {
         this.props.toggleUserList();
       }
 
-      if (event.key === 'y') {
+      if (event.ctrlKey && event.altKey && event.key === '2') {
         this.props.togglePublicChat();
       }
 
-      if (event.key === 'o') {
-        this.props.toggleFullScreen();
-      }
-
-      if (event.key === 's') {
+      if (event.ctrlKey && event.altKey && event.key === '3') {
         this.props.mountModal(<SettingsMenuContainer />);
       }
 
-      if (event.key === 'a') {
+      if (event.ctrlKey && event.altKey && event.key === '4') {
+        this.props.toggleFullScreen();
+      }
+
+      if (event.ctrlKey && event.altKey && event.key === 'i') {
         this.props.mountModal(<AboutContainer />);
       }
 
-      if (event.key === 'b') {
+      if (event.ctrlKey && event.altKey && event.key === 'h') {
         this.props.mountModal(<ShortcutKeysComponent />);
       }
     });
