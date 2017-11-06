@@ -44,6 +44,34 @@ const intlMessages = defineMessages({
     id: 'app.shortcutKeys.toggleMuteLabel',
     description: 'label for the toggle mute shortcut',
   },
+  toggleUserlistShortcut: {
+    id: 'app.shortcutKeys.toggleUserlistShortcut',
+    description: 'key combination to toggle userlist',
+  },
+  toggleMuteShortcut: {
+    id: 'app.shortcutKeys.toggleMuteShortcut',
+    description: 'key combination to mute and unmute',
+  },
+  togglePubChatShortcut: {
+    id: 'app.shortcutKeys.togglePubChatShortcut',
+    description: 'key combination to toggle public chat',
+  },
+  openSettingShortcut: {
+    id: 'app.shortcutKeys.toggleOpenSettingsShortcut',
+    description: 'key combination to open settings',
+  },
+  toggleFullscreenShortcut: {
+    id: 'app.shortcutKeys.toggleFullscreenShortcut',
+    description: 'key combination to toggle fullscreen',
+  },
+  openAboutShortcut: {
+    id: 'app.shortcutKeys.openAboutShortcut',
+    description: 'key combination to open about',
+  },
+  openHelpShortcut: {
+    id: 'app.shortcutKeys.openHelpShortcut',
+    description: '',
+  },
 });
 
 const ShortcutKeysComponent = ({ intl }) => (
@@ -61,43 +89,43 @@ const ShortcutKeysComponent = ({ intl }) => (
           <th className={styles.th}>{intl.formatMessage(intlMessages.functionLabel)}</th>
         </tr>
         <tr>
-          <td className={styles.td}>Ctrl + Alt + 1</td>
+          <td className={styles.td}>{intl.formatMessage(intlMessages.toggleUserlistShortcut)}</td>
           <td className={styles.td}>
             {intl.formatMessage(intlMessages.toggleUserListLabel)}
           </td>
         </tr>
         <tr>
-          <td className={styles.td}>Ctrl + Alt + 2</td>
+          <td className={styles.td}>{intl.formatMessage(intlMessages.togglePubChatShortcut)}</td>
           <td className={styles.td}>
             {intl.formatMessage(intlMessages.togglePubChatLabel)}
           </td>
         </tr>
         <tr>
-          <td className={styles.td}>Ctrl + Alt + 3</td>
+          <td className={styles.td}>{intl.formatMessage(intlMessages.openSettingShortcut)}</td>
           <td className={styles.td}>
             {intl.formatMessage(intlMessages.openSettingsLabel)}
           </td>
         </tr>
         <tr>
-          <td className={styles.td}>Ctrl + Alt + 4</td>
+          <td className={styles.td}>{intl.formatMessage(intlMessages.toggleFullscreenShortcut)}</td>
           <td className={styles.td}>
             {intl.formatMessage(intlMessages.toggleFullscreenLabel)}
           </td>
         </tr>
         <tr>
-          <td className={styles.td}>Ctrl + Alt + M</td>
+          <td className={styles.td}>{intl.formatMessage(intlMessages.toggleMuteShortcut)}</td>
           <td className={styles.td}>
             {intl.formatMessage(intlMessages.toggleMuteLabel)}
           </td>
         </tr>
         <tr>
-          <td className={styles.td}>Ctrl + Alt + I</td>
+          <td className={styles.td}>{intl.formatMessage(intlMessages.openAboutShortcut)}</td>
           <td className={styles.td}>
             {intl.formatMessage(intlMessages.openAboutLabel)}
           </td>
         </tr>
         <tr>
-          <td className={styles.td}>Ctrl + Alt + H</td>
+          <td className={styles.td}>{intl.formatMessage(intlMessages.openHelpShortcut)}</td>
           <td className={styles.td}>
             {intl.formatMessage(intlMessages.openShortcutsLabel)}
           </td>
