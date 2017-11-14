@@ -17,10 +17,6 @@ import SettingsDropdown from './settings-dropdown/component';
 import UserListToggleBtnContainer from './userlist-toggle-btn/container';
 
 const intlMessages = defineMessages({
-  toggleUserListLabel: {
-    id: 'app.navBar.userListToggleBtnLabel',
-    description: 'Toggle button label',
-  },
   newMessages: {
     id: 'app.navBar.toggleUserList.newMessages',
     description: 'label for toggleUserList btn when showing red notification',
