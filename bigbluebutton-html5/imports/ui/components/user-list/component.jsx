@@ -53,7 +53,7 @@ class UserList extends Component {
 
   render() {
     return (
-      <div className={styles.userList}>
+      <div className={styles.userList} id="ul">
         {<UserContent
           intl={this.props.intl}
           openChats={this.props.openChats}
