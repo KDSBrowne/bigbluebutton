@@ -74,7 +74,6 @@ class App extends Component {
     Modal.setAppElement('#app');
     document.getElementsByTagName('html')[0].lang = locale;
     document.getElementsByTagName('html')[0].style.fontSize = this.props.fontSize;
-    document.getElementById('ul').style.width = '15vw';
 
     this.ulHandle.addEventListener('mousedown', this.initULResize, false);
   }
