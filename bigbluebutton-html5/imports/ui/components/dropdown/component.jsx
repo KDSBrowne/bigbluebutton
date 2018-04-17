@@ -4,6 +4,7 @@ import { findDOMNode } from 'react-dom';
 import cx from 'classnames';
 import { defineMessages, injectIntl } from 'react-intl';
 import Button from '/imports/ui/components/button/component';
+import screenreaderTrap from 'makeup-screenreader-trap';
 import { styles } from './styles';
 import DropdownTrigger from './trigger/component';
 import DropdownContent from './content/component';
@@ -66,6 +67,15 @@ class Dropdown extends Component {
     this.handleHide = this.handleHide.bind(this);
     this.handleToggle = this.handleToggle.bind(this);
     this.handleWindowClick = this.handleWindowClick.bind(this);
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    if (!nextState.isOpen) {
+      screenreaderTrap.untrap();
+      return;
+    }
+
+    screenreaderTrap.trap(this.dropdown);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -144,6 +154,7 @@ class Dropdown extends Component {
         aria-haspopup={otherProps['aria-haspopup']}
         aria-label={otherProps['aria-label']}
         tabIndex={-1}
+        ref={(node) => { this.dropdown = node; }}
       >
         {trigger}
         {content}

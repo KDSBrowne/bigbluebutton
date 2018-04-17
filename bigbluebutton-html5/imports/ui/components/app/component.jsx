@@ -115,8 +115,6 @@ class App extends Component {
 
     if (!userList) return null;
 
-    const compactChat = window.location.pathname.includes('chat');
-
     const userListStyle = {};
     userListStyle[styles.compact] = compactUserList;
     userList = React.cloneElement(userList, {
@@ -127,7 +125,7 @@ class App extends Component {
       <div
         className={cx(styles.userList, userListStyle)}
         aria-label={intl.formatMessage(intlMessages.userListLabel)}
-        aria-hidden={compactChat}
+        aria-hidden={window.location.pathname.includes('chat')}
       >
         {userList}
       </div>
@@ -154,13 +152,11 @@ class App extends Component {
 
     if (!media) return null;
 
-    const compactUL = window.location.pathname.includes('users');
-
     return (
       <section
         className={styles.media}
         aria-label={intl.formatMessage(intlMessages.mediaLabel)}
-        aria-hidden={compactUL}
+        aria-hidden={window.location.pathname.includes('users')}
       >
         {media}
         {this.renderClosedCaption()}
@@ -172,13 +168,11 @@ class App extends Component {
     const { actionsbar, intl } = this.props;
     if (!actionsbar) return null;
 
-    const compactUL = window.location.pathname.includes('users');
-
     return (
       <section
         className={styles.actionsbar}
         aria-label={intl.formatMessage(intlMessages.actionsBarLabel)}
-        aria-hidden={compactUL}
+        aria-hidden={window.location.pathname.includes('users')}
       >
         {actionsbar}
       </section>
