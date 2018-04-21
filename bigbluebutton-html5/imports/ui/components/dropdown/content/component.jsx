@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { styles } from '../styles';
 
-
 const PLACEMENTS = [
   'top left', 'top', 'top right',
   'right top', 'right', 'right bottom',
