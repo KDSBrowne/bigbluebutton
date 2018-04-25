@@ -62,6 +62,10 @@ class App extends Component {
     this.state = {
       compactUserList: false, // TODO: Change this on userlist resize (?)
     };
+
+    this.initULResize = this.initULResize.bind(this);
+    this.startULResize = this.startULResize.bind(this);
+    this.stopULResize = this.stopULResize.bind(this);
   }
 
   componentDidMount() {
@@ -70,6 +74,23 @@ class App extends Component {
     Modal.setAppElement('#app');
     document.getElementsByTagName('html')[0].lang = locale;
     document.getElementsByTagName('html')[0].style.fontSize = this.props.fontSize;
+
+    this.ulHandle.addEventListener('mousedown', this.initULResize, false);
+  }
+
+  initULResize() {
+    window.addEventListener('mousemove', this.startULResize, false);
+    window.addEventListener('mouseup', this.stopULResize, false);
+  }
+
+  startULResize(e) {
+    document.getElementById('ul').style.width =
+      `${e.clientX - document.getElementById('ul').offsetLeft}px`;
+  }
+
+  stopULResize(e) {
+    window.removeEventListener('mousemove', this.startULResize, false);
+    window.removeEventListener('mouseup', this.stopULResize, false);
   }
 
   renderNavBar() {
@@ -184,6 +205,17 @@ class App extends Component {
       <main className={styles.main}>
         <NotificationsBarContainer />
         <section className={styles.wrapper}>
+          <div
+            className={styles.ulWrapper}
+            ref={(node) => { this.ulWrapper = node; }}
+          >
+            {this.renderUserList()}
+            <div
+              className={styles.ulHandle}
+              ref={(node) => { this.ulHandle = node; }}
+            />
+          </div>
+          {this.renderChat()}
           <div className={styles.content}>
             {this.renderNavBar()}
             {this.renderMedia()}

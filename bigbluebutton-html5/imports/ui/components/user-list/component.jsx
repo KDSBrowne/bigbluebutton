@@ -74,7 +74,7 @@ class UserList extends Component {
     } = this.props;
 
     return (
-      <div className={styles.userList}>
+      <div className={styles.userList} id="ul">
         {
           SHOW_BRANDING
           && !this.props.compact

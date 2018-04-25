@@ -73,6 +73,8 @@ $item-focus-border: $color-blue-lighter;
   color: $user-list-text;
   height: 100vh;
   padding-top: $md-padding-x;
+  min-width: 8vw;
+  width: 8vw;
 }
 
 .lists {

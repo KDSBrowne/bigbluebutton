@@ -4,6 +4,23 @@ $navbar-height: 65px; // TODO: Change to NavBar real height
 $actionsbar-height: 75px; // TODO: Change to ActionsBar real height
 $bars-padding: $lg-padding-x - .45rem; // -.45 so user-list and chat title is aligned with the presentation title
 
+.ulWrapper {
+  display: flex;
+  flex-direction: row;
+}
+
+.ulHandle {
+  display: flex;
+  width: 3px;
+  order: 2;
+  position: relative;
+  padding: 0;
+  cursor: col-resize;
+  background-color: $color-off-white;
+  margin-left: auto;
+}
+
+
 .main {
   position: relative;
   height: 100%;
@@ -97,6 +114,7 @@ $bars-padding: $lg-padding-x - .45rem; // -.45 so user-list and chat title is al
 
   z-index: 2;
   overflow: visible;
+  order: 1;
 
   order: 1;
 
