@@ -7,15 +7,16 @@ $bars-padding: $lg-padding-x - .45rem; // -.45 so user-list and chat title is al
 .ulWrapper {
   display: flex;
   flex-direction: row;
+  overflow: visible;
 }
 
 .ulHandle {
   display: flex;
-  width: 3px;
+  width: 4px;
   order: 2;
   position: relative;
   padding: 0;
-  cursor: col-resize;
+  cursor: w-resize;
   background-color: $color-off-white;
   margin-left: auto;
 }
@@ -116,14 +117,12 @@ $bars-padding: $lg-padding-x - .45rem; // -.45 so user-list and chat title is al
   overflow: visible;
   order: 1;
 
-  order: 1;
-
   @include mq($small-only) {
     padding-top: $navbar-height;
   }
 
   @include mq($medium-up) {
-    flex: 0 15vw;
+    flex: 0 25vw;
     order: 1;
   }
 

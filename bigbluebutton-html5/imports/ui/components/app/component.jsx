@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { defineMessages, injectIntl, intlShape } from 'react-intl';
 import Modal from 'react-modal';
 import cx from 'classnames';
+import { findDOMNode } from 'react-dom';
 
 import ToastContainer from '../toast/container';
 import ModalContainer from '../modal/container';
@@ -84,8 +85,14 @@ class App extends Component {
   }
 
   startULResize(e) {
-    document.getElementById('ul').style.width =
-      `${e.clientX - document.getElementById('ul').offsetLeft}px`;
+    const userList = findDOMNode(this.userList);
+    userList.style.width = `${e.clientX - userList.offsetLeft}px`;
+    if (e.clientX - userList.offsetLeft <= 100) {
+      const clickEvent = document.createEvent('MouseEvents');
+      clickEvent.initEvent('mouseup', true, true);
+      userList.dispatchEvent(clickEvent);
+      return this.props.router.push('/');
+    }
   }
 
   stopULResize(e) {
@@ -140,6 +147,7 @@ class App extends Component {
     userListStyle[styles.compact] = compactUserList;
     userList = React.cloneElement(userList, {
       compact: compactUserList,
+      ref: ref => this.userList = ref,
     });
 
     return (
@@ -210,10 +218,12 @@ class App extends Component {
             ref={(node) => { this.ulWrapper = node; }}
           >
             {this.renderUserList()}
-            <div
-              className={styles.ulHandle}
-              ref={(node) => { this.ulHandle = node; }}
-            />
+            {window.location.pathname !== '/html5client/' ?
+              <div
+                className={styles.ulHandle}
+                ref={(node) => { this.ulHandle = node; }}
+              /> : null
+            }
           </div>
           {this.renderChat()}
           <div className={styles.content}>
@@ -221,8 +231,6 @@ class App extends Component {
             {this.renderMedia()}
             {this.renderActionsBar()}
           </div>
-          {this.renderUserList()}
-          {this.renderChat()}
           {this.renderSidebar()}
         </section>
         <ModalContainer />
