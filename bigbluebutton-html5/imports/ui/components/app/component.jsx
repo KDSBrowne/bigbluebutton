@@ -76,14 +76,6 @@ class App extends Component {
     this.ulHandle.style.width = window.location.pathname === '/html5client/' ? `${HIDDEN_HANDLE_SIZE}px` : `${VISIBLE_HANDLE_SIZE}px`;
   }
 
-  shouldComponentUpdate(nextProps, nextState, nextContext) {
-    const userList = findDOMNode(this.userList);
-    //if (userList) {
-    //  userList.style.width = `${this.state.ulWidth}px`;
-    //}
-    return true;
-  }
-
   componentDidMount() {
     const { locale } = this.props;
 
