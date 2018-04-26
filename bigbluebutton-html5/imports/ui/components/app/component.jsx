@@ -69,6 +69,17 @@ class App extends Component {
     this.stopULResize = this.stopULResize.bind(this);
   }
 
+componentWillUpdate(nextProps, nextState) {
+  console.log('app will update');
+  console.log(window.location.pathname)
+  if (window.location.pathname === '/html5client/') {
+    this.ulHandle.style.width = '0px';
+  }else{
+    this.ulHandle.style.width = '4px';
+  }
+}
+
+
   componentDidMount() {
     const { locale } = this.props;
 
@@ -76,7 +87,10 @@ class App extends Component {
     document.getElementsByTagName('html')[0].lang = locale;
     document.getElementsByTagName('html')[0].style.fontSize = this.props.fontSize;
 
-    this.ulHandle.addEventListener('mousedown', this.initULResize, false);
+    if (this.ulHandle) {
+      this.ulHandle.addEventListener('mousedown', this.initULResize, false);
+      this.ulHandle.style.width = '4px';
+    }
   }
 
   initULResize() {
@@ -86,6 +100,7 @@ class App extends Component {
 
   startULResize(e) {
     const userList = findDOMNode(this.userList);
+    console.log(userList);
     userList.style.width = `${e.clientX - userList.offsetLeft}px`;
 
     if (e.clientX - userList.offsetLeft <= 80) {
@@ -93,6 +108,7 @@ class App extends Component {
       clickEvent.initEvent('mouseup', true, true);
       userList.dispatchEvent(clickEvent);
       this.props.router.push('/');
+      this.setState({ compactUserList: true });
     }
   }
 
@@ -209,6 +225,8 @@ class App extends Component {
 
   render() {
     const { params } = this.props;
+
+    console.log(this.state.compactUserList)
 
     return (
       <main className={styles.main}>
