@@ -62,6 +62,7 @@ class App extends Component {
 
     this.state = {
       compactUserList: false, // TODO: Change this on userlist resize (?)
+      ulWidth: 0,
     };
 
     this.initULResize = this.initULResize.bind(this);
@@ -69,16 +70,19 @@ class App extends Component {
     this.stopULResize = this.stopULResize.bind(this);
   }
 
-componentWillUpdate(nextProps, nextState) {
-  console.log('app will update');
-  console.log(window.location.pathname)
-  if (window.location.pathname === '/html5client/') {
-    this.ulHandle.style.width = '0px';
-  }else{
-    this.ulHandle.style.width = '4px';
+  componentWillUpdate(nextProps, nextState) {
+    const VISIBLE_HANDLE_SIZE = 4;
+    const HIDDEN_HANDLE_SIZE = 0;
+    this.ulHandle.style.width = window.location.pathname === '/html5client/' ? `${HIDDEN_HANDLE_SIZE}px` : `${VISIBLE_HANDLE_SIZE}px`;
   }
-}
 
+  shouldComponentUpdate(nextProps, nextState, nextContext) {
+    const userList = findDOMNode(this.userList);
+    //if (userList) {
+    //  userList.style.width = `${this.state.ulWidth}px`;
+    //}
+    return true;
+  }
 
   componentDidMount() {
     const { locale } = this.props;
@@ -100,7 +104,6 @@ componentWillUpdate(nextProps, nextState) {
 
   startULResize(e) {
     const userList = findDOMNode(this.userList);
-    console.log(userList);
     userList.style.width = `${e.clientX - userList.offsetLeft}px`;
 
     if (e.clientX - userList.offsetLeft <= 80) {
@@ -110,6 +113,8 @@ componentWillUpdate(nextProps, nextState) {
       this.props.router.push('/');
       this.setState({ compactUserList: true });
     }
+
+    this.setState({ ulWidth: (e.clientX - userList.offsetLeft) });
   }
 
   stopULResize(e) {
@@ -225,8 +230,6 @@ componentWillUpdate(nextProps, nextState) {
 
   render() {
     const { params } = this.props;
-
-    console.log(this.state.compactUserList)
 
     return (
       <main className={styles.main}>
