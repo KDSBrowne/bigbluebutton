@@ -87,11 +87,12 @@ class App extends Component {
   startULResize(e) {
     const userList = findDOMNode(this.userList);
     userList.style.width = `${e.clientX - userList.offsetLeft}px`;
-    if (e.clientX - userList.offsetLeft <= 100) {
+
+    if (e.clientX - userList.offsetLeft <= 80) {
       const clickEvent = document.createEvent('MouseEvents');
       clickEvent.initEvent('mouseup', true, true);
       userList.dispatchEvent(clickEvent);
-      return this.props.router.push('/');
+      this.props.router.push('/');
     }
   }
 
@@ -139,7 +140,7 @@ class App extends Component {
   renderUserList() {
     const { intl } = this.props;
     let { userList } = this.props;
-    const { compactUserList } = this.state;
+    const { compactUserList, ulWidth } = this.state;
 
     if (!userList) return null;
 
@@ -218,12 +219,10 @@ class App extends Component {
             ref={(node) => { this.ulWrapper = node; }}
           >
             {this.renderUserList()}
-            {window.location.pathname !== '/html5client/' ?
               <div
                 className={styles.ulHandle}
                 ref={(node) => { this.ulHandle = node; }}
-              /> : null
-            }
+              />
           </div>
           {this.renderChat()}
           <div className={styles.content}>
