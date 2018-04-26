@@ -83,9 +83,11 @@ class App extends Component {
     document.getElementsByTagName('html')[0].lang = locale;
     document.getElementsByTagName('html')[0].style.fontSize = this.props.fontSize;
 
+    const VISIBLE_HANDLE_SIZE = 4;
+
     if (this.ulHandle) {
       this.ulHandle.addEventListener('mousedown', this.initULResize, false);
-      this.ulHandle.style.width = '4px';
+      this.ulHandle.style.width = `${VISIBLE_HANDLE_SIZE}px`;
     }
   }
 
@@ -103,10 +105,9 @@ class App extends Component {
       clickEvent.initEvent('mouseup', true, true);
       userList.dispatchEvent(clickEvent);
       this.props.router.push('/');
-      this.setState({ compactUserList: true });
     }
 
-    this.setState({ ulWidth: (e.clientX - userList.offsetLeft) });
+    //this.setState({ ulWidth: (e.clientX - userList.offsetLeft) });
   }
 
   stopULResize(e) {
