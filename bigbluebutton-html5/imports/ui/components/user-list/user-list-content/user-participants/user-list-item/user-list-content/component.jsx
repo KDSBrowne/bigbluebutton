@@ -132,8 +132,6 @@ class UserListContent extends Component {
     this.setState({
       isActionsOpen: false,
     });
-
-    sessionStorage.setItem('BBB-userItemMenu-isOpen', false);
   }
 
   /**
@@ -259,9 +257,6 @@ class UserListContent extends Component {
     if (!actions.length) {
       return contents;
     }
-
-    //console.log(this.state);
-    //console.log(this.props);
 
     return (
       <Dropdown
