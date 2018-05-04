@@ -320,6 +320,30 @@ const toggleVoice = (userId) => { userId === Auth.userID ? makeCall('toggleSelfV
 const changeRole = (userId, role) => { makeCall('changeRole', userId, role); };
 
 const roving = (event, itemCount, changeState) => {
+  if (sessionStorage['BBB-userItemMenu-isOpen'] === 'true') {
+
+    let menuChildren = document.activeElement.getElementsByTagName('li');
+
+    if ([KEY_CODES.ESCAPE].includes(event.keyCode)) {
+      return document.activeElement.click();
+    }
+
+    if ([KEY_CODES.ARROW_UP].includes(event.keyCode)) {
+      return menuChildren[menuChildren.length - 1].focus();
+    }
+
+    if ([KEY_CODES.ARROW_DOWN].includes(event.keyCode)) {
+      for (let i = 0; i < menuChildren.length; i++) {
+        if (menuChildren[i].hasAttribute("tabIndex")) {
+          menuChildren[i].focus();
+          break;
+        }
+      }
+
+      return;
+    }
+  }
+ 
   if (this.selectedIndex === undefined) {
     this.selectedIndex = -1;
   }
@@ -350,7 +374,8 @@ const roving = (event, itemCount, changeState) => {
     changeState(this.selectedIndex);
   }
 
-  if ([KEY_CODES.ARROW_RIGHT, KEY_CODES.SPACE].includes(event.keyCode)) {
+  if ([KEY_CODES.ARROW_RIGHT, KEY_CODES.SPACE, KEY_CODES.ARROW_LEFT].includes(event.keyCode)) {
+    sessionStorage.setItem('BBB-userItemMenu-isOpen', true);
     document.activeElement.firstChild.click();
   }
 };

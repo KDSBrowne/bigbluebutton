@@ -11,6 +11,7 @@ import DropdownContent from '/imports/ui/components/dropdown/content/component';
 import DropdownList from '/imports/ui/components/dropdown/list/component';
 import DropdownListSeparator from '/imports/ui/components/dropdown/list/separator/component';
 import DropdownListTitle from '/imports/ui/components/dropdown/list/title/component';
+import SessionStorage from '/imports/ui/services/storage/session';
 import { styles } from './styles';
 import UserName from './../user-name/component';
 import UserIcons from './../user-icons/component';
@@ -118,6 +119,7 @@ class UserListContent extends Component {
       dropdownVisible: false,
     });
 
+    sessionStorage.setItem('BBB-userItemMenu-isOpen', false);
     const scrollContainer = this.props.getScrollContainerRef();
     scrollContainer.removeEventListener('scroll', this.handleScroll, false);
   }
@@ -130,6 +132,8 @@ class UserListContent extends Component {
     this.setState({
       isActionsOpen: false,
     });
+
+    sessionStorage.setItem('BBB-userItemMenu-isOpen', false);
   }
 
   /**
@@ -255,6 +259,9 @@ class UserListContent extends Component {
     if (!actions.length) {
       return contents;
     }
+
+    //console.log(this.state);
+    //console.log(this.props);
 
     return (
       <Dropdown
