@@ -321,12 +321,11 @@ const changeRole = (userId, role) => { makeCall('changeRole', userId, role); };
 
 const roving = (event, itemCount, changeState) => {
   if (sessionStorage['BBB-userItemMenu-isOpen'] === 'true') {
-
-    let menuChildren = document.activeElement.getElementsByTagName('li');
-
     if ([KEY_CODES.ESCAPE].includes(event.keyCode)) {
       return document.activeElement.click();
     }
+
+    const menuChildren = document.activeElement.getElementsByTagName('li');
 
     if ([KEY_CODES.ARROW_UP].includes(event.keyCode)) {
       return menuChildren[menuChildren.length - 1].focus();
@@ -334,7 +333,7 @@ const roving = (event, itemCount, changeState) => {
 
     if ([KEY_CODES.ARROW_DOWN].includes(event.keyCode)) {
       for (let i = 0; i < menuChildren.length; i++) {
-        if (menuChildren[i].hasAttribute("tabIndex")) {
+        if (menuChildren[i].hasAttribute('tabIndex')) {
           menuChildren[i].focus();
           break;
         }
@@ -343,7 +342,7 @@ const roving = (event, itemCount, changeState) => {
       return;
     }
   }
- 
+
   if (this.selectedIndex === undefined) {
     this.selectedIndex = -1;
   }
