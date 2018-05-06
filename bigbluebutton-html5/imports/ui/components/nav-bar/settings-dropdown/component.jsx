@@ -78,18 +78,45 @@ class SettingsDropdown extends Component {
     this.getListItems = this.getListItems.bind(this);
   }
 
-  componentWillMount() {
-    const { intl, isFullScreen, mountModal } = this.props;
+  componentWillReceiveProps(nextProps) {
+    const {
+      fullscreenLabel,
+      fullscreenDesc,
+      fullscreenIcon
+    } = this.getFullscreenInfo(nextProps);
+
+    this.menuItems.splice(0,1, <DropdownListItem
+      key={_.uniqueId('list-item-')}
+      icon={fullscreenIcon}
+      label={fullscreenLabel}
+      description={fullscreenDesc}
+      onClick={() => nextProps.handleToggleFullscreen()}
+    />)
+  }
+
+  getFullscreenInfo(nextProps) {
+    const { intl, isFullScreen, mountModal } = nextProps;
 
     let fullscreenLabel = intl.formatMessage(intlMessages.fullscreenLabel);
     let fullscreenDesc = intl.formatMessage(intlMessages.fullscreenDesc);
     let fullscreenIcon = 'fullscreen';
-
+    
     if (isFullScreen) {
       fullscreenLabel = intl.formatMessage(intlMessages.exitFullscreenLabel);
       fullscreenDesc = intl.formatMessage(intlMessages.exitFullscreenDesc);
       fullscreenIcon = 'exit_fullscreen';
     }
+
+    return {
+      fullscreenLabel,
+      fullscreenDesc,
+      fullscreenIcon
+    }
+  }
+  
+  componentWillMount() {
+  const { intl, mountModal } = this.props;
+  const { fullscreenLabel, fullscreenDesc, fullscreenIcon } = this.getFullscreenInfo(this.props);
 
     this.menuItems = [
       (<DropdownListItem
