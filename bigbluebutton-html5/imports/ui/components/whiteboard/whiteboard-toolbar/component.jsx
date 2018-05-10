@@ -419,36 +419,7 @@ class WhiteboardToolbar extends Component {
   renderThicknessItemIcon() {
     return (
       <svg className={styles.customSvgIcon} shapeRendering="geometricPrecision">
-        <circle
-          shapeRendering="geometricPrecision"
-          cx="50%"
-          cy="50%"
-          stroke="black"
-          strokeWidth="1"
-        >
-          <animate
-            ref={(ref) => { this.thicknessListIconColor = ref; }}
-            attributeName="fill"
-            attributeType="XML"
-            from={this.state.prevColorSelected.value}
-            to={this.state.colorSelected.value}
-            begin="indefinite"
-            dur={TRANSITION_DURATION}
-            repeatCount="0"
-            fill="freeze"
-          />
-          <animate
-            ref={(ref) => { this.thicknessListIconRadius = ref; }}
-            attributeName="r"
-            attributeType="XML"
-            from={this.state.prevThicknessSelected.value}
-            to={this.state.thicknessSelected.value}
-            begin="indefinite"
-            dur={TRANSITION_DURATION}
-            repeatCount="0"
-            fill="freeze"
-          />
-        </circle>
+        <circle cx="50%" cy="50%" r={this.state.thicknessSelected.value} stroke="black" stroke-width="1" fill={this.state.colorSelected.value} />
       </svg>
     );
   }
@@ -456,10 +427,6 @@ class WhiteboardToolbar extends Component {
   renderColorItem() {
     const { intl } = this.props;
     const isDisabled = this.state.annotationSelected.value === 'pointer';
-
-    console.log('renderColorItem')
-    console.log(this.state.colorSelected)
-
 
     return (
       <ToolbarMenuItem
