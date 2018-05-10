@@ -127,13 +127,13 @@ class WhiteboardToolbar extends Component {
   componentDidMount() {
     if (this.state.annotationSelected.value !== 'text') {
       // trigger initial animation on the thickness circle, otherwise it stays at 0
-      if ('beginElement' in this.thicknessListIconColor && this.thicknessListIconRadius && this.colorListIconColor) {
-        this.thicknessListIconColor.beginElement();
-        this.thicknessListIconRadius.beginElement();
-        this.colorListIconColor.beginElement();
-      }
-    } else if ('beginElement' in this.colorListIconColor) {
-      this.colorListIconColor.beginElement();
+      //if ('beginElement' in this.thicknessListIconColor && this.thicknessListIconRadius && this.colorListIconColor) {
+        //this.thicknessListIconColor.beginElement();
+        //this.thicknessListIconRadius.beginElement();
+        //this.colorListIconColor.beginElement();
+     // }
+   // } else if ('beginElement' in this.colorListIconColor) {
+      //this.colorListIconColor.beginElement();
     }
   }
 
@@ -181,26 +181,26 @@ class WhiteboardToolbar extends Component {
     if (this.state.colorSelected.value !== prevState.colorSelected.value) {
       // 1st case b)
       if (this.state.annotationSelected.value !== 'text') {
-        if ('beginElement' in this.thicknessListIconColor) {
-          this.thicknessListIconColor.beginElement();
-        }
+        //if ('beginElement' in this.thicknessListIconColor) {
+          //this.thicknessListIconColor.beginElement();
+        //}
       }
       // 1st case a)
-      if ('beginElement' in this.colorListIconColor) {
-        this.colorListIconColor.beginElement();
-      }
+      //if ('beginElement' in this.colorListIconColor) {
+        //this.colorListIconColor.beginElement();
+      //}
     // 2nd case
     } else if (this.state.thicknessSelected.value !== prevState.thicknessSelected.value) {
-      if ('beginElement' in this.thicknessListIconRadius) {
-        this.thicknessListIconRadius.beginElement();
-      }
+      //if ('beginElement' in this.thicknessListIconRadius) {
+        //this.thicknessListIconRadius.beginElement();
+      //}
       // 3rd case
     } else if (this.state.annotationSelected.value !== 'text' &&
           prevState.annotationSelected.value === 'text') {
-      if ('beginElement' in this.thicknessListIconRadius && this.thicknessListIconColor) {
-        this.thicknessListIconRadius.beginElement();
-        this.thicknessListIconColor.beginElement();
-      }
+      //if ('beginElement' in this.thicknessListIconRadius && this.thicknessListIconColor) {
+        //this.thicknessListIconRadius.beginElement();
+        //this.thicknessListIconColor.beginElement();
+      //}
     }
     // 4th case, initial animation is triggered in componentDidMount
   }
@@ -286,6 +286,10 @@ class WhiteboardToolbar extends Component {
   // and closes the color list
   handleColorChange(color) {
     this.props.actions.setColor(HEXToINTColor(color.value));
+
+    console.log('handleColorChange')
+    console.log(color)
+    console.log(HEXToINTColor(color.value))
 
     this.setState({
       prevColorSelected: this.state.colorSelected,
@@ -452,6 +456,11 @@ class WhiteboardToolbar extends Component {
   renderColorItem() {
     const { intl } = this.props;
     const isDisabled = this.state.annotationSelected.value === 'pointer';
+
+    console.log('renderColorItem')
+    console.log(this.state.colorSelected)
+
+
     return (
       <ToolbarMenuItem
         disabled={isDisabled}
@@ -483,19 +492,7 @@ class WhiteboardToolbar extends Component {
   renderColorItemIcon() {
     return (
       <svg className={styles.customSvgIcon}>
-        <rect x="25%" y="25%" width="50%" height="50%" stroke="black" strokeWidth="1">
-          <animate
-            ref={(ref) => { this.colorListIconColor = ref; }}
-            attributeName="fill"
-            attributeType="XML"
-            from={this.state.prevColorSelected.value}
-            to={this.state.colorSelected.value}
-            begin="indefinite"
-            dur={TRANSITION_DURATION}
-            repeatCount="0"
-            fill="freeze"
-          />
-        </rect>
+        <rect x="25%" y="25%" width="50%" height="50%" stroke="black" strokeWidth="1" fill={this.state.colorSelected.value}/>
       </svg>
     );
   }
