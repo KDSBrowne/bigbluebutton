@@ -3,6 +3,7 @@ import { withTracker } from 'meteor/react-meteor-data';
 import { withModalMounter } from '/imports/ui/components/modal/service';
 import AudioModal from './component';
 import Service from '../service';
+import deviceInfo from '/imports/utils/deviceInfo';
 
 const AudioModalContainer = props => <AudioModal {...props} />;
 
@@ -24,7 +25,7 @@ export default withModalMounter(withTracker(({ mountModal }) =>
         }
         reject(() => {
           Service.exitAudio();
-        })
+        });
       });
 
       return call.then(() => {
@@ -55,4 +56,5 @@ export default withModalMounter(withTracker(({ mountModal }) =>
     joinFullAudioImmediately: !listenOnlyMode && skipCheck,
     joinFullAudioEchoTest: !listenOnlyMode && !skipCheck,
     forceListenOnlyAttendee: listenOnlyMode && forceListenOnly && !Service.isUserModerator(),
+    deviceInfo,
   }))(AudioModalContainer));

@@ -127,10 +127,12 @@ class WhiteboardToolbar extends Component {
   componentDidMount() {
     if (this.state.annotationSelected.value !== 'text') {
       // trigger initial animation on the thickness circle, otherwise it stays at 0
-      this.thicknessListIconColor.beginElement();
-      this.thicknessListIconRadius.beginElement();
-      this.colorListIconColor.beginElement();
-    } else {
+      if ('beginElement' in this.thicknessListIconColor && this.thicknessListIconRadius && this.colorListIconColor) {
+        this.thicknessListIconColor.beginElement();
+        this.thicknessListIconRadius.beginElement();
+        this.colorListIconColor.beginElement();
+      }
+    } else if ('beginElement' in this.colorListIconColor) {
       this.colorListIconColor.beginElement();
     }
   }
@@ -179,20 +181,27 @@ class WhiteboardToolbar extends Component {
     if (this.state.colorSelected.value !== prevState.colorSelected.value) {
       // 1st case b)
       if (this.state.annotationSelected.value !== 'text') {
-        this.thicknessListIconColor.beginElement();
+        if ('beginElement' in this.thicknessListIconColor) {
+          this.thicknessListIconColor.beginElement();
+        }
       }
       // 1st case a)
-      this.colorListIconColor.beginElement();
+      if ('beginElement' in this.colorListIconColor) {
+        this.colorListIconColor.beginElement();
+      }
     // 2nd case
     } else if (this.state.thicknessSelected.value !== prevState.thicknessSelected.value) {
-      this.thicknessListIconRadius.beginElement();
+      if ('beginElement' in this.thicknessListIconRadius) {
+        this.thicknessListIconRadius.beginElement();
+      }
       // 3rd case
     } else if (this.state.annotationSelected.value !== 'text' &&
           prevState.annotationSelected.value === 'text') {
-      this.thicknessListIconRadius.beginElement();
-      this.thicknessListIconColor.beginElement();
+      if ('beginElement' in this.thicknessListIconRadius && this.thicknessListIconColor) {
+        this.thicknessListIconRadius.beginElement();
+        this.thicknessListIconColor.beginElement();
+      }
     }
-
     // 4th case, initial animation is triggered in componentDidMount
   }
 

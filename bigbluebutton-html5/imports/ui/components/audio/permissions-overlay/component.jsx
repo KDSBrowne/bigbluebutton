@@ -34,9 +34,15 @@ class PermissionsOverlay extends Component {
         top: '100px',
         left: '100px',
       },
+      'Microsoft Edge': {
+        top: '100px',
+        left: '100px',
+      },
     };
 
     const browser = window.bowser.name;
+
+    console.log(browser);
 
     this.state = {
       styles: {

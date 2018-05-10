@@ -265,26 +265,28 @@ class AudioModal extends Component {
 
     return (
       <span className={styles.audioOptions}>
-        {!forceListenOnlyAttendee ?
-          <Button
-            className={styles.audioBtn}
-            label={intl.formatMessage(intlMessages.microphoneLabel)}
-            icon="unmute"
-            circle
-            size="jumbo"
-            onClick={skipCheck ? this.handleJoinMicrophone : this.handleGoToEchoTest}
-          />
-        : null}
-        {listenOnlyMode ?
-          <Button
-            className={styles.audioBtn}
-            label={intl.formatMessage(intlMessages.listenOnlyLabel)}
-            icon="listen"
-            circle
-            size="jumbo"
-            onClick={this.handleJoinListenOnly}
-          />
-        : null}
+        {!this.props.deviceInfo.browserType().isEdge ? <span>
+          {!forceListenOnlyAttendee ?
+            <Button
+              className={styles.audioBtn}
+              label={intl.formatMessage(intlMessages.microphoneLabel)}
+              icon="unmute"
+              circle
+              size="jumbo"
+              onClick={skipCheck ? this.handleJoinMicrophone : this.handleGoToEchoTest}
+            />
+          : null}
+          {listenOnlyMode ?
+            <Button
+              className={styles.audioBtn}
+              label={intl.formatMessage(intlMessages.listenOnlyLabel)}
+              icon="listen"
+              circle
+              size="jumbo"
+              onClick={this.handleJoinListenOnly}
+            />
+          : null}
+        </span> : <p>Audio Not supported in Edge</p>}
       </span>
     );
   }
@@ -374,11 +376,11 @@ class AudioModal extends Component {
               data-test="audioModalHeader"
               className={styles.header}
             >
-              <h3 className={styles.title}>
-                { content ?
+              {<h3 className={styles.title}>
+                { !this.props.deviceInfo.browserType().isEdge ? (content ?
                   this.contents[content].title :
-                  intl.formatMessage(intlMessages.audioChoiceLabel)}
-              </h3>
+                  intl.formatMessage(intlMessages.audioChoiceLabel)) : null }
+              </h3>}
               <Button
                 data-test="modalBaseCloseButton"
                 className={styles.closeBtn}
