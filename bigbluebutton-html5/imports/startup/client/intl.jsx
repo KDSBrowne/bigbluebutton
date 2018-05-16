@@ -12,10 +12,10 @@ const propTypes = {
   children: PropTypes.element.isRequired,
 };
 
-const DEFAULT_LANGUAGE = Meteor.settings.public.app.defaultSettings.application.locale;
+const FALLBACK_LANGUAGE = Meteor.settings.public.app.defaultSettings.application.fallbackLocale;
 
 const defaultProps = {
-  locale: DEFAULT_LANGUAGE,
+  locale: FALLBACK_LANGUAGE,
 };
 
 class IntlStartup extends Component {
@@ -24,7 +24,7 @@ class IntlStartup extends Component {
 
     this.state = {
       messages: {},
-      locale: DEFAULT_LANGUAGE,
+      locale: FALLBACK_LANGUAGE,
     };
 
     this.fetchLocalizedMessages = this.fetchLocalizedMessages.bind(this);
@@ -54,16 +54,16 @@ class IntlStartup extends Component {
         return response.json();
       })
       .then(({ messages, normalizedLocale }) => {
-        const dasherizedLocale = normalizedLocale.replace('_', '-')
+        const dasherizedLocale = normalizedLocale.replace('_', '-');
         this.setState({ messages, locale: dasherizedLocale }, () => {
-          Settings.application.locale = dasherizedLocale;
+          Settings.application.fallbackLocale = dasherizedLocale;
           Settings.save();
           baseControls.updateLoadingState(false);
         });
       })
       .catch((messages) => {
-        this.setState({ locale: DEFAULT_LANGUAGE }, () => {
-          Settings.application.locale = DEFAULT_LANGUAGE;
+        this.setState({ locale: FALLBACK_LANGUAGE }, () => {
+          Settings.application.fallbackLocale = FALLBACK_LANGUAGE;
           Settings.save();
           baseControls.updateLoadingState(false);
         });

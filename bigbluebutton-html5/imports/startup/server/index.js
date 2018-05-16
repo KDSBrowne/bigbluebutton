@@ -21,15 +21,15 @@ WebApp.connectHandlers.use('/check', (req, res) => {
 
 WebApp.connectHandlers.use('/locale', (req, res) => {
   const APP_CONFIG = Meteor.settings.public.app;
-  const defaultLocale = APP_CONFIG.defaultSettings.application.locale;
-  const localeRegion = req.query.locale.split(/[-_]/g);
-  const localeList = [defaultLocale, localeRegion[0]];
+  const fallback = APP_CONFIG.defaultSettings.application.fallbackLocale;
+  const browserLocaleRegion = req.query.locale.split(/[-_]/g);
+  const localeList = [fallback, browserLocaleRegion[0]];
 
-  let normalizedLocale = localeRegion[0];
+  let normalizedLocale = browserLocaleRegion[0];
   let messages = {};
 
-  if (localeRegion.length > 1) {
-    normalizedLocale = `${localeRegion[0]}_${localeRegion[1].toUpperCase()}`;
+  if (browserLocaleRegion.length > 1) {
+    normalizedLocale = `${browserLocaleRegion[0]}_${browserLocaleRegion[1].toUpperCase()}`;
     localeList.push(normalizedLocale);
   }
   localeList.forEach((locale) => {
@@ -48,13 +48,13 @@ WebApp.connectHandlers.use('/locale', (req, res) => {
 
 WebApp.connectHandlers.use('/locales', (req, res) => {
   const APP_CONFIG = Meteor.settings.public.app;
-  const defaultLocale = APP_CONFIG.defaultSettings.application.locale;
+  const fallback = APP_CONFIG.defaultSettings.application.fallbackLocale;
 
   let availableLocales = [];
 
-  const defaultLocaleFile = `${defaultLocale}.json`;
-  const defaultLocalePath = `locales/${defaultLocaleFile}`;
-  const localesPath = Assets.absoluteFilePath(defaultLocalePath).replace(defaultLocaleFile, '');
+  const fallbackLocaleFile = `${fallback}.json`;
+  const fallbackLocalePath = `locales/${fallbackLocaleFile}`;
+  const localesPath = Assets.absoluteFilePath(fallbackLocalePath).replace(fallbackLocaleFile, '');
 
   try {
     const getAvailableLocales = fs.readdirSync(localesPath);
