@@ -67,21 +67,39 @@ class Dropdown extends Component {
     this.handleHide = this.handleHide.bind(this);
     this.handleToggle = this.handleToggle.bind(this);
     this.handleWindowClick = this.handleWindowClick.bind(this);
+    this.componentDidUpdate = this.componentDidUpdate.bind(this);
   }
 
   componentWillUpdate(nextProps, nextState) {
     return nextState.isOpen ? screenreaderTrap.trap(this.dropdown) : screenreaderTrap.untrap();
   }
 
+  componentDidUpdate(prevProps, prevState, event) {
+    const {
+      userDropdownOpen,
+      closeUserDropdown,
+      showEmojiMenu,
+      onShow,
+      onHide,
+    } = this.props;
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.isOpen && !prevState.isOpen) {
-      this.props.onShow();
+    if (event) {
+      const menuContent = findDOMNode(this.content);
+
+      if (!menuContent.contains(event.target)) {
+        this.props.emojiSelected();
+        this.handleHide();
+      }
     }
 
-    if (!this.state.isOpen && prevState.isOpen) {
-      this.props.onHide();
-    }
+    if (userDropdownOpen) return closeUserDropdown();
+
+    const emojisToggled = (showEmojiMenu && !prevProps.showEmojiMenu) || (!showEmojiMenu && prevProps.showEmojiMenu);
+    if (emojisToggled) this.handleShow();
+
+    if (this.state.isOpen && !prevState.isOpen) onShow();
+
+    if (!this.state.isOpen && prevState.isOpen) onHide();
   }
 
   handleShow() {
@@ -91,11 +109,13 @@ class Dropdown extends Component {
     });
   }
 
-  handleHide() {
+  handleHide(event) {
     this.setState({ isOpen: false }, () => {
       const { removeEventListener } = window;
       removeEventListener('click', this.handleWindowClick, true);
     });
+
+    this.componentDidUpdate(this.props, this.state, event);
   }
 
   handleWindowClick(event) {
@@ -109,7 +129,7 @@ class Dropdown extends Component {
       return;
     }
 
-    this.handleHide();
+    this.handleHide(event);
   }
 
   handleToggle() {

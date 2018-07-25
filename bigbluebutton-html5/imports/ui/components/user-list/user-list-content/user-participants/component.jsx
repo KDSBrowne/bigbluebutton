@@ -142,6 +142,9 @@ class UserParticipants extends Component {
       setEmojiStatus,
       removeUser,
       toggleVoice,
+      handleEmojiChange,
+      getEmojiList,
+      getEmoji,
     } = this.props;
 
     const userActions =
@@ -213,6 +216,9 @@ class UserParticipants extends Component {
             normalizeEmojiName={normalizeEmojiName}
             isMeetingLocked={isMeetingLocked}
             getScrollContainerRef={this.getScrollContainerRef}
+            handleEmojiChange={handleEmojiChange}
+            getEmojiList={getEmojiList}
+            getEmoji={getEmoji}
           />
         </div>
       </CSSTransition>
@@ -220,9 +226,7 @@ class UserParticipants extends Component {
   }
 
   focusUserItem(index) {
-    if (!this.userRefs[index]) {
-      return;
-    }
+    if (!this.userRefs[index]) return;
 
     this.userRefs[index].firstChild.focus();
   }
