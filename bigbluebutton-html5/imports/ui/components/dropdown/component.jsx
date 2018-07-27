@@ -76,26 +76,28 @@ class Dropdown extends Component {
 
   componentDidUpdate(prevProps, prevState, event) {
     const {
-      userDropdownOpen,
-      closeUserDropdown,
-      showEmojiMenu,
       onShow,
       onHide,
+      nestedMenu,
     } = this.props;
 
-    if (event) {
-      const menuContent = findDOMNode(this.content);
+    if (nestedMenu) {
+      if (event) {
+        const menuContent = findDOMNode(this.content);
 
-      if (!menuContent.contains(event.target)) {
-        this.props.emojiSelected();
-        this.handleHide();
+        if (!menuContent.contains(event.target)) {
+          this.props.emojiSelected();
+          this.handleHide();
+        }
       }
+
+      if (nestedMenu.isOpen) return nestedMenu.close();
+
+      const nestedMenuToggled = (nestedMenu.isDisplayed && !prevProps.nestedMenu.isDisplayed)
+      || (!nestedMenu.isDisplayed && prevProps.nestedMenu.isDisplayed);
+
+      if (nestedMenuToggled) this.handleShow();
     }
-
-    if (userDropdownOpen) return closeUserDropdown();
-
-    const emojisToggled = (showEmojiMenu && !prevProps.showEmojiMenu) || (!showEmojiMenu && prevProps.showEmojiMenu);
-    if (emojisToggled) this.handleShow();
 
     if (this.state.isOpen && !prevState.isOpen) onShow();
 

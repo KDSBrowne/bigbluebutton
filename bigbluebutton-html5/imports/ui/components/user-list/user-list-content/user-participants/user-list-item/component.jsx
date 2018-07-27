@@ -5,10 +5,9 @@ import { injectIntl } from 'react-intl';
 import _ from 'lodash';
 import { defineMessages } from 'react-intl';
 import DropdownListSeparator from '/imports/ui/components/dropdown/list/separator/component';
-import UserListContent from './user-list-content/component';
+import UserDropdown from './user-dropdown/component';
 import UserAction from './user-action/component';
 import DropdownListItem from '/imports/ui/components/dropdown/list/item/component';
-import Icon from '/imports/ui/components/icon/component';
 import { styles } from './styles';
 
 const propTypes = {
@@ -70,31 +69,31 @@ class UserListItem extends Component {
     super();
 
     this.state = {
-      showEmojiMenu: false,
-      userDropdownOpen: false,
+      showNestedOptions: false,
+      isOpen: false,
     };
 
-    this.closeEmojiMenu = this.closeEmojiMenu.bind(this);
+    this.hideNestedOptions = this.hideNestedOptions.bind(this);
     this.closeUserDropdown = this.closeUserDropdown.bind(this);
     this.emojiSelected = this.emojiSelected.bind(this);
   }
 
   closeUserDropdown() {
     this.setState({
-      userDropdownOpen: false,
+      isOpen: false,
     });
   }
 
-  closeEmojiMenu() {
+  hideNestedOptions() {
     this.setState({
-      showEmojiMenu: false,
+      showNestedOptions: false,
     });
   }
 
   emojiSelected() {
     this.setState({
-      userDropdownOpen: true,
-    }, this.closeEmojiMenu());
+      isOpen: true,
+    }, this.hideNestedOptions());
   }
 
   getUsersActions() {
@@ -114,7 +113,6 @@ class UserListItem extends Component {
     const {
       openChat,
       clearStatus,
-      setStatus,
       setPresenter,
       remove,
       mute,
@@ -141,16 +139,16 @@ class UserListItem extends Component {
       setstatus: {
         icon: 'user',
         label: () => intl.formatMessage(intlMessages.statusTriggerLabel),
-        handler: () => this.setState({ showEmojiMenu: true }),
+        handler: () => this.setState({ showNestedOptions: true }),
       },
       back: {
         icon: 'left_arrow',
         label: () => intl.formatMessage(intlMessages.backTriggerLabel),
-        handler: () => this.setState({ showEmojiMenu: false }),
+        handler: () => this.setState({ showNestedOptions: false }),
       },
     };
 
-    if (this.state.showEmojiMenu) {
+    if (this.state.showNestedOptions) {
       const statuses = Object.keys(getEmojiList);
       const options = statuses.map(status => (
         <DropdownListItem
@@ -196,7 +194,7 @@ class UserListItem extends Component {
 
     const actions = this.getUsersActions();
 
-    const contents = (<UserListContent
+    const contents = (<UserDropdown
       compact={compact}
       user={user}
       intl={intl}
@@ -205,11 +203,13 @@ class UserListItem extends Component {
       meeting={meeting}
       isMeetingLocked={isMeetingLocked}
       getScrollContainerRef={getScrollContainerRef}
-      showEmojiMenu={this.state.showEmojiMenu}
-      userDropdownOpen={this.state.userDropdownOpen}
-      closeUserDropdown={this.closeUserDropdown}
-      closeEmojiMenu={this.closeEmojiMenu}
       emojiSelected={this.emojiSelected}
+      nestedMenu={{
+        isOpen: this.state.isOpen,
+        isDisplayed: this.state.showNestedOptions,
+        close: this.closeUserDropdown,
+        hide: this.hideNestedOptions,
+      }}
     />);
 
     return contents;

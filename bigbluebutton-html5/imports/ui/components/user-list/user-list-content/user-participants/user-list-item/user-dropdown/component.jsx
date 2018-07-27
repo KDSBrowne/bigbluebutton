@@ -8,8 +8,6 @@ import Dropdown from '/imports/ui/components/dropdown/component';
 import DropdownTrigger from '/imports/ui/components/dropdown/trigger/component';
 import DropdownContent from '/imports/ui/components/dropdown/content/component';
 import DropdownList from '/imports/ui/components/dropdown/list/component';
-import DropdownListSeparator from '/imports/ui/components/dropdown/list/separator/component';
-import DropdownListTitle from '/imports/ui/components/dropdown/list/title/component';
 import { styles } from './styles';
 import UserName from './../user-name/component';
 import UserIcons from './../user-icons/component';
@@ -54,8 +52,7 @@ const propTypes = {
   getScrollContainerRef: PropTypes.func.isRequired,
 };
 
-
-class UserListContent extends Component {
+class UserDropdown extends Component {
   /**
    * Return true if the content fit on the screen, false otherwise.
    *
@@ -86,7 +83,8 @@ class UserListContent extends Component {
   }
 
   handleClick() {
-    if (this.props.showEmojiMenu) {
+    const { nestedMenu } = this.props;
+    if (nestedMenu.isDisplayed) {
       this.props.emojiSelected();
     }
   }
@@ -162,7 +160,7 @@ class UserListContent extends Component {
       };
 
       const isDropdownVisible =
-        UserListContent.checkIfDropdownIsVisible(
+        UserDropdown.checkIfDropdownIsVisible(
           dropdownContent.offsetTop,
           dropdownContent.offsetHeight,
         );
@@ -291,16 +289,13 @@ class UserListContent extends Component {
     return (
       <Dropdown
         ref={(ref) => { this.dropdown = ref; }}
-        closeEmojiMenu={this.props.closeEmojiMenu}
-        userDropdownOpen={this.props.userDropdownOpen}
-        closeUserDropdown={this.props.closeUserDropdown}
-        showEmojiMenu={this.props.showEmojiMenu}
-        emojiSelected={this.props.emojiSelected}
         isOpen={this.state.isActionsOpen}
         onShow={this.onActionsShow}
         onHide={this.onActionsHide}
         className={userItemContentsStyle}
         autoFocus={false}
+        nestedMenu={this.props.nestedMenu}
+        emojiSelected={this.props.emojiSelected}
         aria-haspopup="true"
         aria-live="assertive"
         aria-relevant="additions"
@@ -329,5 +324,5 @@ class UserListContent extends Component {
   }
 }
 
-UserListContent.propTypes = propTypes;
-export default UserListContent;
+UserDropdown.propTypes = propTypes;
+export default UserDropdown;
