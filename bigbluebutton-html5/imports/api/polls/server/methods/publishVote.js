@@ -44,6 +44,9 @@ export default function publishVote(credentials, id, pollAnswerId) { // TODO dis
     $pull: {
       users: requesterUserId,
     },
+    $push: {
+      reponses: { userId: requesterUserId, ans: pollAnswerId }
+    },
   };
 
   const cb = (err) => {

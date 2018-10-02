@@ -2,6 +2,7 @@ import React from 'react';
 import { makeCall } from '/imports/ui/services/api';
 import { withTracker } from 'meteor/react-meteor-data';
 import Users from '/imports/api/users';
+import Polls from '/imports/api/polls';
 import Auth from '/imports/ui/services/auth';
 import Presentations from '/imports/api/presentations';
 import PresentationAreaService from '/imports/ui/components/presentation/service';
@@ -34,6 +35,8 @@ export default withTracker(({ }) => {
 
   const publishPoll = () => makeCall('publishPoll');
 
+  const getCurrentPoll = () => { return makeCall('getCurrentPoll', Auth.userId) }
+
   return {
     currentSlide,
     currentUser,
@@ -42,5 +45,7 @@ export default withTracker(({ }) => {
     startCustomPoll,
     stopPoll,
     publishPoll,
+    getCurrentPoll,
+	 currentPoll: () => Polls.findOne({ meetingId: Auth.meetingID }),
   };
 })(PollContainer);

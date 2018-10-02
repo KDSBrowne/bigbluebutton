@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router';
 import Button from '/imports/ui/components/button/component';
 import Icon from '/imports/ui/components/icon/component';
+import LiveResultContainer from './live-result/container';
 import { findDOMNode } from 'react-dom';
 import { defineMessages, injectIntl } from 'react-intl';
 import _ from 'lodash';
@@ -204,9 +205,15 @@ class Poll extends Component {
       intl, router, publishPoll, stopPoll,
     } = this.props;
 
+
     return (
       <div>
         <div className={styles.instructions}>{intl.formatMessage(intlMessages.activePollInstruction)}</div>
+
+
+        <LiveResultContainer />
+
+
         <Button
           onClick={() => {
             publishPoll();
@@ -276,10 +283,24 @@ class Poll extends Component {
           >
             <Icon iconName="left_arrow" />{intl.formatMessage(intlMessages.pollPaneTitle)}
           </Link>
+
+
         </header>
         {
           this.state.isPolling ? this.renderActivePollOptions() : this.renderPollOptions()
         }
+
+        <Button
+          icon="close"
+          size="md"
+          hideLabel
+          onClick={() => {
+            // testing
+            this.props.getCurrentPoll();
+          }}
+          label="close"
+        />
+
       </div>
     );
   }
