@@ -273,11 +273,10 @@ const getAvailableActions = (currentUser, user, isBreakoutRoom) => {
                             && !user.isMuted
                             && !user.isListenOnly;
 
-  const allowedToUnmuteAudio = hasAuthority
-                              && user.isVoiceUser
+  const allowedToUnmuteAudio = user.isVoiceUser
                               && !user.isListenOnly
                               && user.isMuted
-                              && (ALLOW_MODERATOR_TO_UNMUTE_AUDIO || user.isCurrent);
+                              && user.isCurrent;
 
   const allowedToResetStatus = hasAuthority
       && user.emoji.status !== EMOJI_STATUSES.none
