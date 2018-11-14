@@ -48,12 +48,12 @@ const defaultProps = {
 const toggleChatOpen = (id) => {
   const prevId = Session.get('idChatOpen');
 
-  const openChat = () => {
+  const handleOpenChat = () => {
     Session.set('idChatOpen', id);
     Session.set('isChatOpen', true);
   };
 
-  const closeChat = () => {
+  const handleCloseChat = () => {
     Session.set('isChatOpen', false);
     Session.set('idChatOpen', '');
   };
@@ -61,7 +61,7 @@ const toggleChatOpen = (id) => {
   Session.set('breakoutRoomIsOpen', false);
   Session.set('isPollOpen', false);
 
-  return prevId === id ? closeChat() : openChat();
+  return prevId === id ? handleCloseChat() : handleOpenChat();
 };
 
 const ChatListItem = (props) => {
