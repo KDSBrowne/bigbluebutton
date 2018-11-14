@@ -44,6 +44,11 @@ const Chat = (props) => {
   const HIDE_CHAT_AK = shortcuts.hidePrivateChat;
   const CLOSE_CHAT_AK = shortcuts.closePrivateChat;
 
+  const handleCloseChat = () => {
+    Session.set('isChatOpen', false);
+    Session.set('idChatOpen', '');
+  };
+
   return (
     <div
       data-test="publicChat"
@@ -56,7 +61,7 @@ const Chat = (props) => {
         >
           <Button
             onClick={() => {
-              Session.set('isChatOpen', false);
+              handleCloseChat();
             }}
             aria-label={intl.formatMessage(intlMessages.hideChatLabel, { 0: title })}
             accessKey={HIDE_CHAT_AK}
@@ -74,8 +79,7 @@ const Chat = (props) => {
               hideLabel
               onClick={() => {
                 actions.handleClosePrivateChat(chatID);
-                Session.set('isChatOpen', false);
-                Session.set('idChatOpen', '');
+                handleCloseChat();
               }}
               aria-label={intl.formatMessage(intlMessages.closeChatLabel, { 0: title })}
               label={intl.formatMessage(intlMessages.closeChatLabel, { 0: title })}

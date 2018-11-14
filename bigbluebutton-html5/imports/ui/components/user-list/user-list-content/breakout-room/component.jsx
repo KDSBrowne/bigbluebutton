@@ -11,10 +11,12 @@ const intlMessages = defineMessages({
     description: 'breakout title',
   },
 });
+
 const toggleBreakoutPanel = () => {
   const breakoutPanelState = Session.get('breakoutRoomIsOpen');
   Session.set('breakoutRoomIsOpen', !breakoutPanelState);
   Session.set('isChatOpen', false);
+  Session.set('idChatOpen', '');
   Session.set('isPollOpen', false);
 };
 

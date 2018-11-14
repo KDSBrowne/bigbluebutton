@@ -45,9 +45,23 @@ const defaultProps = {
   shortcuts: '',
 };
 
-const toggleChatOpen = () => {
-  Session.set('isChatOpen', !Session.get('isChatOpen'));
+const toggleChatOpen = (id) => {
+  const prevId = Session.get('idChatOpen');
+
+  const openChat = () => {
+    Session.set('idChatOpen', id);
+    Session.set('isChatOpen', true);
+  };
+
+  const closeChat = () => {
+    Session.set('isChatOpen', false);
+    Session.set('idChatOpen', '');
+  };
+
   Session.set('breakoutRoomIsOpen', false);
+  Session.set('isPollOpen', false);
+
+  return prevId === id ? closeChat() : openChat();
 };
 
 const ChatListItem = (props) => {
@@ -73,13 +87,7 @@ const ChatListItem = (props) => {
       tabIndex={tabIndex}
       accessKey={isPublicChat(chat) ? TOGGLE_CHAT_PUB_AK : null}
       onClick={() => {
-        toggleChatOpen();
-        Session.set('idChatOpen', chat.id);
-
-        if (Session.equals('isPollOpen', true)) {
-          Session.set('isPollOpen', false);
-          Session.set('forcePollOpen', true);
-        }
+        toggleChatOpen(chat.id);
       }}
       id="chat-toggle-button"
       aria-label={isPublicChat(chat) ? intl.formatMessage(intlMessages.titlePublic) : chat.name}
