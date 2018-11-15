@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { defineMessages, injectIntl } from 'react-intl';
-import { Session } from 'meteor/session';
 import withShortcutHelper from '/imports/ui/components/shortcut-help/service';
 import { styles } from './styles';
 import ChatAvatar from './chat-avatar/component';
@@ -45,25 +44,6 @@ const defaultProps = {
   shortcuts: '',
 };
 
-const toggleChatOpen = (id) => {
-  const prevId = Session.get('idChatOpen');
-
-  const handleOpenChat = () => {
-    Session.set('idChatOpen', id);
-    Session.set('isChatOpen', true);
-  };
-
-  const handleCloseChat = () => {
-    Session.set('isChatOpen', false);
-    Session.set('idChatOpen', '');
-  };
-
-  Session.set('breakoutRoomIsOpen', false);
-  Session.set('isPollOpen', false);
-
-  return prevId === id ? handleCloseChat() : handleOpenChat();
-};
-
 const ChatListItem = (props) => {
   const {
     chat,
@@ -73,6 +53,7 @@ const ChatListItem = (props) => {
     tabIndex,
     isPublicChat,
     shortcuts: TOGGLE_CHAT_PUB_AK,
+    toggleChatPanel,
   } = props;
 
   const isCurrentChat = chat.id === openChat;
@@ -87,7 +68,7 @@ const ChatListItem = (props) => {
       tabIndex={tabIndex}
       accessKey={isPublicChat(chat) ? TOGGLE_CHAT_PUB_AK : null}
       onClick={() => {
-        toggleChatOpen(chat.id);
+        toggleChatPanel(chat.id);
       }}
       id="chat-toggle-button"
       aria-label={isPublicChat(chat) ? intl.formatMessage(intlMessages.titlePublic) : chat.name}

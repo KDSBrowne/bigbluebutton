@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { styles } from './styles';
 import UserParticipants from './user-participants/component';
 import UserMessages from './user-messages/component';
-import UserPolls from './user-polls/component';
-import BreakoutRoomItem from './breakout-room/component';
+import UserPollsContainer from './user-polls/container';
+import BreakoutRoomItemContainer from './breakout-room/container';
 
 const propTypes = {
   openChats: PropTypes.arrayOf(String).isRequired,
@@ -81,14 +81,17 @@ class UserContent extends React.Component {
             roving,
           }}
         />
-        <UserPolls
+        <UserPollsContainer
           isPresenter={currentUser.isPresenter}
           {...{
             pollIsOpen,
             forcePollOpen,
           }}
         />
-        <BreakoutRoomItem isPresenter={currentUser.isPresenter} hasBreakoutRoom={hasBreakoutRoom} />
+        <BreakoutRoomItemContainer
+          isPresenter={currentUser.isPresenter}
+          hasBreakoutRoom={hasBreakoutRoom}
+        />
         <UserParticipants
           {...{
             users,

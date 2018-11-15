@@ -6,6 +6,7 @@ import Meetings from '/imports/api/meetings';
 import Auth from '/imports/ui/services/auth';
 import { meetingIsBreakout } from '/imports/ui/components/app/service';
 import getFromUserSettings from '/imports/ui/services/users-settings';
+import { toggleUserList } from '/imports/ui/services/panel-manager';
 import userListService from '../user-list/service';
 import ChatService from '../chat/service';
 import Service from './service';
@@ -65,8 +66,6 @@ export default withTracker(() => {
     hasUnreadMessages: checkUnreadMessages(),
     isBreakoutRoom: meetingIsBreakout(),
     beingRecorded: meetingRecorded,
-    toggleUserList: () => {
-      Session.set('isUserListOpen', !isExpanded);
-    },
+    toggleUserList: () => toggleUserList(),
   };
 })(NavBarContainer);

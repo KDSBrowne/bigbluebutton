@@ -5,6 +5,7 @@ import { Session } from 'meteor/session';
 import Auth from '/imports/ui/services/auth';
 import Chat from './component';
 import ChatService from './service';
+import { resetPanelIfOpen } from '/imports/ui/services/panel-manager';
 
 const CHAT_CONFIG = Meteor.settings.public.chat;
 const PUBLIC_CHAT_KEY = CHAT_CONFIG.public_id;
@@ -149,7 +150,6 @@ export default injectIntl(withTracker(({ intl }) => {
     };
   });
 
-
   const scrollPosition = ChatService.getScrollPosition(chatID);
   const hasUnreadMessages = ChatService.hasUnreadMessages(chatID);
   const lastReadMessageTime = ChatService.lastReadMessageTime(chatID);
@@ -178,5 +178,6 @@ export default injectIntl(withTracker(({ intl }) => {
 
       handleReadMessage: timestamp => ChatService.updateUnreadMessage(timestamp),
     },
+    handleClosePanel: resetPanelIfOpen,
   };
 })(ChatContainer));

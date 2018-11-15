@@ -1,7 +1,5 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
 import { defineMessages, injectIntl } from 'react-intl';
-import { Session } from 'meteor/session';
 import Icon from '/imports/ui/components/icon/component';
 import { styles } from './styles';
 
@@ -12,21 +10,14 @@ const intlMessages = defineMessages({
   },
 });
 
-const toggleBreakoutPanel = () => {
-  const breakoutPanelState = Session.get('breakoutRoomIsOpen');
-  Session.set('breakoutRoomIsOpen', !breakoutPanelState);
-  Session.set('isChatOpen', false);
-  Session.set('idChatOpen', '');
-  Session.set('isPollOpen', false);
-};
-
 const BreakoutRoomItem = ({
   hasBreakoutRoom,
   intl,
+  toggleBreakoutRoomPanel,
 }) => {
   if (hasBreakoutRoom) {
     return (
-      <div role="button" onClick={toggleBreakoutPanel}>
+      <div role="button" onClick={toggleBreakoutRoomPanel}>
         <h2 className={styles.smallTitle}> {intl.formatMessage(intlMessages.breakoutTitle).toUpperCase()}</h2>
         <div className={styles.BreakoutRoomsItem}>
           <div className={styles.BreakoutRoomsContents}>
