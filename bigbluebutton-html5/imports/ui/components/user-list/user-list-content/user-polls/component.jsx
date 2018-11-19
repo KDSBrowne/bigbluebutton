@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import { defineMessages, injectIntl } from 'react-intl';
 import Icon from '/imports/ui/components/icon/component';
-import { Session } from 'meteor/session';
 import { styles } from './styles';
 
 const intlMessages = defineMessages({
@@ -23,6 +22,7 @@ class UserPolls extends Component {
       isPresenter,
       pollIsOpen,
       forcePollOpen,
+      togglePanel,
     } = this.props;
 
     if (!isPresenter) return null;
@@ -32,7 +32,7 @@ class UserPolls extends Component {
       <div className={styles.messages}>
         {
           <h2 className={styles.smallTitle}>
-            {'Polling'}
+            {intl.formatMessage(intlMessages.pollLabel)}
           </h2>
         }
         <div className={styles.scrollableList}>
@@ -41,12 +41,7 @@ class UserPolls extends Component {
             tabIndex={0}
             className={styles.pollLink}
             onClick={() => {
-              Session.set('isChatOpen', false);
-              Session.set('breakoutRoomIsOpen', false);
-
-              return Session.equals('isPollOpen', true)
-                ? Session.set('isPollOpen', false)
-                : Session.set('isPollOpen', true);
+              togglePanel('isPollOpen', !Session.get('isPollOpen'));
             }}
           >
             <Icon iconName="polling" className={styles.icon} />

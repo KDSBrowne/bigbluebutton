@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { defineMessages, injectIntl } from 'react-intl';
-import { Session } from 'meteor/session';
 import Button from '/imports/ui/components/button/component';
 import { styles } from './styles';
 import Service from './service';
@@ -105,7 +104,7 @@ class LiveResult extends Component {
 
   render() {
     const {
-      intl, publishPoll, stopPoll, handleBackClick,
+      intl, publishPoll, stopPoll, handleBackClick, togglePanel,
     } = this.props;
 
     return (
@@ -117,9 +116,7 @@ class LiveResult extends Component {
           onClick={() => {
             publishPoll();
             stopPoll();
-            Session.set('isUserListOpen', true);
-            Session.set('isPollOpen', false);
-            Session.set('forcePollOpen', false);
+            togglePanel('isPollOpen', false);
           }}
           label={intl.formatMessage(intlMessages.publishLabel)}
           color="primary"

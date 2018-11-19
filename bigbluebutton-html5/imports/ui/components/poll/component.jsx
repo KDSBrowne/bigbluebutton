@@ -185,7 +185,7 @@ class Poll extends Component {
 
   renderActivePollOptions() {
     const {
-      intl, publishPoll, stopPoll, currentUser, currentPoll, getUser,
+      intl, publishPoll, stopPoll, currentUser, currentPoll, getUser, togglePanel,
     } = this.props;
 
     return (
@@ -200,6 +200,7 @@ class Poll extends Component {
             currentUser,
             getUser,
             currentPoll,
+            togglePanel,
           }}
           handleBackClick={this.handleBackClick}
         />
@@ -235,7 +236,7 @@ class Poll extends Component {
 
   render() {
     const {
-      intl, stopPoll, currentPoll,
+      intl, stopPoll, currentPoll, togglePanel,
     } = this.props;
 
     return (
@@ -248,9 +249,8 @@ class Poll extends Component {
             aria-label={intl.formatMessage(intlMessages.hidePollDesc)}
             className={styles.hideBtn}
             onClick={() => {
-              Session.set('isPollOpen', false);
+              togglePanel('isPollOpen', false);
               Session.set('forcePollOpen', true);
-              Session.set('isUserListOpen', true);
             }}
           />
 
@@ -260,9 +260,8 @@ class Poll extends Component {
             if (currentPoll) {
               stopPoll();
             }
-            Session.set('isPollOpen', false);
+            togglePanel('isPollOpen', false);
             Session.set('forcePollOpen', false);
-            Session.set('isUserListOpen', true);
           }}
             className={styles.closeBtn}
             icon="close"

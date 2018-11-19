@@ -75,8 +75,6 @@ class NavBar extends Component {
       isActionsOpen: false,
       didSendBreakoutInvite: false,
     };
-
-    this.handleToggleUserList = this.handleToggleUserList.bind(this);
   }
 
   componentDidUpdate(oldProps) {
@@ -106,10 +104,6 @@ class NavBar extends Component {
     if (!breakouts.length && this.state.didSendBreakoutInvite) {
       this.setState({ didSendBreakoutInvite: false });
     }
-  }
-
-  handleToggleUserList() {
-    this.props.toggleUserList();
   }
 
   inviteUserToBreakout(breakout) {
@@ -177,6 +171,7 @@ class NavBar extends Component {
       beingRecorded,
       isExpanded,
       intl,
+      togglePanel,
       shortcuts: TOGGLE_USERLIST_AK,
     } = this.props;
 
@@ -194,7 +189,9 @@ class NavBar extends Component {
         <div className={styles.left}>
           <Button
             data-test="userListToggleButton"
-            onClick={this.handleToggleUserList}
+            onClick={() => {
+              togglePanel('isUserListOpen', !Session.get('isUserListOpen'));
+            }}
             ghost
             circle
             hideLabel

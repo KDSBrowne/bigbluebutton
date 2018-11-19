@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { defineMessages, injectIntl } from 'react-intl';
 import injectWbResizeEvent from '/imports/ui/components/presentation/resize-wrapper/component';
 import Button from '/imports/ui/components/button/component';
-import { Session } from 'meteor/session';
 import withShortcutHelper from '/imports/ui/components/shortcut-help/service';
 import { styles } from './styles';
 import MessageForm from './message-form/component';
@@ -39,6 +38,7 @@ const Chat = (props) => {
     actions,
     intl,
     shortcuts,
+    togglePanel,
   } = props;
 
   const HIDE_CHAT_AK = shortcuts.hidePrivateChat;
@@ -56,7 +56,7 @@ const Chat = (props) => {
         >
           <Button
             onClick={() => {
-              Session.set('isChatOpen', false);
+              togglePanel('isChatOpen', false, '');
             }}
             aria-label={intl.formatMessage(intlMessages.hideChatLabel, { 0: title })}
             accessKey={HIDE_CHAT_AK}
@@ -74,8 +74,7 @@ const Chat = (props) => {
               hideLabel
               onClick={() => {
                 actions.handleClosePrivateChat(chatID);
-                Session.set('isChatOpen', false);
-                Session.set('idChatOpen', '');
+                togglePanel('isChatOpen', false, chatID);
               }}
               aria-label={intl.formatMessage(intlMessages.closeChatLabel, { 0: title })}
               label={intl.formatMessage(intlMessages.closeChatLabel, { 0: title })}

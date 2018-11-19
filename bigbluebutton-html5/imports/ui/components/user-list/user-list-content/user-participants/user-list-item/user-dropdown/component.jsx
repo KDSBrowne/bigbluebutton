@@ -11,10 +11,10 @@ import DropdownList from '/imports/ui/components/dropdown/list/component';
 import DropdownListItem from '/imports/ui/components/dropdown/list/item/component';
 import DropdownListSeparator from '/imports/ui/components/dropdown/list/separator/component';
 import _ from 'lodash';
-import { Session } from 'meteor/session';
 import { styles } from './styles';
 import UserName from './../user-name/component';
 import UserIcons from './../user-icons/component';
+import { togglePanel } from '/imports/ui/services/panel-manager';
 
 const messages = defineMessages({
   presenter: {
@@ -236,12 +236,7 @@ class UserDropdown extends Component {
         intl.formatMessage(messages.ChatLabel),
         () => {
           getGroupChatPrivate(currentUser, user);
-          if (Session.equals('isPollOpen', true)) {
-            Session.set('isPollOpen', false);
-            Session.set('forcePollOpen', true);
-          }
-          Session.set('idChatOpen', user.id);
-          Session.set('isChatOpen', true);
+          togglePanel('isChatOpen', true, user.id);
         },
         'chat',
       ));

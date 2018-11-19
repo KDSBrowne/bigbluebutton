@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { styles } from './styles';
 import UserParticipants from './user-participants/component';
 import UserMessages from './user-messages/component';
-import UserPolls from './user-polls/component';
+import UserPoll from './user-polls/component';
 import BreakoutRoomItem from './breakout-room/component';
 
 const propTypes = {
@@ -64,6 +64,7 @@ class UserContent extends React.Component {
       pollIsOpen,
       forcePollOpen,
       hasBreakoutRoom,
+      togglePanel,
     } = this.props;
 
     return (
@@ -79,16 +80,22 @@ class UserContent extends React.Component {
             compact,
             intl,
             roving,
+            togglePanel,
           }}
         />
-        <UserPolls
+        <UserPoll
           isPresenter={currentUser.isPresenter}
           {...{
             pollIsOpen,
             forcePollOpen,
+            togglePanel,
           }}
         />
-        <BreakoutRoomItem isPresenter={currentUser.isPresenter} hasBreakoutRoom={hasBreakoutRoom} />
+        <BreakoutRoomItem
+          isPresenter={currentUser.isPresenter}
+          hasBreakoutRoom={hasBreakoutRoom}
+          togglePanel={togglePanel}
+        />
         <UserParticipants
           {...{
             users,

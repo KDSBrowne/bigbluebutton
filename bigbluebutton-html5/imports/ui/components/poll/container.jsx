@@ -5,6 +5,7 @@ import Users from '/imports/api/users';
 import Auth from '/imports/ui/services/auth';
 import Presentations from '/imports/api/presentations';
 import PresentationAreaService from '/imports/ui/components/presentation/service';
+import { togglePanel } from '/imports/ui/services/panel-manager';
 import Poll from './component';
 import Service from './service';
 
@@ -13,9 +14,8 @@ const PollContainer = ({ ...props }) => {
   if (currentUser.presenter) {
     return (<Poll {...props} />);
   }
-  Session.set('isPollOpen', false);
+  togglePanel('isPollOpen', false);
   Session.set('forcePollOpen', false);
-  Session.set('isUserListOpen', true);
   return null;
 };
 
@@ -42,5 +42,6 @@ export default withTracker(({ }) => {
     publishPoll: Service.publishPoll,
     currentPoll: Service.currentPoll(),
     getUser: Service.getUser,
+    togglePanel,
   };
 })(PollContainer);

@@ -10,6 +10,7 @@ import DropdownListItem from '/imports/ui/components/dropdown/list/item/componen
 import PresentationUploaderContainer from '/imports/ui/components/presentation/presentation-uploader/container';
 import { withModalMounter } from '/imports/ui/components/modal/service';
 import withShortcutHelper from '/imports/ui/components/shortcut-help/service';
+import { Session } from 'meteor/session';
 import BreakoutRoom from '../create-breakout-room/component';
 import { styles } from '../styles';
 
@@ -106,7 +107,7 @@ class ActionsDropdown extends Component {
       isRecording,
       record,
       toggleRecording,
-      togglePollMenu,
+      togglePanel,
       meetingIsBreakout,
       hasBreakoutRoom,
     } = this.props;
@@ -118,7 +119,7 @@ class ActionsDropdown extends Component {
           label={intl.formatMessage(intlMessages.pollBtnLabel)}
           description={intl.formatMessage(intlMessages.pollBtnDesc)}
           key={this.pollId}
-          onClick={() => togglePollMenu()}
+          onClick={() => togglePanel('isPollOpen', !Session.get('isPollOpen'))}
         />
         : null),
       (isUserPresenter ?
