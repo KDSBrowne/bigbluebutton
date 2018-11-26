@@ -79,9 +79,29 @@ const intlMessages = defineMessages({
 class ActionsDropdown extends Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      isActionsOpen: false,
+    };
+
     this.handlePresentationClick = this.handlePresentationClick.bind(this);
     this.handleCreateBreakoutRoomClick = this.handleCreateBreakoutRoomClick.bind(this);
+    this.onActionsShow = this.onActionsShow.bind(this);
+    this.onActionsHide = this.onActionsHide.bind(this);
   }
+
+  onActionsShow() {
+    this.setState({
+      isActionsOpen: true,
+    });
+  }
+
+  onActionsHide() {
+    this.setState({
+      isActionsOpen: false,
+    });
+  }
+
 
   componentWillMount() {
     this.presentationItemId = _.uniqueId('action-item-');
@@ -187,7 +207,12 @@ class ActionsDropdown extends Component {
     if ((!isUserPresenter && !isUserModerator) || availableActions.length === 0) return null;
 
     return (
-      <Dropdown ref={(ref) => { this._dropdown = ref; }} >
+      <Dropdown
+        isOpen={this.state.isActionsOpen}
+        ref={(ref) => { this._dropdown = ref; }}
+        onShow={this.onActionsShow}
+        onHide={this.onActionsHide}
+      >
         <DropdownTrigger tabIndex={0} accessKey={OPEN_ACTIONS_AK}>
           <Button
             hideLabel

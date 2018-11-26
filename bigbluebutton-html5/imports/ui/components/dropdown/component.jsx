@@ -162,7 +162,7 @@ class Dropdown extends Component {
       >
         {trigger}
         {content}
-        {this.state.isOpen ?
+        {this.state.isOpen && this.props.isOpen ?
           <Button
             className={styles.close}
             label={intl.formatMessage(intlMessages.close)}
