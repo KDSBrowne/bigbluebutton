@@ -98,7 +98,7 @@ class Dropdown extends Component {
     });
   }
 
-  handleWindowClick() {
+  handleWindowClick(event) {
     const triggerElement = findDOMNode(this.trigger);
     const contentElement = findDOMNode(this.content);
     const closeDropdown = this.props.isOpen && this.state.isOpen && triggerElement.contains(event.target);
@@ -162,7 +162,7 @@ class Dropdown extends Component {
       >
         {trigger}
         {content}
-        {this.state.isOpen ?
+        {this.state.isOpen && this.props.isOpen ?
           <Button
             className={styles.close}
             label={intl.formatMessage(intlMessages.close)}
