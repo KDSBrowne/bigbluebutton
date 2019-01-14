@@ -4,6 +4,11 @@ import Presentations from '/imports/api/presentations';
 import Slides from '/imports/api/slides';
 import Users from '/imports/api/users';
 import Auth from '/imports/ui/services/auth';
+import { makeCall } from '/imports/ui/services/api';
+
+const toggleFitToWidth = (podId, currentPresentation) => {
+  makeCall('togglePresentationWidth', podId, currentPresentation);
+};
 
 const getCurrentPresentation = podId => Presentations.findOne({
   podId,
@@ -61,4 +66,5 @@ export default {
   getCurrentSlide,
   isPresenter,
   getMultiUserStatus,
+  toggleFitToWidth,
 };
