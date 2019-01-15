@@ -78,9 +78,17 @@
   border-right: 0 !important;
 }
 
+.fitToWidthBtn {
+  border-top-left-radius: 5px !important;
+  border-bottom-left-radius: 5px !important;
+}
+
+.fitToWidthBtn,
 .skipSlide,
 .prevSlide {
   border: none !important;
+  
+  
 
   &[aria-disabled="true"] {
     opacity: 1;

@@ -266,7 +266,7 @@ class PresentationToolbar extends Component {
             onClick={fitToWidthHandler}
             label={intl.formatMessage(intlMessages.fitToWidth)}
             hideLabel
-            className={styles.skipSlide}
+            className={styles.fitToWidthBtn}
           />
         </span>
         {/* Fit to screen button
