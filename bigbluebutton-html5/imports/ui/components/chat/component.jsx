@@ -39,6 +39,7 @@ const Chat = (props) => {
     actions,
     intl,
     shortcuts,
+    UnsentMessagesCollection,
   } = props;
 
   const HIDE_CHAT_AK = shortcuts.hidePrivateChat;
@@ -56,6 +57,7 @@ const Chat = (props) => {
         >
           <Button
             onClick={() => {
+              Session.set('idChatOpen', '');
               Session.set('openPanel', 'userlist');
             }}
             aria-label={intl.formatMessage(intlMessages.hideChatLabel, { 0: title })}
@@ -75,6 +77,7 @@ const Chat = (props) => {
                 hideLabel
                 onClick={() => {
                   actions.handleClosePrivateChat(chatID);
+                  Session.set('idChatOpen', '');
                   Session.set('openPanel', 'userlist');
                 }}
                 aria-label={intl.formatMessage(intlMessages.closeChatLabel, { 0: title })}
@@ -97,6 +100,8 @@ const Chat = (props) => {
         partnerIsLoggedOut={partnerIsLoggedOut}
       />
       <MessageForm
+        UnsentMessagesCollection={UnsentMessagesCollection}
+        chatId={chatID}
         disabled={isChatLocked}
         chatAreaId={ELEMENT_ID}
         chatTitle={title}

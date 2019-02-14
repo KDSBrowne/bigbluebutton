@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { defineMessages, injectIntl, intlShape } from 'react-intl';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import WhiteboardOverlayContainer from '/imports/ui/components/whiteboard/whiteboard-overlay/container';
 import WhiteboardToolbarContainer from '/imports/ui/components/whiteboard/whiteboard-toolbar/container';
@@ -10,8 +11,25 @@ import PresentationToolbarContainer from './presentation-toolbar/container';
 import PresentationOverlayContainer from './presentation-overlay/container';
 import Slide from './slide/component';
 import { styles } from './styles.scss';
+import MediaService, { shouldEnableSwapLayout } from '../media/service';
+import PresentationCloseButton from './presentation-close-button/component';
+import FullscreenButton from '../video-provider/fullscreen-button/component';
 
-export default class PresentationArea extends Component {
+const intlMessages = defineMessages({
+  presentationLabel: {
+    id: 'app.presentationUploder.title',
+    description: 'presentation area element label',
+  },
+});
+
+const isFullscreen = () => document.fullscreenElement !== null;
+
+const renderPresentationClose = () => {
+  if (!shouldEnableSwapLayout() || isFullscreen()) return null;
+  return <PresentationCloseButton toggleSwapLayout={MediaService.toggleSwapLayout} />;
+};
+
+class PresentationArea extends Component {
   constructor() {
     super();
 
@@ -61,6 +79,7 @@ export default class PresentationArea extends Component {
     const presentationSizes = {};
 
     if (refPresentationArea && refWhiteboardArea) {
+      const { userIsPresenter, multiUser } = this.props;
       // By default presentation sizes are equal to the sizes of the refPresentationArea
       // direct parent of the svg wrapper
       let { clientWidth, clientHeight } = refPresentationArea;
@@ -103,10 +122,10 @@ export default class PresentationArea extends Component {
   }
 
   calculateSize() {
+    const { presentationHeight, presentationWidth } = this.state;
     const { currentSlide } = this.props;
     const originalWidth = currentSlide.calculatedData.width;
     const originalHeight = currentSlide.calculatedData.height;
-    const { presentationHeight, presentationWidth } = this.state;
 
     let adjustedWidth;
     let adjustedHeight;
@@ -137,14 +156,15 @@ export default class PresentationArea extends Component {
     };
   }
 
-  zoomChanger(updatedZoom) {
+
+  zoomChanger(incomingZoom) {
     const { zoom } = this.state;
-    let newZoom = updatedZoom;
+    let newZoom = incomingZoom;
     const isDifferent = newZoom !== zoom;
 
     if (newZoom <= HUNDRED_PERCENT) {
       newZoom = HUNDRED_PERCENT;
-    } else if (updatedZoom >= MAX_PERCENT) {
+    } else if (incomingZoom >= MAX_PERCENT) {
       newZoom = MAX_PERCENT;
     }
     if (isDifferent) this.setState({ zoom: newZoom });
@@ -184,6 +204,8 @@ export default class PresentationArea extends Component {
     const adjustedSizes = this.calculateSize();
     // a reference to the slide object
     const slideObj = currentSlide;
+    const presentationCloseButton = renderPresentationClose();
+    const presentationFullscreenButton = this.renderPresentationFullscreen();
 
     // retrieving the pre-calculated data from the slide object
     const {
@@ -196,8 +218,10 @@ export default class PresentationArea extends Component {
       imageUri,
     } = slideObj.calculatedData;
     const svgDimensions = fitToWidth ? {
+      position: 'absolute',
       width: 'inherit',
     } : {
+      position: 'absolute',
       width: adjustedSizes.width,
       height: adjustedSizes.height,
     };
@@ -205,6 +229,8 @@ export default class PresentationArea extends Component {
       <div
         style={svgDimensions}
       >
+        {presentationCloseButton}
+        {presentationFullscreenButton}
         <TransitionGroup>
           <CSSTransition
             key={slideObj.id}
@@ -221,8 +247,10 @@ export default class PresentationArea extends Component {
           >
             <svg
               data-test="whiteboard"
-              width={width}
-              height={height}
+              {...{
+                width,
+                height,
+              }}
               ref={(ref) => { if (ref != null) { this.svggroup = ref; } }}
               viewBox={`${x} ${y} ${viewBoxWidth} ${viewBoxHeight}`}
               version="1.1"
@@ -241,8 +269,10 @@ export default class PresentationArea extends Component {
                   svgHeight={height}
                 />
                 <AnnotationGroupContainer
-                  width={width}
-                  height={height}
+                  {...{
+                    width,
+                    height,
+                  }}
                   whiteboardId={slideObj.id}
                 />
                 <CursorWrapperContainer
@@ -283,24 +313,31 @@ export default class PresentationArea extends Component {
 
     return (
       <PresentationOverlayContainer
-        podId={podId}
+        {...{
+          podId,
+          touchZoom,
+          fitToWidth,
+          zoom,
+          delta,
+          viewBoxWidth,
+          viewBoxHeight,
+          adjustedSizes,
+        }}
         currentSlideNum={currentSlide.num}
-        slide={slideObj}
         whiteboardId={slideObj.id}
+        slide={slideObj}
         slideWidth={width}
         slideHeight={height}
-        delta={delta}
-        viewBoxWidth={viewBoxWidth}
-        viewBoxHeight={viewBoxHeight}
-        zoom={zoom}
         zoomChanger={this.zoomChanger}
-        adjustedSizes={adjustedSizes}
         getSvgRef={this.getSvgRef}
         presentationSize={this.getPresentationSizesAvailable()}
-        touchZoom={touchZoom}
-        fitToWidth={fitToWidth}
       >
         <WhiteboardOverlayContainer
+          {...{
+            zoom,
+            viewBoxWidth,
+            viewBoxHeight,
+          }}
           getSvgRef={this.getSvgRef}
           whiteboardId={slideObj.id}
           slideWidth={width}
@@ -308,11 +345,8 @@ export default class PresentationArea extends Component {
           viewBoxX={x}
           viewBoxY={y}
           pointChanger={this.pointUpdate}
-          viewBoxWidth={viewBoxWidth}
-          viewBoxHeight={viewBoxHeight}
           physicalSlideWidth={(adjustedSizes.width / slideObj.widthRatio) * 100}
           physicalSlideHeight={(adjustedSizes.height / slideObj.heightRatio) * 100}
-          zoom={zoom}
           zoomChanger={this.zoomChanger}
           touchUpdate={this.touchUpdate}
         />
@@ -320,18 +354,34 @@ export default class PresentationArea extends Component {
     );
   }
 
-  renderPresentationToolbar() {
-    const { currentSlide, podId } = this.props;
-    const { zoom } = this.state;
+  renderPresentationFullscreen() {
+    const { intl } = this.props;
+    if (isFullscreen()) return null;
 
+    const full = () => this.refPresentationContainer.requestFullscreen();
+
+    return (
+      <FullscreenButton
+        handleFullscreen={full}
+        elementName={intl.formatMessage(intlMessages.presentationLabel)}
+        dark
+      />
+    );
+  }
+
+  renderPresentationToolbar() {
+    const { zoom } = this.state;
+    const { currentSlide, podId } = this.props;
     if (!currentSlide) return null;
 
     return (
       <PresentationToolbarContainer
-        podId={podId}
+        {...{
+          podId,
+          zoom,
+        }}
         currentSlideNum={currentSlide.num}
         presentationId={currentSlide.presentationId}
-        zoom={zoom}
         zoomChanger={this.zoomChanger}
         fitToWidthHandler={this.fitToWidthHandler}
       />
@@ -340,7 +390,6 @@ export default class PresentationArea extends Component {
 
   renderWhiteboardToolbar() {
     const { currentSlide } = this.props;
-
     if (!currentSlide || !currentSlide.calculatedData) return null;
 
     const adjustedSizes = this.calculateSize();
@@ -358,7 +407,10 @@ export default class PresentationArea extends Component {
     const { showSlide } = this.state;
 
     return (
-      <div className={styles.presentationContainer}>
+      <div
+        ref={(ref) => { this.refPresentationContainer = ref; }}
+        className={styles.presentationContainer}
+      >
         <div
           ref={(ref) => { this.refPresentationArea = ref; }}
           className={styles.presentationArea}
@@ -367,12 +419,8 @@ export default class PresentationArea extends Component {
             ref={(ref) => { this.refWhiteboardArea = ref; }}
             className={styles.whiteboardSizeAvailable}
           />
-          {showSlide
-            ? this.renderPresentationArea()
-            : null }
-          {userIsPresenter || multiUser
-            ? this.renderWhiteboardToolbar()
-            : null }
+          {showSlide ? this.renderPresentationArea() : null }
+          {userIsPresenter || multiUser ? this.renderWhiteboardToolbar() : null }
         </div>
         {this.renderPresentationToolbar()}
       </div>
@@ -380,7 +428,10 @@ export default class PresentationArea extends Component {
   }
 }
 
+export default injectIntl(PresentationArea);
+
 PresentationArea.propTypes = {
+  intl: intlShape.isRequired,
   podId: PropTypes.string.isRequired,
   // Defines a boolean value to detect whether a current user is a presenter
   userIsPresenter: PropTypes.bool.isRequired,

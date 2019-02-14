@@ -59,7 +59,7 @@ export default injectIntl(withTracker(({ intl }) => {
 
     messages = ChatService.getPublicGroupMessages();
 
-    const time = user.logTime;
+    const time = user.loginTime;
     const welcomeId = `welcome-msg-${time}`;
 
     const welcomeMsg = {
@@ -167,6 +167,7 @@ export default injectIntl(withTracker(({ intl }) => {
     scrollPosition,
     minMessageLength: CHAT_CONFIG.min_message_length,
     maxMessageLength: CHAT_CONFIG.max_message_length,
+    UnsentMessagesCollection: ChatService.UnsentMessagesCollection,
     actions: {
       handleClosePrivateChat: chatId => ChatService.closePrivateChat(chatId),
 

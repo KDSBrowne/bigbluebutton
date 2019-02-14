@@ -1,5 +1,5 @@
 import flat from 'flat';
-import { check } from 'meteor/check';
+import { check, Match } from 'meteor/check';
 import Meetings from '/imports/api/meetings';
 import Logger from '/imports/startup/server/logger';
 
@@ -36,17 +36,18 @@ export default function addMeeting(meeting) {
       userInactivityInspectTimerInMinutes: Number,
       userInactivityThresholdInMinutes: Number,
       userActivitySignResponseDelayInMinutes: Number,
+      timeRemaining: Number,
     },
     welcomeProp: {
       welcomeMsg: String,
       modOnlyMessage: String,
       welcomeMsgTemplate: String,
     },
-    recordProp: {
+    recordProp: Match.ObjectIncluding({
       allowStartStopRecording: Boolean,
       autoStartRecording: Boolean,
-      record: Boolean,
-    },
+      record: Boolean
+    }),
     password: {
       viewerPass: String,
       moderatorPass: String,

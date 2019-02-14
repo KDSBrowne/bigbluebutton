@@ -4,9 +4,26 @@ import { makeCall } from '/imports/ui/services/api';
 import Meetings from '/imports/api/meetings';
 import Breakouts from '/imports/api/breakouts';
 
+const USER_CONFIG = Meteor.settings.public.user;
+const ROLE_MODERATOR = USER_CONFIG.role_moderator;
+
+const getBreakouts = () => Breakouts.find({ parentMeetingId: Auth.meetingID })
+  .fetch()
+  .sort((a, b) => a.sequence - b.sequence);
+
+const getUsersNotAssigned = (users) => {
+  const breakouts = getBreakouts();
+  const breakoutUsers = breakouts
+    .reduce((acc, value) => [...acc, ...value.users], [])
+    .map(u => u.userId);
+  return users.filter(u => !breakoutUsers.includes(u.intId));
+};
+
+const takePresenterRole = () => makeCall('assignPresenter', Auth.userID);
+
 export default {
   isUserPresenter: () => Users.findOne({ userId: Auth.userID }).presenter,
-  isUserModerator: () => Users.findOne({ userId: Auth.userID }).moderator,
+  isUserModerator: () => Users.findOne({ userId: Auth.userID }).role === ROLE_MODERATOR,
   recordSettingsList: () => Meetings.findOne({ meetingId: Auth.meetingID }).recordProp,
   meetingIsBreakout: () => Meetings.findOne({ meetingId: Auth.meetingID }).meetingProp.isBreakout,
   meetingName: () => Meetings.findOne({ meetingId: Auth.meetingID }).meetingProp.name,
@@ -14,4 +31,8 @@ export default {
   hasBreakoutRoom: () => Breakouts.find({ parentMeetingId: Auth.meetingID }).fetch().length > 0,
   toggleRecording: () => makeCall('toggleRecording'),
   createBreakoutRoom: (numberOfRooms, durationInMinutes, freeJoin = true, record = false) => makeCall('createBreakoutRoom', numberOfRooms, durationInMinutes, freeJoin, record),
+  sendInvitation: (breakoutId, userId) => makeCall('requestJoinURL', { breakoutId, userId }),
+  getBreakouts,
+  getUsersNotAssigned,
+  takePresenterRole,
 };

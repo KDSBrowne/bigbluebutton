@@ -110,6 +110,7 @@ public class MeetingService implements MessageListener {
   private StunTurnService stunTurnService;
   private RedisStorageService storeService;
   private CallbackUrlService callbackUrlService;
+  private boolean keepEvents;
 
   private ParamsProcessorUtil paramsProcessorUtil;
   private PresentationUrlDownloadService presDownloadService;
@@ -252,16 +253,20 @@ public class MeetingService implements MessageListener {
     return false;
   }
 
+  private boolean storeEvents(Meeting m) {
+    return m.isRecord() || keepEvents;
+  }
+
   private void handleCreateMeeting(Meeting m) {
     if (m.isBreakout()) {
       Meeting parent = meetings.get(m.getParentMeetingId());
       parent.addBreakoutRoom(m.getExternalId());
-      if (parent.isRecord()) {
+      if (storeEvents(parent)) {
         storeService.addBreakoutRoom(parent.getInternalId(), m.getInternalId());
       }
     }
 
-    if (m.isRecord()) {
+    if (storeEvents(m)) {
       Map<String, String> metadata = new TreeMap<>();
       metadata.putAll(m.getMetadata());
       // TODO: Need a better way to store these values for recordings
@@ -294,13 +299,13 @@ public class MeetingService implements MessageListener {
     logData.put("isBreakout", m.isBreakout());
     logData.put("webcamsOnlyForModerator", m.getWebcamsOnlyForModerator());
     logData.put("record", m.isRecord());
-    logData.put("event", "create_meeting");
+    logData.put("logCode", "create_meeting");
     logData.put("description", "Create meeting.");
 
     Gson gson = new Gson();
     String logStr = gson.toJson(logData);
 
-    log.info("Create meeting: data={}", logStr);
+    log.info(" --analytics-- data={}", logStr);
 
     gw.createMeeting(m.getInternalId(), m.getExternalId(), m.getParentMeetingId(), m.getName(), m.isRecord(),
             m.getTelVoice(), m.getDuration(), m.getAutoStartRecording(), m.getAllowStartStopRecording(),
@@ -310,7 +315,7 @@ public class MeetingService implements MessageListener {
             m.getDialNumber(), m.getMaxUsers(), m.getMaxInactivityTimeoutMinutes(), m.getWarnMinutesBeforeMax(),
             m.getMeetingExpireIfNoUserJoinedInMinutes(), m.getmeetingExpireWhenLastUserLeftInMinutes(),
             m.getUserInactivityInspectTimerInMinutes(), m.getUserActivitySignResponseDelayInMinutes(),
-            m.getUserInactivityThresholdInMinutes(), m.getMuteOnStart());
+            m.getUserInactivityThresholdInMinutes(), m.getMuteOnStart(), keepEvents);
   }
 
   private String formatPrettyDate(Long timestamp) {
@@ -333,12 +338,12 @@ public class MeetingService implements MessageListener {
         logData.put("extUserId", prevUser.getExternalUserId());
         logData.put("intUserId", prevUser.getInternalUserId());
         logData.put("username", prevUser.getFullname());
-        logData.put("event", "duplicate_user_with_external_userid");
+        logData.put("logCode", "duplicate_user_with_external_userid");
         logData.put("description", "Duplicate user with external userid.");
 
         Gson gson = new Gson();
         String logStr = gson.toJson(logData);
-        log.info("Duplicate user with same externalUserId: data={}", logStr);
+        log.info(" --analytics-- data={}", logStr);
 
         gw.ejectDuplicateUser(message.meetingID,
                 prevUser.getInternalUserId(), prevUser.getFullname(),
@@ -449,13 +454,13 @@ public class MeetingService implements MessageListener {
       logData.put("meetingId", m.getInternalId());
       logData.put("externalMeetingId", m.getExternalId());
       logData.put("name", m.getName());
-      logData.put("event", "kick_off_ingest_and_processing");
+      logData.put("logCode", "kick_off_ingest_and_processing");
       logData.put("description", "Start processing of recording.");
 
       Gson gson = new Gson();
       String logStr = gson.toJson(logData);
 
-      log.info("Initiate recording processing: data={}", logStr);
+      log.info(" --analytics-- data={}", logStr);
       recordingService.startIngestAndProcessing(m.getInternalId());
     }
   }
@@ -499,9 +504,18 @@ public class MeetingService implements MessageListener {
         message.sourcePresentationId,
         message.sourcePresentationSlide, breakout.getInternalId());
     } else {
-      log.error(
-        "Failed to create breakout room {}.Reason: Parent meeting {} not found.",
-        message.meetingId, message.parentMeetingId);
+      Map<String, Object> logData = new HashMap<String, Object>();
+      logData.put("meetingId", message.meetingId);
+      logData.put("parentMeetingId", message.parentMeetingId);
+      logData.put("name", message.name);
+      logData.put("logCode", "create_breakout_failed");
+      logData.put("reason", "Parent not found.");
+      logData.put("description", "Create breakout failed.");
+
+      Gson gson = new Gson();
+      String logStr = gson.toJson(logData);
+
+      log.error(" --analytics-- data={}", logStr);
     }
   }
   
@@ -522,6 +536,11 @@ public class MeetingService implements MessageListener {
     if (m != null) {
       m.setForciblyEnded(true);
       processRecording(m);
+      if (keepEvents) {
+        // The creation of the ended tag must occur after the creation of the
+        // recorded tag to avoid concurrency issues at the recording scripts
+        recordingService.markAsEnded(m.getInternalId());
+      }
       destroyMeeting(m.getInternalId());
       meetings.remove(m.getInternalId());
       removeUserSessions(m.getInternalId());
@@ -577,13 +596,13 @@ public class MeetingService implements MessageListener {
         logData.put("duration", m.getDuration());
         logData.put("record", m.isRecord());
         logData.put("isBreakout", m.isBreakout());
-        logData.put("event", "meeting_started");
+        logData.put("logCode", "meeting_started");
         logData.put("description", "Meeting has started.");
 
         Gson gson = new Gson();
         String logStr = gson.toJson(logData);
 
-        log.info("Meeting started: data={}", logStr);
+        log.info(" --analytics-- data={}", logStr);
       } else {
         Map<String, Object> logData = new HashMap<>();
         logData.put("meetingId", m.getInternalId());
@@ -595,13 +614,13 @@ public class MeetingService implements MessageListener {
         logData.put("duration", m.getDuration());
         logData.put("record", m.isRecord());
         logData.put("isBreakout", m.isBreakout());
-        logData.put("event", "meeting_restarted");
+        logData.put("logCode", "meeting_restarted");
         logData.put("description", "Meeting has restarted.");
 
         Gson gson = new Gson();
         String logStr = gson.toJson(logData);
 
-        log.info("Meeting restarted: data={}", logStr);
+        log.info(" --analytics-- data={}", logStr);
       }
     }
   }
@@ -618,13 +637,13 @@ public class MeetingService implements MessageListener {
       logData.put("name", m.getName());
       logData.put("duration", m.getDuration());
       logData.put("record", m.isRecord());
-      logData.put("event", "meeting_destroyed");
+      logData.put("logCode", "meeting_destroyed");
       logData.put("description", "Meeting has been destroyed.");
 
       Gson gson = new Gson();
       String logStr = gson.toJson(logData);
 
-      log.info("Meeting destroyed: data={}", logStr);
+      log.info(" --analytics-- data={}", logStr);
     }
   }
 
@@ -640,13 +659,13 @@ public class MeetingService implements MessageListener {
       logData.put("name", m.getName());
       logData.put("duration", m.getDuration());
       logData.put("record", m.isRecord());
-      logData.put("event", "meeting_destroyed");
-      logData.put("description", "Meeting has been destroyed.");
+      logData.put("logCode", "meeting_ended");
+      logData.put("description", "Meeting has ended.");
 
       Gson gson = new Gson();
       String logStr = gson.toJson(logData);
 
-      log.info("Meeting ended: data={}", logStr);
+      log.info(" --analytics-- data={}", logStr);
 
       String endCallbackUrl = "endCallbackUrl".toLowerCase();
       Map<String, String> metadata = m.getMetadata();
@@ -661,7 +680,7 @@ public class MeetingService implements MessageListener {
         } catch (URISyntaxException e) {
             log.error("URI Syntax error in callback url=[{}]", callbackUrl, e);
         }
-        callbackUrlService.handleMessage(new MeetingEndedEvent(callbackUrl));
+        callbackUrlService.handleMessage(new MeetingEndedEvent(m.getInternalId(), m.getExternalId(), m.getName(), callbackUrl));
       }
 
       processRemoveEndedMeeting(message);
@@ -697,13 +716,13 @@ public class MeetingService implements MessageListener {
       logData.put("role", user.getRole());
       logData.put("guest", user.isGuest());
       logData.put("guestStatus", user.getGuestStatus());
-      logData.put("event", "user_joined_message");
+      logData.put("logCode", "user_joined_message");
       logData.put("description", "User joined the meeting.");
       logData.put("clientType", user.getClientType());
 
       Gson gson = new Gson();
       String logStr = gson.toJson(logData);
-      log.info("User joined meeting: data={}", logStr);
+      log.info(" --analytics-- data={}", logStr);
     }
   }
 
@@ -723,13 +742,13 @@ public class MeetingService implements MessageListener {
         logData.put("role", user.getRole());
         logData.put("guest", user.isGuest());
         logData.put("guestStatus", user.getGuestStatus());
-        logData.put("event", "user_left_message");
+        logData.put("logCode", "user_left_message");
         logData.put("description", "User left the meeting.");
 
         Gson gson = new Gson();
         String logStr = gson.toJson(logData);
 
-        log.info("User left meeting: data={}", logStr);
+        log.info(" --analytics-- data={}", logStr);
 
         if (m.getNumUsers() == 0) {
           // Last user the meeting. Mark this as the time
@@ -984,5 +1003,9 @@ public class MeetingService implements MessageListener {
 
   public void setStunTurnService(StunTurnService s) {
     stunTurnService = s;
+  }
+
+  public void setKeepEvents(boolean value) {
+    keepEvents = value;
   }
 }

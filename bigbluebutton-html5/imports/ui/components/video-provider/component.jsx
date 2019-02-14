@@ -6,6 +6,9 @@ import { fetchWebRTCMappedStunTurnServers } from '/imports/utils/fetchStunTurnSe
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import logger from '/imports/startup/client/logger';
 import { Session } from 'meteor/session';
+import browser from 'browser-detect';
+import { tryGenerateIceCandidates } from '../../../utils/safari-webrtc';
+import Auth from '/imports/ui/services/auth';
 
 import VideoService from './service';
 import VideoList from './video-list/component';
@@ -108,7 +111,7 @@ class VideoProvider extends Component {
     };
 
     // Set a valid bbb-webrtc-sfu application server socket in the settings
-    this.ws = new ReconnectingWebSocket(Meteor.settings.public.kurento.wsUrl);
+    this.ws = new ReconnectingWebSocket(Auth.authenticateURL(Meteor.settings.public.kurento.wsUrl));
     this.wsQueue = [];
 
     this.visibility = new VisibilityEvent();
@@ -146,6 +149,7 @@ class VideoProvider extends Component {
   }
 
   componentDidMount() {
+    this.checkIceConnectivity();
     document.addEventListener('joinVideo', this.shareWebcam); // TODO find a better way to do this
     document.addEventListener('exitVideo', this.unshareWebcam);
     this.ws.onmessage = this.onWsMessage;
@@ -197,6 +201,7 @@ class VideoProvider extends Component {
   onWsMessage(msg) {
     const parsedMessage = JSON.parse(msg.data);
 
+    if (parsedMessage.id === 'pong') return;
     this.logger('debug', `Received new message '${parsedMessage.id}'`, { topic: 'ws', message: parsedMessage });
 
     switch (parsedMessage.id) {
@@ -272,6 +277,17 @@ class VideoProvider extends Component {
     }
   }
 
+  checkIceConnectivity() {
+    // Webkit ICE restrictions demand a capture device permission to release
+    // host candidates
+    if (browser().name === 'safari') {
+      const { intl } = this.props;
+      tryGenerateIceCandidates().catch((e) => {
+        this.notifyError(intl.formatMessage(intlSFUErrors[2021]));
+      });
+    }
+  }
+
   logger(type, message, options = {}) {
     const { userId, userName } = this.props;
     const topic = options.topic || 'video';
@@ -323,7 +339,9 @@ class VideoProvider extends Component {
 
     if (this.connectedToMediaServer()) {
       const jsonMessage = JSON.stringify(message);
-      this.logger('debug', `Sending message '${message.id}'`, { topic: 'ws', message });
+      if (message.id !== 'ping') {
+        this.logger('debug', `Sending message '${message.id}'`, { topic: 'ws', message });
+      }
       ws.send(jsonMessage, (error) => {
         if (error) {
           this.logger(`client: Websocket error '${error}' on message '${message.id}'`, { topic: 'ws' });
@@ -504,8 +522,6 @@ class VideoProvider extends Component {
             voiceBridge,
           };
           this.sendMessage(message);
-
-
         });
       });
       if (this.webRtcPeers[id].peerConnection) {
