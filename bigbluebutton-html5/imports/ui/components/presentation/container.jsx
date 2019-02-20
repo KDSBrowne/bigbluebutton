@@ -9,6 +9,7 @@ const PresentationAreaContainer = ({ presentationPodIds, ...props }) => (
 );
 
 export default withTracker(({ podId }) => {
+  const currentPresentation = PresentationAreaService.getCurrentPresentation(podId);
   const currentSlide = PresentationAreaService.getCurrentSlide(podId);
   return {
     currentSlide,
@@ -16,5 +17,7 @@ export default withTracker(({ podId }) => {
     multiUser: PresentationAreaService
       .getMultiUserStatus(currentSlide && currentSlide.id) && !getSwapLayout(),
     isFullscreen: PresentationAreaService.isFullscreen(),
+    fitSlideToWidth: () => PresentationAreaService.fitSlideToWidth(podId, currentPresentation),
+    fitToWidth: currentPresentation.fitToWidth || false,
   };
 })(PresentationAreaContainer);

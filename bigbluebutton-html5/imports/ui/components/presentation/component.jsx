@@ -27,7 +27,6 @@ class PresentationArea extends Component {
         x: 0,
         y: 0,
       },
-      fitToWidth: false,
     };
 
     this.getSvgRef = this.getSvgRef.bind(this);
@@ -179,12 +178,9 @@ class PresentationArea extends Component {
   }
 
   fitToWidthHandler() {
-    const { fitToWidth } = this.state;
-    this.setState({
-      fitToWidth: !fitToWidth,
-    });
+    const { fitSlideToWidth } = this.props;
+    fitSlideToWidth();
   }
-
 
   isPresentationAccessible() {
     const { currentSlide } = this.props;
@@ -206,13 +202,13 @@ class PresentationArea extends Component {
       multiUser,
       podId,
       currentSlide,
+      fitToWidth,
     } = this.props;
 
     const {
       delta,
       zoom,
       touchZoom,
-      fitToWidth,
     } = this.state;
 
     if (!userIsPresenter && !multiUser) {
@@ -270,10 +266,8 @@ class PresentationArea extends Component {
 
   // renders the whole presentation area
   renderPresentationArea() {
-    const { fitToWidth } = this.state;
-    const { podId, currentSlide } = this.props;
+    const { podId, currentSlide, fitToWidth } = this.props;
     if (!this.isPresentationAccessible()) return null;
-
 
     // to control the size of the svg wrapper manually
     // and adjust cursor's thickness, so that svg didn't scale it automatically
