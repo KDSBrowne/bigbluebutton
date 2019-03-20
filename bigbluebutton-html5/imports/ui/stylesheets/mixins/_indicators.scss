@@ -41,6 +41,7 @@
 }
 
 @mixin highContrastOutline() {
+  /* Visible in Windows high-contrast themes */
   outline: transparent;
   outline-style: dotted;
   outline-width: thin;
