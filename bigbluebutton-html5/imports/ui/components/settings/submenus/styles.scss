@@ -1,5 +1,6 @@
 @import '/imports/ui/stylesheets/mixins/focus';
 @import '/imports/ui/stylesheets/variables/_all';
+@import '/imports/ui/stylesheets/mixins/_indicators';
 
 .title {
   color: var(--color-gray-dark);
@@ -58,6 +59,7 @@
 }
 
 .select {
+  @include highContrastOutline();
   @include elementFocus(var(--color-primary));
 
   background-color: var(--color-white);
@@ -74,6 +76,9 @@
   display: flex;
   justify-content: flex-end;
   flex-flow: row;
+  > div {
+    @include highContrastOutline();
+  }
 }
 
 .pullContentCenter {
@@ -97,10 +102,10 @@
 }
 
 .swatch {
+  @include highContrastOutline();
   @include elementFocus(var(--color-primary));
 
   position: absolute;
-  float: right;
   background: var(--color-white);
   border-radius: var(--border-size);
   border: var(--border-size) solid var(--color-gray-light);

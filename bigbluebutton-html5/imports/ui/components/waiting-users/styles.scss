@@ -95,7 +95,6 @@
   &:focus {
     background-color: var(--list-item-bg-hover);
     box-shadow: inset 0 0 0 var(--border-size) var(--item-focus-border), inset 1px 0 0 1px var(--item-focus-border);
-    outline: none;
   }
 
   &:hover {
@@ -126,8 +125,7 @@
   
   &:focus {
     background-color: var(--list-item-bg-hover) !important;
-    box-shadow: inset 0 0 0 var(--border-size) var(--item-focus-border), inset 1px 0 0 1px var(--item-focus-border) ;
-    outline: none;
+    box-shadow: inset 0 0 0 var(--border-size) var(--item-focus-border), inset 1px 0 0 1px var(--item-focus-border);
   }
 
   &:hover {

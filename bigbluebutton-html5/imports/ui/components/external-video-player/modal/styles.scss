@@ -1,6 +1,7 @@
 @import "/imports/ui/stylesheets/variables/_all";
 @import "/imports/ui/components/modal/simple/styles";
 @import "/imports/ui/stylesheets/mixins/focus";
+@import '/imports/ui/stylesheets/mixins/_indicators';
 
 .header {
   margin: 0;
@@ -67,10 +68,6 @@
 }
 
 .startBtn {
-  &:focus {
-    outline: none !important;
-  }
-
   i{
     color: #3c5764;
   }
@@ -85,10 +82,6 @@
 }
 
 .stopBtn {
-  &:focus {
-    outline: none !important;
-  }
-
   i{
     color: red;
   }
@@ -122,6 +115,7 @@
   }
 
   input {
+    @include highContrastOutline();
     @include inputFocus(var(--color-blue-light));
     display: block;
     margin: 10px 0 10px 0;

@@ -1,5 +1,6 @@
 @import "/imports/ui/stylesheets/variables/_all";
 @import "/imports/ui/stylesheets/mixins/_scrollable";
+@import '/imports/ui/stylesheets/mixins/_indicators';
 
 /* Variables
  * ==========
@@ -42,11 +43,15 @@
 }
 
 %list-item {
+  @include highContrastOutline();
+
   display: flex;
   flex-flow: row;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
   cursor: pointer;
+  margin-top: 1px !important;
+  margin-bottom: 1px !important;
 
   [style~="--enableAnimation:1;"] & {
     transition: all .3s;
@@ -59,7 +64,6 @@
   &:focus {
     background-color: var(--list-item-bg-hover);
     box-shadow: inset 0 0 0 var(--border-size) var(--item-focus-border), inset 1px 0 0 1px var(--item-focus-border);
-    outline: none;
   }
 
   &:hover {

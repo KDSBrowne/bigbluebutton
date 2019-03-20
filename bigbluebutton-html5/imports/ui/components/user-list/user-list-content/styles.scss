@@ -19,7 +19,11 @@
 .scrollableList {
   @include elementFocus(var(--list-item-bg-hover));
   @include scrollbox-vertical(var(--user-list-bg));
-
+  
+  :global(.browser-edge) & {
+    background: none !important;
+  }
+  
   &:active {
     box-shadow: none;
     border-radius: none;

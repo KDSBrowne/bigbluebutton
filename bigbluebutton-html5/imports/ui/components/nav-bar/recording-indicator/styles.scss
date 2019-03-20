@@ -1,5 +1,6 @@
 @import "../../../stylesheets/variables/_all";
 @import "../../../stylesheets/variables/typography";
+@import '/imports/ui/stylesheets/mixins/_indicators';
 
 .visuallyHidden {
   position: absolute;
@@ -116,6 +117,10 @@
   &:after {
     background-color: var(--color-danger);
   }
+}
+
+.btnWrapper {
+  @include highContrastOutline();
 }
 
 .recordingIndicatorOFF {

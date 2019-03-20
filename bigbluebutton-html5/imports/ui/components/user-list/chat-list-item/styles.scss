@@ -13,6 +13,7 @@
   padding-top: var(--lg-padding-y);
   padding-bottom: var(--lg-padding-y);
   padding-left: var(--lg-padding-y);
+  margin-left: 1px;
 }
 
 .chatListItemLink {
@@ -50,5 +51,4 @@
 .active {
   background-color: var(--list-item-bg-hover);
   box-shadow: inset 0 0 0 var(--border-size) var(--item-focus-border), inset 1px 0 0 1px var(--item-focus-border);
-  outline: none;
 }

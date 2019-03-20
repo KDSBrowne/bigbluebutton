@@ -486,6 +486,7 @@ class UserDropdown extends PureComponent {
     const userItemContentsStyle = {};
 
     userItemContentsStyle[styles.dropdown] = true;
+    userItemContentsStyle[styles.outlined] = true;
     userItemContentsStyle[styles.userListItem] = !isActionsOpen;
     userItemContentsStyle[styles.usertListItemWithMenu] = isActionsOpen;
 

@@ -1,4 +1,5 @@
 @import "/imports/ui/stylesheets/variables/_all";
+@import '/imports/ui/stylesheets/mixins/_indicators';
 
 .visuallyhidden {
   position: absolute;
@@ -51,12 +52,11 @@
   grid-template-columns: 1fr 1fr 1fr;
 
   select {
-    margin-right: .5rem;
-    padding: .5rem .5rem .5rem .3rem;
+    @include highContrastOutline();
 
-    outline-color: transparent;
-    outline-style: none;
-    outline: none;
+    margin-right: .5rem;
+    margin-left: .5rem;
+    padding: .5rem .5rem .5rem .3rem;
 
     option {
       color: var(--toolbar-button-color);

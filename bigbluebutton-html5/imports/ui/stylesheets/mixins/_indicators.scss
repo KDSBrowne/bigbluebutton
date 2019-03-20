@@ -39,3 +39,9 @@
     padding-bottom: var(--indicator-padding-bottom);
   }
 }
+
+@mixin highContrastOutline() {
+  outline: transparent;
+  outline-style: dotted;
+  outline-width: thin;
+}

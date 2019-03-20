@@ -1,4 +1,5 @@
 @import "/imports/ui/stylesheets/variables/_all";
+@import '/imports/ui/stylesheets/mixins/_indicators';
 
 /* Base
  * ==========
@@ -40,8 +41,9 @@
 }
 
 .button {
+  @include highContrastOutline();
+
   border: none;
-  outline: none;
   overflow: visible;
   display: inline-block;
   border-radius: var(--border-size);

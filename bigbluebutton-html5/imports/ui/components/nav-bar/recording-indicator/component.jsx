@@ -61,7 +61,7 @@ class RecordingIndicator extends React.PureComponent {
     };
 
     return (
-      <div>
+      <div className={styles.btnWrapper}>
         {amIModerator ? (
           <Tooltip
             title={buttonTitle}

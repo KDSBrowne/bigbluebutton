@@ -1,4 +1,5 @@
 @import "../../stylesheets/variables/_all";
+@import '/imports/ui/stylesheets/mixins/_indicators';
 
 :root {
   --toast-default-color: var(--color-white);
@@ -157,8 +158,9 @@
 }
 
 .close {
+  @include highContrastOutline();
+  
   background: transparent;
-  outline: none;
   border: none;
   cursor: pointer;
   opacity: .5;

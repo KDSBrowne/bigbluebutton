@@ -1,7 +1,9 @@
 @import "/imports/ui/stylesheets/variables/_all";
 @import "/imports/ui/stylesheets/mixins/_scrollable";
+@import '/imports/ui/stylesheets/mixins/_indicators';
 
 .modal {
+  @include highContrastOutline();
   @include scrollbox-vertical();
 
   max-width: 60vw;
@@ -9,7 +11,6 @@
   border-radius: var(--border-radius);
   background: #fff;
   overflow: auto;
-  outline: none;
 
   @include mq($small-only) {
     max-width: 95vw;

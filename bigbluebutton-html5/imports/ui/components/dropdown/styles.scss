@@ -12,10 +12,6 @@
 
 .dropdown {
   position: relative;
-
-  &:focus {
-    outline: none;
-  }
 }
 
 .content {
@@ -74,9 +70,6 @@
     right: 0;
     bottom: 0;
   }
-}
-
-.trigger {
 }
 
 .close {

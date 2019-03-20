@@ -127,7 +127,6 @@
 .dropdown, .dropdownFireFox {
   flex: 1;
   display: flex;
-  outline: none !important;
   width: var(--cam-dropdown-width);
 
   @include mq($medium-up) {
