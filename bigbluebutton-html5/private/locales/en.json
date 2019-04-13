@@ -106,6 +106,7 @@
     "app.presentationUploder.title": "Presentation",
     "app.presentationUploder.message": "As a presenter you have the ability of uploading any office document or PDF file.  We recommend PDF file for best results.",
     "app.presentationUploder.confirmLabel": "Start",
+    "app.presentationUploder.uploadLabel": "Upload",
     "app.presentationUploder.confirmDesc": "Save your changes and start the presentation",
     "app.presentationUploder.dismissLabel": "Cancel",
     "app.presentationUploder.dismissDesc": "Close the modal window and discard your changes",

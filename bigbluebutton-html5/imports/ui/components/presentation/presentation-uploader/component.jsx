@@ -56,6 +56,10 @@ const intlMessages = defineMessages({
     id: 'app.presentationUploder.confirmDesc',
     description: 'description of the confirm',
   },
+  uploadLabel: {
+    id: 'app.presentationUploder.uploadLabel',
+    description: 'used in the confirm button to upload new presentation',
+  },
   dismissLabel: {
     id: 'app.presentationUploder.dismissLabel',
     description: 'used in the button that close modal',
@@ -638,7 +642,12 @@ class PresentationUploader extends Component {
 
   render() {
     const { intl } = this.props;
-    const { preventClosing, disableActions } = this.state;
+    const { preventClosing, disableActions, presentations } = this.state;
+
+    let awaitingConversion = false;
+    presentations.map((presentation) => {
+      if (!presentation.conversion.done) awaitingConversion = true;
+    });
 
     return (
       <ModalFullscreen
@@ -646,7 +655,7 @@ class PresentationUploader extends Component {
         preventClosing={preventClosing}
         confirm={{
           callback: this.handleConfirm,
-          label: intl.formatMessage(intlMessages.confirmLabel),
+          label: awaitingConversion ? intl.formatMessage(intlMessages.uploadLabel) : intl.formatMessage(intlMessages.confirmLabel),
           description: intl.formatMessage(intlMessages.confirmDesc),
           disabled: disableActions,
         }}
