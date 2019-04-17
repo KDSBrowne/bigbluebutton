@@ -53,6 +53,10 @@ const intlMessages = defineMessages({
     id: 'app.recording.stopTitle',
     description: 'stop recording title',
   },
+  resumeLabel: {
+    id: 'app.recording.resumeTitle',
+    description: 'label for resuming recording button',
+  },
 });
 
 const propTypes = {
@@ -297,6 +301,10 @@ class NavBar extends PureComponent {
     let ariaLabel = intl.formatMessage(intlMessages.toggleUserListAria);
     ariaLabel += hasUnreadMessages ? (` ${intl.formatMessage(intlMessages.newMessages)}`) : '';
 
+    const notRecordingLabel = time > 0
+      ? intl.formatMessage(intlMessages.resumeLabel)
+      : intl.formatMessage(intlMessages.startTitle);
+
     return (
       <div className={styles.navbar}>
         <div className={styles.left}>
@@ -322,7 +330,7 @@ class NavBar extends PureComponent {
           <RecordingIndicator
             {...recordProps}
             title={intl.formatMessage(intlMessages[recordingMessage])}
-            buttonTitle={(!recordProps.recording ? intl.formatMessage(intlMessages.startTitle)
+            buttonTitle={(!recordProps.recording ? notRecordingLabel
               : intl.formatMessage(intlMessages.stopTitle))}
             mountModal={mountModal}
             time={time}
