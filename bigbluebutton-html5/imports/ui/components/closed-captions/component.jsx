@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { defineMessages, injectIntl } from 'react-intl';
 import injectWbResizeEvent from '/imports/ui/components/presentation/resize-wrapper/component';
 import { styles } from './styles.scss';
-import SpeechRecognition from '/imports/ui/components/speech-recognition/component';
+import SpeechRecognitionContainer from '/imports/ui/components/speech-recognition/container';
 
 const intlMessages = defineMessages({
   noLocaleSelected: {
@@ -63,7 +63,7 @@ class ClosedCaptions extends React.PureComponent {
 
     return (
       <div disabled className={styles.ccbox}>
-        <SpeechRecognition />
+        <SpeechRecognitionContainer />
       </div>
     );
   }
