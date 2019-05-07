@@ -18,6 +18,9 @@
   display: flex;
   flex-flow: row;
   flex: 1;
+  position: relative;
+  margin-left: var(--border-size);
+  margin-top: var(--border-size);
 }
 
 .systemMessage {
@@ -116,10 +119,16 @@
   }
 }
 
-.message {
+.message, .hyperlink {
   flex: 1;
   margin-top: calc(var(--line-height-computed) / 3);
   margin-bottom: 0;
   color: var(--color-text);
   word-wrap: break-word;
+}
+
+.hyperlink {
+  a {
+    color: var(--color-primary);
+  }
 }
