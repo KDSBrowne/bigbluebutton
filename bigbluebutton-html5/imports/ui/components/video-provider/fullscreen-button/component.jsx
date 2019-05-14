@@ -45,19 +45,24 @@ const FullscreenButtonComponent = ({
     [styles.light]: !dark,
   });
 
+  const isIPhone = navigator.userAgent.match(/iPhone/i) != null;
+
   return (
-    <div className={wrapperClassName}>
-      <Button
-        color="default"
-        icon="fullscreen"
-        size="sm"
-        onClick={handleFullscreen}
-        label={formattedLabel}
-        hideLabel
-        className={cx(styles.button, styles.fullScreenButton, className)}
-        tooltipDistance={tooltipDistance}
-      />
-    </div>
+    isIPhone ? null
+      : (
+        <div className={wrapperClassName}>
+          <Button
+            color="default"
+            icon="fullscreen"
+            size="sm"
+            onClick={handleFullscreen}
+            label={formattedLabel}
+            hideLabel
+            className={cx(styles.button, styles.fullScreenButton, className)}
+            tooltipDistance={tooltipDistance}
+          />
+        </div>
+      )
   );
 };
 

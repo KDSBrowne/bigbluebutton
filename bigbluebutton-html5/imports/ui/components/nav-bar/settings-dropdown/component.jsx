@@ -151,7 +151,8 @@ class SettingsDropdown extends PureComponent {
       fullscreenIcon = 'exit_fullscreen';
     }
 
-    if (noIOSFullscreen) return null;
+    const isIPhone = navigator.userAgent.match(/iPhone/i) != null;
+    if (noIOSFullscreen || isIPhone) return null;
 
     return (
       <DropdownListItem
