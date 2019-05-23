@@ -245,6 +245,7 @@ class ApplicationMenu extends BaseMenu {
               <div
                 id="changeLangLabel"
                 aria-label={intl.formatMessage(intlMessages.ariaLanguageLabel)}
+                htmlFor="langSelector"
               />
               <label
                 aria-labelledby="changeLangLabel"
@@ -252,6 +253,7 @@ class ApplicationMenu extends BaseMenu {
               >
                 {availableLocales && availableLocales.length > 0 ? (
                   <select
+                    id="langSelector"
                     defaultValue={this.state.settings.locale}
                     className={styles.select}
                     onChange={this.handleSelectChange.bind(this, 'locale', availableLocales)}
