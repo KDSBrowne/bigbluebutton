@@ -3,6 +3,7 @@ import { defineMessages, injectIntl } from 'react-intl';
 import _ from 'lodash';
 import Button from '/imports/ui/components/button/component';
 import { Session } from 'meteor/session';
+import logger from '/imports/startup/client/logger';
 import { styles } from './styles';
 import BreakoutRoomContainer from './breakout-remaining-time/container';
 
@@ -142,14 +143,33 @@ class BreakoutRoom extends PureComponent {
     const moderatorJoinedAudio = isMicrophoneUser && isModerator;
     const disable = waiting && requestedBreakoutId !== breakoutId;
     const audioAction = joinedAudioOnly
-      ? () => this.returnBackToMeeeting(breakoutId)
-      : () => this.transferUserToBreakoutRoom(breakoutId);
+      ? () => {
+        logger.info({
+          logCode: 'breakoutroom_rejoin_main_audio',
+          extraInfo: { logType: 'moderator_action' },
+        }, 'joining main room audio closed audio in breakout room');
+        this.returnBackToMeeeting(breakoutId);
+      }
+      : () => {
+        logger.info({
+          logCode: 'breakoutroom_join_audio',
+          extraInfo: { logType: 'moderator_action' },
+        }, 'joining breakout room audio closed audio in main room');
+        return this.transferUserToBreakoutRoom(breakoutId);
+      };
     return (
       <div className={styles.breakoutActions}>
         <Button
           label={intl.formatMessage(intlMessages.breakoutJoin)}
           aria-label={`${intl.formatMessage(intlMessages.breakoutJoin)} ${number}`}
-          onClick={() => this.getBreakoutURL(breakoutId)}
+          onClick={() => {
+            logger.info({
+              logCode: 'breakoutroom_join',
+              extraInfo: { logType: 'moderator_action' },
+            }, 'joining breakout room closed audio in the main room');
+            this.getBreakoutURL(breakoutId);
+          }
+          }
           disabled={disable}
           className={styles.joinButton}
         />
