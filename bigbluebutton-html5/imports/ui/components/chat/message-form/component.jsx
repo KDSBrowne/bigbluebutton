@@ -81,6 +81,9 @@ class MessageForm extends PureComponent {
 
   componentDidMount() {
     const { mobile } = this.BROWSER_RESULTS;
+    const { stopUserTyping } = this.props;
+    stopUserTyping();
+
     this.setMessageState();
     this.setMessageHint();
 
