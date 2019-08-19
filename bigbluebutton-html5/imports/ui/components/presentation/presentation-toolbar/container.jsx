@@ -9,10 +9,10 @@ import PresentationToolbarService from './service';
 const PresentationToolbarContainer = (props) => {
   const {
     userIsPresenter,
-    getSwapLayout,
+    layoutSwapped,
   } = props;
 
-  if (userIsPresenter && !getSwapLayout) {
+  if (userIsPresenter && !layoutSwapped) {
     // Only show controls if user is presenter and layout isn't swapped
 
     return (
@@ -28,24 +28,12 @@ export default withTracker((params) => {
   const {
     podId,
     presentationId,
-    fitToWidth,
-    fullscreenRef,
-    zoom,
-    zoomChanger,
-    currentSlideNum,
-    fitToWidthHandler,
   } = params;
 
   return {
-    getSwapLayout: MediaService.getSwapLayout(),
-    fitToWidthHandler,
-    fitToWidth,
-    fullscreenRef,
+    layoutSwapped: MediaService.getSwapLayout() && MediaService.shouldEnableSwapLayout(),
     userIsPresenter: PresentationService.isPresenter(podId),
     numberOfSlides: PresentationToolbarService.getNumberOfSlides(podId, presentationId),
-    zoom,
-    zoomChanger,
-    currentSlideNum,
     nextSlide: PresentationToolbarService.nextSlide,
     previousSlide: PresentationToolbarService.previousSlide,
     skipToSlide: PresentationToolbarService.skipToSlide,
