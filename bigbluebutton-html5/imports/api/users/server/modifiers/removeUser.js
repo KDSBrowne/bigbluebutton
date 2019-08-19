@@ -3,6 +3,7 @@ import Users from '/imports/api/users';
 import Logger from '/imports/startup/server/logger';
 import stopWatchingExternalVideo from '/imports/api/external-videos/server/methods/stopWatchingExternalVideo';
 import clearUserInfoForRequester from '/imports/api/users-infos/server/modifiers/clearUserInfoForRequester';
+import clearTypingUser from './clearTypingUser';
 
 const clearAllSessions = (sessionUserId) => {
   const serverSessions = Meteor.server.sessions;
@@ -46,8 +47,8 @@ export default function removeUser(meetingId, userId) {
 
     const sessionUserId = `${meetingId}-${userId}`;
     clearAllSessions(sessionUserId);
-
     clearUserInfoForRequester(meetingId, userId);
+    clearTypingUser(meetingId, userId);
 
     return Logger.info(`Removed user id=${userId} meeting=${meetingId}`);
   };
