@@ -1,6 +1,7 @@
 import React from 'react';
 import { withTracker } from 'meteor/react-meteor-data';
 import { RecordMeetings } from '/imports/api/meetings';
+import { convertNumToEasternArabic } from '/imports/ui/components/app/service';
 import RecordIndicator from './component';
 import Auth from '/imports/ui/services/auth';
 
@@ -30,5 +31,6 @@ export default withTracker(() => {
     record: recordObeject && recordObeject.record,
     recording: recordObeject && recordObeject.recording,
     time: recordObeject && recordObeject.time,
+    convertNumToEasternArabic,
   };
 })(RecordIndicatorContainer);

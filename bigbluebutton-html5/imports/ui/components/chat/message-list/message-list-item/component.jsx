@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedTime, defineMessages, injectIntl } from 'react-intl';
+import { defineMessages, injectIntl } from 'react-intl';
 import _ from 'lodash';
-
 import UserAvatar from '/imports/ui/components/user-avatar/component';
 import Message from './message/component';
 
@@ -149,6 +148,7 @@ class MessageListItem extends Component {
       messages,
       time,
       chatAreaId,
+      convertNumToEasternArabic,
       lastReadMessageTime,
       handleReadMessage,
       scrollArea,
@@ -188,7 +188,9 @@ class MessageListItem extends Component {
                   )}
               </div>
               <time className={styles.time} dateTime={dateTime}>
-                <FormattedTime value={dateTime} />
+                <span>
+                  {convertNumToEasternArabic(intl.formatTime(dateTime))}
+                </span>
               </time>
             </div>
             <div className={styles.messages}>

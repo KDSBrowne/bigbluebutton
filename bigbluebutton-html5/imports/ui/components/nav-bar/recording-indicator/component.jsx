@@ -97,6 +97,7 @@ class RecordingIndicator extends PureComponent {
       amIModerator,
       intl,
       allowStartStopRecording,
+      convertNumToEasternArabic,
     } = this.props;
 
     const { time } = this.state;
@@ -169,7 +170,7 @@ class RecordingIndicator extends PureComponent {
             ) : null
           }
           {recording
-            ? <span aria-hidden>{humanizeSeconds(time)}</span> : <span>{recordTitle}</span>}
+            ? <span aria-hidden>{convertNumToEasternArabic(humanizeSeconds(time))}</span> : <span>{recordTitle}</span>}
         </div>
       </div>
     );
@@ -207,7 +208,7 @@ class RecordingIndicator extends PureComponent {
                 {recordingIndicatorIcon}
 
                 {recording
-                  ? <div className={styles.presentationTitle}>{humanizeSeconds(time)}</div> : null}
+                  ? <div className={styles.presentationTitle}>{convertNumToEasternArabic(humanizeSeconds(time))}</div> : null}
               </div>
             </Tooltip>
           )}

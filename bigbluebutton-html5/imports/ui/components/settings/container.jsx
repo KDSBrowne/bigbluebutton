@@ -1,6 +1,7 @@
 import React from 'react';
 import { withTracker } from 'meteor/react-meteor-data';
 import SettingsService from '/imports/ui/services/settings';
+import { convertNumToEasternArabic } from '/imports/ui/components/app/service';
 import Settings from './component';
 
 import {
@@ -20,4 +21,5 @@ export default withTracker(() => ({
   updateSettings,
   availableLocales: getAvailableLocales(),
   isModerator: getUserRoles() === 'MODERATOR',
+  convertNumToEasternArabic,
 }))(SettingsContainer);

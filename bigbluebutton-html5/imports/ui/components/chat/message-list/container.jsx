@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import { withTracker } from 'meteor/react-meteor-data';
+import { convertNumToEasternArabic } from '/imports/ui/components/app/service';
 import ChatList from './component';
 import ChatService from '../service';
 
@@ -16,6 +17,7 @@ export default withTracker(({ chatId }) => {
   const scrollPosition = ChatService.getScrollPosition(chatId);
   const lastReadMessageTime = ChatService.lastReadMessageTime(chatId);
   return {
+    convertNumToEasternArabic,
     hasUnreadMessages,
     scrollPosition,
     lastReadMessageTime,

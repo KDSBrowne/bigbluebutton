@@ -148,6 +148,7 @@ class ZoomTool extends PureComponent {
       tooltipDistance,
       isMeteorConnected,
       step,
+      convertNumToEasternArabic,
     } = this.props;
     const { stateZoomValue } = this.state;
 
@@ -194,7 +195,7 @@ class ZoomTool extends PureComponent {
               aria-describedby="resetZoomDescription"
               disabled={(stateZoomValue === minBound) || !isMeteorConnected}
               color="default"
-              customIcon={stateZoomPct}
+              customIcon={convertNumToEasternArabic(stateZoomPct)}
               size="md"
               onClick={() => this.resetZoom()}
               label={intl.formatMessage(intlMessages.resetZoomLabel)}

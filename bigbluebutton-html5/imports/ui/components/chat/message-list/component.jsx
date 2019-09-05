@@ -37,17 +37,19 @@ class MessageList extends Component {
 
   componentDidMount() {
     const { scrollArea } = this;
+    const { scrollPosition } = this.props;
 
     this.setState({
       scrollArea: this.scrollArea,
     });
 
-    this.scrollTo(this.props.scrollPosition);
+    this.scrollTo(scrollPosition);
     scrollArea.addEventListener('scroll', this.handleScrollChange, false);
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.chatId !== nextProps.chatId) {
+    const { chatId } = this.props;
+    if (chatId !== nextProps.chatId) {
       const { scrollArea } = this;
       this.handleScrollUpdate(scrollArea.scrollTop, scrollArea);
     }
@@ -60,7 +62,9 @@ class MessageList extends Component {
       partnerIsLoggedOut,
     } = this.props;
 
-    if (!this.state.scrollArea && nextState.scrollArea) return true;
+    const { scrollArea } = this.state;
+
+    if (!scrollArea && nextState.scrollArea) return true;
 
     const switchingCorrespondent = chatId !== nextProps.chatId;
     const hasNewUnreadMessages = hasUnreadMessages !== nextProps.hasUnreadMessages;
@@ -78,7 +82,8 @@ class MessageList extends Component {
   }
 
   componentWillUpdate(nextProps) {
-    if (this.props.chatId !== nextProps.chatId) {
+    const { chatId } = this.props;
+    if (chatId !== nextProps.chatId) {
       this.shouldScrollBottom = false;
       return;
     }
@@ -112,12 +117,13 @@ class MessageList extends Component {
   }
 
   handleScrollUpdate(position, target) {
+    const { handleScrollUpdate } = this.props;
     if (position !== null && position + target.offsetHeight === target.scrollHeight) {
-      this.props.handleScrollUpdate(null);
+      handleScrollUpdate(null);
       return;
     }
 
-    this.props.handleScrollUpdate(position);
+    handleScrollUpdate(position);
   }
 
   handleScrollChange(e) {
@@ -166,8 +172,9 @@ class MessageList extends Component {
 
   render() {
     const {
-      messages, intl, id, lastReadMessageTime, handleReadMessage,
+      messages, intl, id, lastReadMessageTime, handleReadMessage, convertNumToEasternArabic,
     } = this.props;
+    const { scrollArea } = this.state;
     const isEmpty = messages.length === 0;
     return (
       <div className={styles.messageListWrapper}>
@@ -183,14 +190,17 @@ class MessageList extends Component {
         >
           {messages.map(message => (
             <MessageListItem
-              handleReadMessage={handleReadMessage}
+              {...{
+                convertNumToEasternArabic,
+                handleReadMessage,
+                lastReadMessageTime,
+                scrollArea,
+              }}
               key={message.id}
               messages={message.content}
               user={message.sender}
               time={message.time}
               chatAreaId={id}
-              lastReadMessageTime={lastReadMessageTime}
-              scrollArea={this.state.scrollArea}
             />
           ))}
         </div>

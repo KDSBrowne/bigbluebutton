@@ -178,7 +178,7 @@ class PresentationToolbar extends PureComponent {
 
   renderSkipSlideOpts(numberOfSlides) {
     // Fill drop down menu with all the slides in presentation
-    const { intl } = this.props;
+    const { intl, convertNumToEasternArabic } = this.props;
     const optionList = [];
     for (let i = 1; i <= numberOfSlides; i += 1) {
       optionList.push((
@@ -187,7 +187,7 @@ class PresentationToolbar extends PureComponent {
           key={i}
         >
           {
-            intl.formatMessage(intlMessages.goToSlide, { 0: i })
+            intl.formatMessage(intlMessages.goToSlide, { 0: convertNumToEasternArabic(i) })
           }
         </option>));
     }
@@ -206,6 +206,7 @@ class PresentationToolbar extends PureComponent {
       isFullscreen,
       fullscreenRef,
       isMeteorConnected,
+      convertNumToEasternArabic,
     } = this.props;
 
     const BROWSER_RESULTS = browser();
@@ -292,8 +293,11 @@ class PresentationToolbar extends PureComponent {
                     minBound={HUNDRED_PERCENT}
                     maxBound={MAX_PERCENT}
                     step={STEP}
-                    tooltipDistance={tooltipDistance}
-                    isMeteorConnected={isMeteorConnected}
+                    {...{
+                      convertNumToEasternArabic,
+                      tooltipDistance,
+                      isMeteorConnected,
+                    }}
                   />
                 )
                 : null

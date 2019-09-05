@@ -151,7 +151,7 @@ class ApplicationMenu extends BaseMenu {
   }
 
   render() {
-    const { availableLocales, intl } = this.props;
+    const { availableLocales, intl, convertNumToEasternArabic } = this.props;
     const { isLargestFontSize, isSmallestFontSize, settings } = this.state;
 
     // conversions can be found at http://pxtoem.com
@@ -286,7 +286,7 @@ class ApplicationMenu extends BaseMenu {
             <div className={styles.col}>
               <div aria-hidden className={cx(styles.formElement, styles.pullContentCenter)}>
                 <label className={cx(styles.label, styles.bold)}>
-                  {`${pixelPercentage[this.state.settings.fontSize]}`}
+                  {convertNumToEasternArabic(pixelPercentage[this.state.settings.fontSize])}
                 </label>
               </div>
             </div>

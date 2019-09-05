@@ -36,6 +36,8 @@ const validIOSVersion = () => {
   return true;
 };
 
+const convertNumToEasternArabic = s => s.toString().replace(/\d/g, d => String.fromCharCode(`0x066${d}`));
+
 export {
   getCaptionsStatus,
   getFontSize,
@@ -43,4 +45,5 @@ export {
   getBreakoutRooms,
   getMeeting,
   validIOSVersion,
+  convertNumToEasternArabic,
 };

@@ -386,6 +386,7 @@ class BreakoutRoom extends PureComponent {
 
   changeNumberOfRooms(event) {
     const numberOfRooms = Number.parseInt(event.target.value, 10);
+
     this.setState({
       numberOfRooms,
       numberOfRoomsIsValid: numberOfRooms <= MAX_BREAKOUT_ROOMS
@@ -394,7 +395,7 @@ class BreakoutRoom extends PureComponent {
   }
 
   renderRoomsGrid() {
-    const { intl } = this.props;
+    const { intl, convertNumToEasternArabic } = this.props;
     const {
       valid,
       numberOfRooms,
@@ -417,7 +418,7 @@ class BreakoutRoom extends PureComponent {
       <div className={styles.boxContainer} key="rooms-grid-">
         <div className={!valid ? styles.changeToWarn : null}>
           <p className={styles.freeJoinLabel}>
-            {intl.formatMessage(intlMessages.notAssigned, { 0: this.getUserByRoom(0).length })}
+            {intl.formatMessage(intlMessages.notAssigned, { 0: convertNumToEasternArabic(this.getUserByRoom(0).length) })}
           </p>
           <div className={styles.breakoutBox} onDrop={drop(0)} onDragOver={allowDrop}>
             {this.renderUserItemByRoom(0)}
@@ -430,7 +431,7 @@ class BreakoutRoom extends PureComponent {
           _.range(1, rooms + 1).map(value => (
             <div key={`room-${value}`}>
               <p className={styles.freeJoinLabel}>
-                {intl.formatMessage(intlMessages.roomLabel, { 0: (value) })}
+                {intl.formatMessage(intlMessages.roomLabel, { 0: convertNumToEasternArabic(value) })}
               </p>
               <div className={styles.breakoutBox} onDrop={drop(value)} onDragOver={allowDrop}>
                 {this.renderUserItemByRoom(value)}
@@ -446,6 +447,7 @@ class BreakoutRoom extends PureComponent {
     const {
       intl,
       isInvitation,
+      convertNumToEasternArabic,
     } = this.props;
     const {
       numberOfRooms,
@@ -475,7 +477,11 @@ class BreakoutRoom extends PureComponent {
               aria-label={intl.formatMessage(intlMessages.numberOfRooms)}
             >
               {
-                _.range(MIN_BREAKOUT_ROOMS, MAX_BREAKOUT_ROOMS + 1).map(item => (<option key={_.uniqueId('value-')}>{item}</option>))
+                _.range(MIN_BREAKOUT_ROOMS, MAX_BREAKOUT_ROOMS + 1).map(item => (
+                  <option key={_.uniqueId('value-')} value={item}>
+                    { convertNumToEasternArabic(item) }
+                  </option>
+                ))
               }
             </select>
           </div>
@@ -493,6 +499,7 @@ class BreakoutRoom extends PureComponent {
                 onBlur={this.blurDurationTime}
                 aria-label={intl.formatMessage(intlMessages.duration)}
               />
+
               <HoldButton
                 key="decrease-breakout-time"
                 exec={this.decreaseDurationTime}

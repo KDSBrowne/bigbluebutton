@@ -84,10 +84,6 @@ class UserParticipants extends Component {
     }
   }
 
-  componentWillUnmount() {
-    this.refScrollContainer.removeEventListener('keydown', this.rove);
-  }
-
   shouldComponentUpdate(nextProps, nextState) {
     const isPropsEqual = _.isEqual(this.props, nextProps);
     const isStateEqual = _.isEqual(this.state, nextState);
@@ -103,6 +99,10 @@ class UserParticipants extends Component {
       const { firstChild } = selectedUser;
       if (firstChild) firstChild.focus();
     }
+  }
+
+  componentWillUnmount() {
+    this.refScrollContainer.removeEventListener('keydown', this.rove);
   }
 
   getScrollContainerRef() {
@@ -198,6 +198,7 @@ class UserParticipants extends Component {
       meeting,
       muteAllExceptPresenter,
       currentUser,
+      convertNumToEasternArabic,
     } = this.props;
 
     return (
@@ -209,7 +210,7 @@ class UserParticipants extends Component {
                 <h2 className={styles.smallTitle}>
                   {intl.formatMessage(intlMessages.usersTitle)}
                   &nbsp;(
-                  {users.length}
+                  {convertNumToEasternArabic(users.length)}
                   )
                 </h2>
                 {currentUser.role === ROLE_MODERATOR
