@@ -50,6 +50,9 @@ class TalkingIndicator extends PureComponent {
         0: name,
       });
 
+      let icon = talking ? 'unmute' : 'blank';
+      icon = muted ? 'mute' : icon;
+
       return (
         <Button
           key={_.uniqueId(`${name}-`)}
@@ -59,7 +62,7 @@ class TalkingIndicator extends PureComponent {
           aria-label={ariaLabel}
           aria-describedby={talking ? 'description' : null}
           color="primary"
-          icon="unmute"
+          icon={icon}
           size="sm"
           style={{
             backgroundColor: color,
