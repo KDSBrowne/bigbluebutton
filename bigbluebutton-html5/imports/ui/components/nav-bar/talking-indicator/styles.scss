@@ -8,8 +8,8 @@
   --talker-max-width: 10rem;
   --talker-font-weight: 400;
   --talker-border-radius: 2rem;
-  --max-speaker-height: 1.5rem;
-  --icon-offset: 1.1rem;
+  --max-speaker-height: 1.7rem;
+  --bottom-offset: .25rem;
 }
 
 .hidden {
@@ -41,38 +41,37 @@
   font-weight: var(--talker-font-weight);
   border-radius: var(--talker-border-radius) var(--talker-border-radius);
   font-size: var(--font-size-base);
-  padding-left: var(--border-radius);
-  padding-right: var(--border-radius);
   margin-left: var(--border-radius);
   margin-right: var(--border-radius);
+  height: var(--lg-padding-x);
+  box-shadow: none !important;
+  
+  i,
+  span {
+    position: relative;
+    bottom: var(--bottom-offset);
+  }
 
-  > span {
-    max-width: var(--talker-max-width);
+  span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    max-width: var(--talker-max-width);
+    height: 1rem;
   }
 
   i {
-    position: relative;
-    top: var(--border-size-large);
     font-size: var(--font-size-small);
+  }
+
+  span:hover {
+    opacity: 1;
   }
 }
 
 .spoke {
   opacity: var(--spoke-opacity);
-  padding-right: var(--icon-offset);
-
-  [dir="rtl"]  & {
-    padding-left: var(--icon-offset);
-    padding-right: var(--border-radius);
-  }
  }
-
-.unmuted {
-  cursor: pointer;
-}
 
 .muted {
   cursor: default;
