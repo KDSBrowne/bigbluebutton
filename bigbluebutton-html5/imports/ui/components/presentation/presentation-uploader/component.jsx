@@ -7,7 +7,7 @@ import cx from 'classnames';
 import _ from 'lodash';
 import logger from '/imports/startup/client/logger';
 import browser from 'browser-detect';
-
+import { toast } from 'react-toastify';
 import { notify } from '/imports/ui/services/notification';
 import ModalFullscreen from '/imports/ui/components/modal/fullscreen/component';
 import { withModalMounter } from '/imports/ui/components/modal/service';
@@ -15,6 +15,7 @@ import Icon from '/imports/ui/components/icon/component';
 import Button from '/imports/ui/components/button/component';
 import Checkbox from '/imports/ui/components/checkbox/component';
 import { styles } from './styles.scss';
+
 
 const propTypes = {
   intl: intlShape.isRequired,
@@ -185,6 +186,8 @@ class PresentationUploader extends Component {
       disableActions: false,
     };
 
+    this.toastId = null;
+
     this.handleConfirm = this.handleConfirm.bind(this);
     this.handleDismiss = this.handleDismiss.bind(this);
     this.handleFiledrop = this.handleFiledrop.bind(this);
@@ -199,6 +202,12 @@ class PresentationUploader extends Component {
   }
 
   componentDidUpdate() {
+    if (this.toastId) {
+      toast.update(this.toastId, {
+        render: this.renderToastList(),
+      });
+    }
+
     this.releaseActionsOnPresentationError();
   }
 
@@ -251,6 +260,7 @@ class PresentationUploader extends Component {
   handleConfirm() {
     const { mountModal, intl, handleSave } = this.props;
     const { disableActions, presentations, oldCurrentId } = this.state;
+
     const presentationsToSave = presentations
       .filter(p => !p.upload.error && !p.conversion.error);
 
@@ -303,11 +313,24 @@ class PresentationUploader extends Component {
   }
 
   handleDismiss() {
-    const { mountModal } = this.props;
+    const {
+      presentations,
+    } = this.state;
+
+    let hasNewUpload = false;
+
+    presentations.map((item) => {
+      if (item.id.indexOf(item.filename) !== -1) hasNewUpload = true;
+    });
+
+    if (hasNewUpload) {
+      this.toastId = toast.info(this.renderToastList(), {
+        hideProgressBar: true,
+        autoClose: false,
+      });
+    }
 
     return new Promise((resolve) => {
-      mountModal(null);
-
       this.setState({
         preventClosing: false,
         disableActions: false,
@@ -452,6 +475,44 @@ class PresentationUploader extends Component {
     if (item.upload.done) {
       dispatchTogglePresentationDownloadable(item, !oldDownloadableState);
     }
+  }
+
+  renderToastList() {
+    const { presentations } = this.state;
+    const { intl } = this.props;
+
+    let converted = 0;
+
+    const presentationsSorted = presentations
+      .filter(p => (p.upload.progress ? p : null))
+      .sort((a, b) => a.uploadTimestamp - b.uploadTimestamp)
+      .map((p) => {
+        if (p.conversion.done) converted += 1;
+        return p;
+      });
+
+    let toastHeading = '';
+    const itemLabel = presentationsSorted.length > 1 ? 'items' : 'item';
+    if (converted === 0) toastHeading = `Uploading ${presentationsSorted.length} ${itemLabel}`;
+    if (converted > 0 && converted !== presentationsSorted.length) toastHeading = `${converted} of ${presentationsSorted.length} uploads complete`;
+    if (converted === presentationsSorted.length) toastHeading = `${converted} uploads complete`;
+
+
+    return (
+      <div>
+        <div className={styles.first}>
+          <Icon className={styles.uploadIcon} iconName="upload" />
+          <span className={styles.toastHeading}>{toastHeading}</span>
+        </div>
+        <div>
+          <div>
+            <div>
+              {presentationsSorted.map(item => this.renderToastItem(item))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   renderPresentationList() {
@@ -609,6 +670,48 @@ class PresentationUploader extends Component {
     );
   }
 
+  renderToastItem(item) {
+    const { intl } = this.props;
+
+    const isUploading = !item.upload.done && item.upload.progress > 0;
+    const isConverting = !item.conversion.done && item.upload.done;
+    const hasError = item.conversion.error || item.upload.error;
+    const isProcessing = (isUploading || isConverting) && !hasError;
+
+    const itemClassName = {
+      [styles.done]: !isProcessing && !hasError,
+      [styles.err]: hasError,
+      [styles.loading]: isProcessing,
+    };
+
+    const er = {
+      [styles.er]: hasError,
+      [styles.info]: !hasError,
+    };
+
+    let icon = isProcessing ? 'blank' : 'check';
+    if (hasError) icon = 'circle_close';
+
+    return (
+      <div key={item.id} className={styles.newtr}>
+        <div className={styles.newtd}>
+          <span className={styles.tIIcon}>
+            <Icon iconName="file" />
+          </span>
+          <span className={styles.tIName}>
+            <span>{item.filename}</span>
+          </span>
+          <span className={styles.newtdlast}>
+            <Icon iconName={icon} className={cx(itemClassName)} />
+          </span>
+        </div>
+        <div className={styles.infoinfo}>
+          <span className={cx(er)}>{this.renderPresentationItemStatus(item)}</span>
+        </div>
+      </div>
+    );
+  }
+
   renderPicDropzone() {
     const {
       intl,
@@ -712,7 +815,6 @@ class PresentationUploader extends Component {
           callback: this.handleDismiss,
           label: intl.formatMessage(intlMessages.dismissLabel),
           description: intl.formatMessage(intlMessages.dismissDesc),
-          disabled: disableActions,
         }}
       >
         <p>{intl.formatMessage(intlMessages.message)}</p>

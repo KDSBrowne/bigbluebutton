@@ -127,6 +127,7 @@
   padding: var(--sm-padding-y);
   min-width: var(--toast-container-min-width);
   max-width: var(--toast-container-max-width);
+  width: var(--toast-container-min-width);
   box-sizing: border-box;
   right: var(--jumbo-padding-y);
   left: auto;
@@ -183,7 +184,7 @@
   line-height: 0;
   position: relative;
   font-size: 70%;
-  left: var(--toast-offset-sm);
+  //left: -3px;
   
   [dir="rtl"] & {
     left: auto;

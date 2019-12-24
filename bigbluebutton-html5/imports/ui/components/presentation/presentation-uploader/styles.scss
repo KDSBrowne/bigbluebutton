@@ -6,6 +6,11 @@
   to { background-position: 0 0; }
 }
 
+@keyframes rotate {
+  0% { transform: rotate(0); }
+  100% { transform: rotate(360deg); }
+}
+
 .visuallyHidden {
   position: absolute;
   overflow: hidden;
@@ -251,4 +256,123 @@
   vertical-align: baseline;
   border-radius: .25em;
   text-transform: uppercase;
+}
+
+.uploadIcon {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  height: 2.286rem;
+  width: 2.286rem;
+  border-radius: 50%;
+  font-size: 135%;
+  line-height: 2.35rem;
+  margin-right: .75rem;
+
+  [dir="rtl"] & {
+    margin-left: .75rem;
+    margin-right: 0;
+  }
+}
+
+.toastHeading {
+  position: fixed;
+  font-weight: 600;
+  margin-top: .4rem;
+}
+
+.first {
+    position: relative;
+    margin-bottom: .5rem;
+    padding-bottom: .75rem;
+    border-bottom: 1px #F2F2F2 solid;
+}
+
+.tIName {
+    margin-left: 1.25rem;
+    top: 3px;
+    height: 1rem;
+    width: auto;
+    position: relative;
+    text-align: left;
+    font-weight: 500;
+
+    [dir="rtl"] & {
+      margin-right: 1.25rem;
+      margin-left: 0;
+      text-align: right;
+    }
+}
+
+.tIIcon {
+  width: 1%;
+  padding-bottom: .65rem;
+}
+
+.loading {
+  color: var(--color-gray-lightest);
+  border: 1px solid;
+  border-radius: 50%;
+  border-right-color: var(--color-gray);
+  animation: rotate 1s linear infinite;
+}
+
+.done {
+  color: var(--color-success);
+}
+
+.err {
+  color: var(--color-danger);
+}
+
+.loading,
+.done,
+.err{
+  position: relative;
+  width: 16px;
+  height: 16px;
+  font-size: 117%;
+}
+
+.newtr {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  margin-top: 8px;
+}
+
+.er,
+.info {
+  font-size: 70%;
+}
+
+.er {
+  color: var(--color-danger);
+}
+
+.infoinfo {
+  padding: 0;
+  bottom: .5rem;
+  position: relative;
+  left: 3px;
+  max-height: 8px;
+  height: 8px;
+  
+  [dir="rtl"] & {
+    right: 3px;
+    left: 0;
+  }
+}
+
+.newtd {
+  display: flex;
+  flex-direction: row;
+  width: 16.75rem;
+} 
+
+.newtdlast {
+  margin-left: auto;
+  [dir="rtl"] & {
+    margin-right: auto;
+    margin-left: 0;
+  }
 }
