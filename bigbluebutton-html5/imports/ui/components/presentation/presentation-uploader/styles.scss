@@ -1,6 +1,17 @@
 @import "../../../stylesheets/variables/_all";
 @import "../../../stylesheets/mixins/_scrollable";
 
+:root {
+  --uploadIconSize: 2.286rem;
+  --statusIconSize: 16px;
+  --statusInfoHeight: 8px;
+  --toast-md-margin: .5rem;
+  --iconLineHeight: 2.35rem;
+  --iconPadding-md: .65rem;
+  --fileLineWidth: 16.75rem;
+  --itemActionsWidth:  68px; // size of the 2 icons (check/trash)
+}
+
 @keyframes bar-stripes {
   from { background-position: 1rem 0; }
   to { background-position: 0 0; }
@@ -76,7 +87,7 @@
 }
 
 .tableItemActions {
-  min-width: 68px; // size of the 2 icons (check/trash)
+  min-width: var(--itemActionsWidth);
   text-align: left;
 
   [dir="rtl"] & {
@@ -216,7 +227,7 @@
 
 .dropzone {
   flex: auto;
-  border: 2px dashed;
+  border: var(--border-size) dashed;
   border-radius: var(--border-radius);
   padding: calc(var(--lg-padding-y) * 2.5) var(--lg-padding-x);
   text-align: center;
@@ -261,51 +272,51 @@
 .uploadIcon {
   background-color: var(--color-primary);
   color: var(--color-white);
-  height: 2.286rem;
-  width: 2.286rem;
+  height: var(--uploadIconSize);
+  width: var(--uploadIconSize);
   border-radius: 50%;
   font-size: 135%;
-  line-height: 2.35rem;
-  margin-right: .75rem;
+  line-height: var(--iconLineHeight);
+  margin-right: var(--sm-padding-x);
 
   [dir="rtl"] & {
-    margin-left: .75rem;
+    margin-left: var(--sm-padding-x);
     margin-right: 0;
   }
 }
 
-.toastHeading {
+.uploadToastTitle {
   position: fixed;
   font-weight: 600;
-  margin-top: .4rem;
+  margin-top: var(--toast-md-margin);
 }
 
-.first {
-    position: relative;
-    margin-bottom: .5rem;
-    padding-bottom: .75rem;
-    border-bottom: 1px #F2F2F2 solid;
+.uploadToastHeader {
+  position: relative;
+  margin-bottom: var(--toast-md-margin);
+  padding-bottom: var(--sm-padding-x);
+  border-bottom: 1px var(--color-gray-separator) solid;
 }
 
-.tIName {
-    margin-left: 1.25rem;
-    top: 3px;
+.fileName {
+    margin-left: var(--lg-padding-x);
+    top: var(--border-size-large);
     height: 1rem;
     width: auto;
     position: relative;
     text-align: left;
-    font-weight: 500;
+    font-weight: var(--headings-font-weight);
 
     [dir="rtl"] & {
-      margin-right: 1.25rem;
+      margin-right: var(--lg-padding-x);
       margin-left: 0;
       text-align: right;
     }
 }
 
-.tIIcon {
+.fileIcon {
   width: 1%;
-  padding-bottom: .65rem;
+  padding-bottom: var(--iconPadding-md);
 }
 
 .loading {
@@ -328,48 +339,48 @@
 .done,
 .err{
   position: relative;
-  width: 16px;
-  height: 16px;
+  width: var(--statusIconSize);
+  height: var(--statusIconSize);
   font-size: 117%;
 }
 
-.newtr {
+.uploadRow {
   display: flex;
   flex-direction: column;
-  margin-bottom: 8px;
-  margin-top: 8px;
+  margin-bottom: var(--statusInfoHeight);
+  margin-top: var(--statusInfoHeight);
 }
 
-.er,
-.info {
+.textErr,
+.textInfo {
   font-size: 70%;
 }
 
-.er {
+.textErr {
   color: var(--color-danger);
 }
 
-.infoinfo {
+.statusInfo {
   padding: 0;
-  bottom: .5rem;
+  bottom: var(--toast-md-margin);
   position: relative;
-  left: 3px;
-  max-height: 8px;
-  height: 8px;
+  left: var(--border-size-large);
+  max-height: var(--statusInfoHeight);
+  height: var(--statusInfoHeight);
   
   [dir="rtl"] & {
-    right: 3px;
+    right: var(--border-size-large);
     left: 0;
   }
 }
 
-.newtd {
+.fileLine {
   display: flex;
   flex-direction: row;
-  width: 16.75rem;
+  width: var(--fileLineWidth);
 } 
 
-.newtdlast {
+.statusIcon {
   margin-left: auto;
   [dir="rtl"] & {
     margin-right: auto;

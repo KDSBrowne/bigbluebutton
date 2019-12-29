@@ -20,11 +20,12 @@
   --background-active: #eee;
 
   --toast-offset: 4.5rem;
-  --toast-offset-sm: .325rem;
+  --toast-offset-sm: .75rem;
   --toast-mobile-width: 75%;
 
   --toast-max-width: 20rem !important;
-  --toast-body-max-width: 17.75rem !important;
+  --toast-body-max-width: 17.55rem !important;
+  --toast-body-max-width-rtl: 18.25rem !important;
   --toast-container-max-width: 23rem !important;
   --toast-container-min-width: var(--toast-max-width);
 
@@ -171,6 +172,12 @@
   flex: 1;
   background-color: inherit;
   max-width: var(--toast-body-max-width);
+  min-width: var(--toast-body-max-width);
+  
+  [dir="rtl"] & {
+    max-width: var(--toast-body-max-width-rtl);
+    min-width: var(--toast-body-max-width-rtl);
+  }
 }
 
 .close {
@@ -184,11 +191,10 @@
   line-height: 0;
   position: relative;
   font-size: 70%;
-  //left: -3px;
-  
+  right: 5px;
+
   [dir="rtl"] & {
-    left: auto;
-    right: var(--toast-offset-sm);
+    right: -1.25rem;
   }
 
   :global(.animationsEnabled) & {
@@ -211,7 +217,6 @@
   @include mq($small-only) {
     position: relative;
     font-size: var(--font-size-smaller);
-    left: auto;
   }
 }
 

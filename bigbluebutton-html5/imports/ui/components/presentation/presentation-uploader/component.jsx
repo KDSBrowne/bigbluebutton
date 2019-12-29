@@ -479,7 +479,6 @@ class PresentationUploader extends Component {
 
   renderToastList() {
     const { presentations } = this.state;
-    const { intl } = this.props;
 
     let converted = 0;
 
@@ -500,9 +499,9 @@ class PresentationUploader extends Component {
 
     return (
       <div>
-        <div className={styles.first}>
+        <div className={styles.uploadToastHeader}>
           <Icon className={styles.uploadIcon} iconName="upload" />
-          <span className={styles.toastHeading}>{toastHeading}</span>
+          <span className={styles.uploadToastTitle}>{toastHeading}</span>
         </div>
         <div>
           <div>
@@ -671,8 +670,6 @@ class PresentationUploader extends Component {
   }
 
   renderToastItem(item) {
-    const { intl } = this.props;
-
     const isUploading = !item.upload.done && item.upload.progress > 0;
     const isConverting = !item.conversion.done && item.upload.done;
     const hasError = item.conversion.error || item.upload.error;
@@ -684,29 +681,29 @@ class PresentationUploader extends Component {
       [styles.loading]: isProcessing,
     };
 
-    const er = {
-      [styles.er]: hasError,
-      [styles.info]: !hasError,
+    const statusInfoStyle = {
+      [styles.textErr]: hasError,
+      [styles.textInfo]: !hasError,
     };
 
     let icon = isProcessing ? 'blank' : 'check';
     if (hasError) icon = 'circle_close';
 
     return (
-      <div key={item.id} className={styles.newtr}>
-        <div className={styles.newtd}>
-          <span className={styles.tIIcon}>
+      <div key={item.id} className={styles.uploadRow}>
+        <div className={styles.fileLine}>
+          <span className={styles.fileIcon}>
             <Icon iconName="file" />
           </span>
-          <span className={styles.tIName}>
+          <span className={styles.fileName}>
             <span>{item.filename}</span>
           </span>
-          <span className={styles.newtdlast}>
+          <span className={styles.statusIcon}>
             <Icon iconName={icon} className={cx(itemClassName)} />
           </span>
         </div>
-        <div className={styles.infoinfo}>
-          <span className={cx(er)}>{this.renderPresentationItemStatus(item)}</span>
+        <div className={styles.statusInfo}>
+          <span className={cx(statusInfoStyle)}>{this.renderPresentationItemStatus(item)}</span>
         </div>
       </div>
     );
