@@ -9,6 +9,9 @@ import AudioControls from './component';
 import AudioModalContainer from '../audio-modal/container';
 import Service from '../service';
 
+const PUBLIC_CONFIG = Meteor.settings.public;
+const shortcuts = PUBLIC_CONFIG.app.shortcuts;
+
 const AudioControlsContainer = props => <AudioControls {...props} />;
 
 const processToggleMuteFromOutside = (e) => {
@@ -54,6 +57,12 @@ const {
   joinListenOnly,
 } = Service;
 
+const {
+  toggleMute,
+  joinAudio,
+  leaveAudio,
+} = shortcuts;
+
 export default lockContextContainer(withModalMounter(withTracker(({ mountModal, userLocks }) => ({
   processToggleMuteFromOutside: arg => processToggleMuteFromOutside(arg),
   showMute: isConnected() && !isListenOnly() && !isEchoTest() && !userLocks.userMic,
@@ -66,4 +75,7 @@ export default lockContextContainer(withModalMounter(withTracker(({ mountModal, 
   handleToggleMuteMicrophone: () => toggleMuteMicrophone(),
   handleJoinAudio: () => (isConnected() ? joinListenOnly() : mountModal(<AudioModalContainer />)),
   handleLeaveAudio,
+  toggleMute_AK: toggleMute.accesskey,
+  joinAudio_AK: joinAudio.accesskey,
+  leaveAudio_AK: leaveAudio.accesskey,
 }))(AudioControlsContainer)));

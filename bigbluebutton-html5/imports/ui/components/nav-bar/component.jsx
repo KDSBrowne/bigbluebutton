@@ -73,12 +73,11 @@ class NavBar extends PureComponent {
       hasUnreadMessages,
       isExpanded,
       intl,
-      shortcuts: TOGGLE_USERLIST_AK,
       mountModal,
       presentationTitle,
       amIModerator,
+      toggleUserList_AK,
     } = this.props;
-
 
     const toggleBtnClasses = {};
     toggleBtnClasses[styles.btn] = true;
@@ -102,7 +101,7 @@ class NavBar extends PureComponent {
               icon="user"
               className={cx(toggleBtnClasses)}
               aria-expanded={isExpanded}
-              accessKey={TOGGLE_USERLIST_AK}
+              accessKey={toggleUserList_AK}
             />
           </div>
           <div className={styles.center}>

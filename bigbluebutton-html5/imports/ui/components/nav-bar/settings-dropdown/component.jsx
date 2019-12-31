@@ -277,7 +277,7 @@ class SettingsDropdown extends PureComponent {
   render() {
     const {
       intl,
-      shortcuts: OPEN_OPTIONS_AK,
+      openOptions_AK,
     } = this.props;
 
     const { isSettingOpen } = this.state;
@@ -289,7 +289,7 @@ class SettingsDropdown extends PureComponent {
         onShow={this.onActionsShow}
         onHide={this.onActionsHide}
       >
-        <DropdownTrigger tabIndex={0} accessKey={OPEN_OPTIONS_AK}>
+        <DropdownTrigger tabIndex={0} accessKey={openOptions_AK}>
           <Button
             label={intl.formatMessage(intlMessages.optionsLabel)}
             icon="more"

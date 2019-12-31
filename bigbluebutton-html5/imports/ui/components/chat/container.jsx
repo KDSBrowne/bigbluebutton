@@ -11,6 +11,8 @@ const PUBLIC_CHAT_KEY = CHAT_CONFIG.public_id;
 const CHAT_CLEAR = CHAT_CONFIG.system_messages_keys.chat_clear;
 const ROLE_MODERATOR = Meteor.settings.public.user.role_moderator;
 const CONNECTION_STATUS = 'online';
+const PUBLIC_CONFIG = Meteor.settings.public;
+const shortcuts = PUBLIC_CONFIG.app.shortcuts;
 
 const intlMessages = defineMessages({
   [CHAT_CLEAR]: {
@@ -148,6 +150,11 @@ export default injectIntl(withTracker(({ intl }) => {
 
   const { connected: isMeteorConnected } = Meteor.status();
 
+  const {
+    hidePrivateChat,
+    closePrivateChat,
+  } = shortcuts;
+
   return {
     chatID,
     chatName,
@@ -160,5 +167,7 @@ export default injectIntl(withTracker(({ intl }) => {
     actions: {
       handleClosePrivateChat: ChatService.closePrivateChat,
     },
+    hidePrivateChat_AK: hidePrivateChat.accesskey,
+    closePrivateChat_AK: closePrivateChat.accesskey,
   };
 })(ChatContainer));

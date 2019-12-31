@@ -10,6 +10,9 @@ const isSafari = BROWSER_RESULTS.name === 'safari';
 const isIphone = navigator.userAgent.match(/iPhone/i);
 const noIOSFullscreen = (isSafari && BROWSER_RESULTS.versionNumber < 12) || isIphone;
 
+const PUBLIC_CONFIG = Meteor.settings.public;
+const shortcuts = PUBLIC_CONFIG.app.shortcuts;
+
 const SettingsDropdownContainer = props => (
   <SettingsDropdown {...props} />
 );
@@ -22,5 +25,6 @@ export default withTracker((props) => {
     noIOSFullscreen,
     isMeteorConnected: Meteor.status().connected,
     isBreakoutRoom: meetingIsBreakout(),
+    openOptions_AK: shortcuts.openOptions.accesskey,
   };
 })(SettingsDropdownContainer);

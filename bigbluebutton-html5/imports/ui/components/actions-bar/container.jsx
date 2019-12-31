@@ -25,7 +25,10 @@ import MediaService, {
 } from '../media/service';
 
 const ActionsBarContainer = props => <ActionsBar {...props} />;
-const POLLING_ENABLED = Meteor.settings.public.poll.enabled;
+
+const PUBLIC_CONFIG = Meteor.settings.public;
+const POLLING_ENABLED = PUBLIC_CONFIG.poll.enabled;
+const shortcuts = PUBLIC_CONFIG.app.shortcuts;
 
 export default withTracker(() => ({
   amIPresenter: Service.amIPresenter(),
@@ -52,4 +55,5 @@ export default withTracker(() => ({
   isThereCurrentPresentation: Presentations.findOne({ meetingId: Auth.meetingID, current: true },
     { fields: {} }),
   allowExternalVideo: Meteor.settings.public.externalVideoPlayer.enabled,
+  openActions_AK: shortcuts.openActions.accesskey,
 }))(injectIntl(ActionsBarContainer));

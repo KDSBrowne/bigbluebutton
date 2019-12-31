@@ -63,6 +63,9 @@ class AudioControls extends PureComponent {
       intl,
       shortcuts,
       isVoiceUser,
+      toggleMute_AK,
+      joinAudio_AK,
+      leaveAudio_AK,
     } = this.props;
 
     let joinIcon = 'audio_off';
@@ -92,7 +95,7 @@ class AudioControls extends PureComponent {
               icon={muted ? 'mute' : 'unmute'}
               size="lg"
               circle
-              accessKey={shortcuts.toggleMute}
+              accessKey={toggleMute_AK}
             />
           ) : null}
         <Button
@@ -109,7 +112,7 @@ class AudioControls extends PureComponent {
           icon={joinIcon}
           size="lg"
           circle
-          accessKey={inAudio ? shortcuts.leaveAudio : shortcuts.joinAudio}
+          accessKey={inAudio ? leaveAudio_AK : joinAudio_AK}
         />
       </span>);
   }

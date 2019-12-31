@@ -66,7 +66,7 @@ const ChatListItem = (props) => {
     intl,
     tabIndex,
     isPublicChat,
-    shortcuts: TOGGLE_CHAT_PUB_AK,
+    togglePublicChat_AK,
     chatPanelOpen,
   } = props;
 
@@ -81,7 +81,7 @@ const ChatListItem = (props) => {
       className={cx(styles.chatListItem, linkClasses)}
       aria-expanded={isCurrentChat}
       tabIndex={tabIndex}
-      accessKey={isPublicChat(chat) ? TOGGLE_CHAT_PUB_AK : null}
+      accessKey={isPublicChat(chat) ? togglePublicChat_AK : null}
       onClick={() => handleClickToggleChat(chat.userId)}
       id="chat-toggle-button"
       aria-label={isPublicChat(chat) ? intl.formatMessage(intlMessages.titlePublic) : chat.name}

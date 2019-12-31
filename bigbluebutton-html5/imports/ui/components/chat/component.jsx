@@ -32,7 +32,6 @@ const Chat = (props) => {
     isChatLocked,
     actions,
     intl,
-    shortcuts,
     isMeteorConnected,
     lastReadMessageTime,
     hasUnreadMessages,
@@ -41,10 +40,9 @@ const Chat = (props) => {
     minMessageLength,
     maxMessageLength,
     amIModerator,
+    hidePrivateChat_AK,
+    closePrivateChat_AK,
   } = props;
-
-  const HIDE_CHAT_AK = shortcuts.hidePrivateChat;
-  const CLOSE_CHAT_AK = shortcuts.closePrivateChat;
 
   return (
     <div
@@ -62,7 +60,7 @@ const Chat = (props) => {
               Session.set('openPanel', 'userlist');
             }}
             aria-label={intl.formatMessage(intlMessages.hideChatLabel, { 0: title })}
-            accessKey={HIDE_CHAT_AK}
+            accessKey={hidePrivateChat_AK}
             label={title}
             icon="left_arrow"
             className={styles.hideBtn}
@@ -84,7 +82,7 @@ const Chat = (props) => {
                 }}
                 aria-label={intl.formatMessage(intlMessages.closeChatLabel, { 0: title })}
                 label={intl.formatMessage(intlMessages.closeChatLabel, { 0: title })}
-                accessKey={CLOSE_CHAT_AK}
+                accessKey={closePrivateChat_AK}
               />
             )
             : <ChatDropdown isMeteorConnected={isMeteorConnected} amIModerator={amIModerator} />
