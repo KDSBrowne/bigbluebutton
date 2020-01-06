@@ -342,6 +342,8 @@
   width: var(--statusIconSize);
   height: var(--statusIconSize);
   font-size: 117%;
+  bottom: var(--border-size);
+  left: var(--statusInfoHeight);
 }
 
 .uploadRow {
