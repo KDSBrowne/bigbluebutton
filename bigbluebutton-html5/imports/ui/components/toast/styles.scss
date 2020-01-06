@@ -20,7 +20,8 @@
   --background-active: #eee;
 
   --toast-offset: 4.5rem;
-  --toast-offset-sm: .75rem;
+  --toast-offset-sm: .3125rem;
+  --toast-rtl-offset: -1.25rem;
   --toast-mobile-width: 75%;
 
   --toast-max-width: 20rem !important;
@@ -191,10 +192,10 @@
   line-height: 0;
   position: relative;
   font-size: 70%;
-  right: 5px;
+  right: var(--toast-offset-sm);
 
   [dir="rtl"] & {
-    right: -1.25rem;
+    right: var(--toast-rtl-offset)
   }
 
   :global(.animationsEnabled) & {

@@ -16,7 +16,6 @@ import Button from '/imports/ui/components/button/component';
 import Checkbox from '/imports/ui/components/checkbox/component';
 import { styles } from './styles.scss';
 
-
 const propTypes = {
   intl: intlShape.isRequired,
   mountModal: PropTypes.func.isRequired,
@@ -165,7 +164,28 @@ const intlMessages = defineMessages({
     id: 'app.presentationUploder.tableHeading.filename',
     description: 'aria label for file name table heading',
   },
+  uploading: {
+    id: 'app.presentationUploder.uploading',
+    description: 'uploading label for toast notification',
+  },
+  uploadStatus: {
+    id: 'app.presentationUploder.uploadStatus',
+    description: 'upload status for toast notification',
+  },
+  completed: {
+    id: 'app.presentationUploder.completed',
+    description: 'uploads complete label for toast notification',
+  },
+  item: {
+    id: 'app.presentationUploder.item',
+    description: 'single item label',
+  },
+  itemPlural: {
+    id: 'app.presentationUploder.itemPlural',
+    description: 'plural item label',
+  },
 });
+
 
 const BROWSER_RESULTS = browser();
 const isMobileBrowser = (BROWSER_RESULTS ? BROWSER_RESULTS.mobile : false)
@@ -479,6 +499,7 @@ class PresentationUploader extends Component {
 
   renderToastList() {
     const { presentations } = this.state;
+    const { intl } = this.props;
 
     let converted = 0;
 
@@ -491,11 +512,29 @@ class PresentationUploader extends Component {
       });
 
     let toastHeading = '';
-    const itemLabel = presentationsSorted.length > 1 ? 'items' : 'item';
-    if (converted === 0) toastHeading = `Uploading ${presentationsSorted.length} ${itemLabel}`;
-    if (converted > 0 && converted !== presentationsSorted.length) toastHeading = `${converted} of ${presentationsSorted.length} uploads complete`;
-    if (converted === presentationsSorted.length) toastHeading = `${converted} uploads complete`;
+    const itemLabel = presentationsSorted.length > 1
+      ? intl.formatMessage(intlMessages.itemPlural)
+      : intl.formatMessage(intlMessages.item);
 
+    if (converted === 0) {
+      toastHeading = intl.formatMessage(intlMessages.uploading, {
+        0: presentationsSorted.length,
+        1: itemLabel,
+      });
+    }
+
+    if (converted > 0 && converted !== presentationsSorted.length) {
+      toastHeading = intl.formatMessage(intlMessages.uploadStatus, {
+        0: converted,
+        1: presentationsSorted.length,
+      });
+    }
+
+    if (converted === presentationsSorted.length) {
+      toastHeading = intl.formatMessage(intlMessages.completed, {
+        0: converted,
+      });
+    }
 
     return (
       <div>
