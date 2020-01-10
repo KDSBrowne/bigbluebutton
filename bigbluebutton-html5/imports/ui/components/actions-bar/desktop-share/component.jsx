@@ -57,6 +57,10 @@ const intlMessages = defineMessages({
     id: 'app.screenshare.notReadableError',
     description: 'error message when the browser failed to capture the screen',
   },
+  notSupportedSafari: {
+    id: 'app.screenshare.notSupportedSafari',
+    description: 'error message for screen share button on safari',
+  },
   1108: {
     id: 'app.deskshare.iceConnectionStateError',
     description: 'Error message for ice connection state failure',
@@ -155,16 +159,20 @@ const DesktopShare = ({
 
   const shouldAllowScreensharing = screenSharingCheck
     && !isMobileBrowser
-    && amIPresenter
-    && !isSafari;
+    && amIPresenter;
 
   return (shouldAllowScreensharing
     ? (
       <Button
         className={cx(styles.button, isVideoBroadcasting || styles.btn)}
-        disabled={(!isMeteorConnected && !isVideoBroadcasting) || !screenshareDataSavingSetting}
+        disabled={(!isMeteorConnected && !isVideoBroadcasting)
+          || !screenshareDataSavingSetting
+          || isSafari
+        }
         icon={isVideoBroadcasting ? 'desktop' : 'desktop_off'}
-        label={intl.formatMessage(vLabel)}
+        label={isSafari
+          ? intl.formatMessage(intlMessages.notSupportedSafari)
+          : intl.formatMessage(vLabel)}
         description={intl.formatMessage(vDescr)}
         color={isVideoBroadcasting ? 'primary' : 'default'}
         ghost={!isVideoBroadcasting}
