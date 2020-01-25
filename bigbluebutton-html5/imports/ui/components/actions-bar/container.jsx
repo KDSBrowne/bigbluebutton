@@ -24,6 +24,10 @@ import MediaService, {
   shouldEnableSwapLayout,
 } from '../media/service';
 
+import PresentationUploaderService from '/imports/ui/components/presentation/presentation-uploader/service';
+import PresentationPodService from '/imports/ui/components/presentation-pod/service';
+
+
 const ActionsBarContainer = props => <ActionsBar {...props} />;
 const POLLING_ENABLED = Meteor.settings.public.poll.enabled;
 
@@ -52,4 +56,7 @@ export default withTracker(() => ({
   isThereCurrentPresentation: Presentations.findOne({ meetingId: Auth.meetingID, current: true },
     { fields: {} }),
   allowExternalVideo: Meteor.settings.public.externalVideoPlayer.enabled,
+  presentations: PresentationUploaderService.getPresentations(),
+  setPresentation: PresentationUploaderService.setPresentation,
+  podIds: PresentationPodService.getPresentationPodIds(),
 }))(injectIntl(ActionsBarContainer));
