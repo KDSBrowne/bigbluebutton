@@ -12,7 +12,7 @@ const withShortcutHelper = (WrappedComponent, param) => (props) => {
       const obj = { ...el };
       obj.descId = obj.descId.toLowerCase();
       return obj;
-    }).filter(el => ENABLED_SHORTCUTS.includes(el.descIdLowerCase));
+    }).filter(el => ENABLED_SHORTCUTS.includes(el.descId.toLowerCase()));
   }
 
   if (param !== undefined) {
