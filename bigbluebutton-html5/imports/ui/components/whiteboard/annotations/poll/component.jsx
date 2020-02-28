@@ -118,7 +118,7 @@ class PollDrawComponent extends Component {
 
     // calculating the maximum possible width and height of the each line
     // 25% of the height goes to the padding
-    const maxLineWidth = innerWidth / 3;
+    const maxLineWidth = innerWidth / 2.5;
     const maxLineHeight = (innerHeight * 0.75) / textArray.length;
 
     const lineToMeasure = textArray[0];
