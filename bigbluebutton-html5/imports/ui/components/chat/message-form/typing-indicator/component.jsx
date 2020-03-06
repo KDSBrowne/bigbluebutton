@@ -98,11 +98,12 @@ class TypingIndicator extends PureComponent {
 
     const style = {};
     style[styles.error] = !!error;
-    style[styles.info] = !error;
-    style[styles.spacer] = !!this.renderTypingElement();
+    style[styles.info] = this.renderTypingElement() || false;
+    const spacer = {};
+    spacer[styles.space] = !this.renderTypingElement() && !error;
 
     return (
-      <div className={cx(style)}>
+      <div className={cx(style, spacer)}>
         <span className={styles.typingIndicator}>{error || this.renderTypingElement()}</span>
       </div>
     );

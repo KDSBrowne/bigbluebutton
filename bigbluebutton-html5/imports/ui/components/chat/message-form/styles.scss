@@ -106,20 +106,18 @@
   color: var(--color-gray-dark);
   text-align: left;
   padding: var(--border-size) 0;
+  position: relative;
+  bottom: -2px;
 
   [dir="rtl"] & {
     text-align: right;
   }
-
-  &:before {
-    content: "\00a0"; // non-breaking space
-  }
 }
 
-.spacer {
-  &:before {
-    content: none;
-  }
+.info,
+.space {
+  height: 1.3rem;
+  max-height: 1.3rem;
 }
 
 .coupleTyper,
