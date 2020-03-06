@@ -106,6 +106,7 @@
   color: var(--color-gray-dark);
   text-align: left;
   padding: var(--border-size) 0;
+  max-height: 1rem;
 
   [dir="rtl"] & {
     text-align: right;
