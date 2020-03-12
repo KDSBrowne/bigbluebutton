@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
 import injectNotify from '/imports/ui/components/toast/inject-notify/component';
 import { Session } from 'meteor/session';
 
@@ -22,11 +21,16 @@ class ChatPushAlert extends PureComponent {
       chat = 'public';
     }
 
+    let titleText = null;
+    if (title.type === 'span') {
+      titleText = title.props.children;
+    }
+
     return (
       <div
         key={chatId}
         role="button"
-        aria-label={title}
+        aria-label={titleText}
         tabIndex={0}
         onClick={() => {
           Session.set('openPanel', 'chat');
