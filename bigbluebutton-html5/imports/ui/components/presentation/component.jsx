@@ -15,7 +15,7 @@ import PresentationCloseButton from './presentation-close-button/component';
 import DownloadPresentationButton from './download-presentation-button/component';
 import FullscreenService from '../fullscreen-button/service';
 import FullscreenButtonContainer from '../fullscreen-button/container';
-import { withDraggableContext, withDraggableConsumer } from '../media/webcam-draggable-overlay/context';
+import { withDraggableConsumer } from '../media/webcam-draggable-overlay/context';
 
 const intlMessages = defineMessages({
   presentationLabel: {
@@ -84,12 +84,15 @@ class PresentationArea extends PureComponent {
     this.refPresentationContainer.addEventListener('fullscreenchange', this.onFullscreenChange);
 
     const { slidePosition, webcamDraggableDispatch } = this.props;
-    const { width: currWidth, height: currHeight } = slidePosition;
-    if (currWidth > currHeight || currWidth === currHeight) {
-      webcamDraggableDispatch({ type: 'setOrientationToLandscape' });
-    }
-    if (currHeight > currWidth) {
-      webcamDraggableDispatch({ type: 'setOrientationToPortrait' });
+
+    if (slidePosition) {
+      const { width: currWidth, height: currHeight } = slidePosition;
+      if (currWidth > currHeight || currWidth === currHeight) {
+        webcamDraggableDispatch({ type: 'setOrientationToLandscape' });
+      }
+      if (currHeight > currWidth) {
+        webcamDraggableDispatch({ type: 'setOrientationToPortrait' });
+      }
     }
   }
 
