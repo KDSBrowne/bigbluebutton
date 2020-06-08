@@ -214,3 +214,14 @@
     color: var(--color-gray-drak);
     text-align: center;
 }
+
+.anonymousPoll {
+    margin-bottom: .5rem;
+    display: block;
+
+    input {
+        position: relative;
+        left: .5rem;
+        top: 2px;
+    }
+}

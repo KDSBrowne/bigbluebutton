@@ -236,6 +236,8 @@
     "app.poll.answer.e": "E",
     "app.poll.liveResult.usersTitle": "Users",
     "app.poll.liveResult.responsesTitle": "Response",
+    "app.poll.anonymous.label": "Anonymous : ",
+    "app.poll.anonymous.aria": "Set poll as anonymous",
     "app.polling.pollingTitle": "Polling options",
     "app.polling.pollAnswerLabel": "Poll answer {0}",
     "app.polling.pollAnswerDesc": "Select this option to vote for {0}",

@@ -82,6 +82,14 @@ const intlMessages = defineMessages({
     id: 'app.poll.a5',
     description: 'label for A / B / C / D / E poll',
   },
+  anonymousLabel: {
+    id: 'app.poll.anonymous.label',
+    description: 'label for anonymous checkbox option',
+  },
+  anonymousAria: {
+    id: 'app.poll.anonymous.aria',
+    description: 'aria label for anonymous checkbox option',
+  },
 });
 
 const MAX_CUSTOM_FIELDS = Meteor.settings.public.poll.max_custom;
@@ -94,6 +102,7 @@ class Poll extends Component {
     this.state = {
       customPollReq: false,
       isPolling: false,
+      isAnonymous: false,
       customPollValues: [],
     };
 
@@ -246,6 +255,10 @@ class Poll extends Component {
       sendGroupMessage,
     } = this.props;
 
+    const {
+      isAnonymous,
+    } = this.state;
+
     return (
       <div>
         <div className={styles.instructions}>
@@ -258,6 +271,7 @@ class Poll extends Component {
             currentPoll,
             pollAnswerIds,
             sendGroupMessage,
+            isAnonymous,
           }}
           handleBackClick={this.handleBackClick}
         />
@@ -267,13 +281,25 @@ class Poll extends Component {
 
   renderPollOptions() {
     const { isMeteorConnected, intl } = this.props;
-    const { customPollReq } = this.state;
+    const { customPollReq, isAnonymous } = this.state;
 
     return (
       <div>
         <div className={styles.instructions}>
           {intl.formatMessage(intlMessages.quickPollInstruction)}
         </div>
+
+        <label className={styles.anonymousPoll} htmlFor="anonymousPoll">
+          <span aria-hidden>{intl.formatMessage(intlMessages.anonymousLabel)}</span>
+          <input
+            type="checkbox"
+            id="anonymousPoll"
+            onChange={() => this.setState({ isAnonymous: !isAnonymous })}
+            checked={isAnonymous}
+            aria-label={intl.formatMessage(intlMessages.anonymousAria)}
+          />
+        </label>
+
         <div className={styles.grid}>
           {this.renderQuickPollBtns()}
         </div>

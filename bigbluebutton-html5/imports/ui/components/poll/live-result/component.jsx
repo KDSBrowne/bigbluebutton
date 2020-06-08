@@ -44,7 +44,7 @@ const getResponseString = (obj) => {
 class LiveResult extends PureComponent {
   static getDerivedStateFromProps(nextProps) {
     const {
-      currentPoll, intl, pollAnswerIds,
+      currentPoll, intl, pollAnswerIds, isAnonymous,
     } = nextProps;
 
     if (!currentPoll) return null;
@@ -146,6 +146,7 @@ class LiveResult extends PureComponent {
       handleBackClick,
       currentPoll,
       sendGroupMessage,
+      isAnonymous,
     } = this.props;
 
     const { userAnswers, pollStats } = this.state;
@@ -222,15 +223,19 @@ class LiveResult extends PureComponent {
             />
           )
         }
-        <table>
-          <tbody>
-            <tr>
-              <th className={styles.theading}>{intl.formatMessage(intlMessages.usersTitle)}</th>
-              <th className={styles.theading}>{intl.formatMessage(intlMessages.responsesTitle)}</th>
-            </tr>
-            {userAnswers}
-          </tbody>
-        </table>
+        {isAnonymous ? null
+          : (
+            <table>
+              <tbody>
+                <tr>
+                  <th className={styles.theading}>{intl.formatMessage(intlMessages.usersTitle)}</th>
+                  <th className={styles.theading}>{intl.formatMessage(intlMessages.responsesTitle)}</th>
+                </tr>
+                {userAnswers}
+              </tbody>
+            </table>
+          )
+        }
       </div>
     );
   }
