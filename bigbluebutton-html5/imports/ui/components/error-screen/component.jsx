@@ -50,6 +50,23 @@ class ErrorScreen extends React.PureComponent {
     Meteor.disconnect();
   }
 
+  renderUnauthorized() {
+    const { intl, code } = this.props;
+    const formatedMessage = intl.formatMessage(intlMessages[code]);
+
+    return (
+      <div className={styles.background}>
+        <h1 className={styles.title_401}>
+          {formatedMessage}
+        </h1>
+        <div className={styles.separator} />
+        <h1 className={styles.code_401}>
+          {code}
+        </h1>
+      </div>
+    );
+  }
+
   render() {
     const {
       intl,
@@ -62,6 +79,9 @@ class ErrorScreen extends React.PureComponent {
     if (code in intlMessages) {
       formatedMessage = intl.formatMessage(intlMessages[code]);
     }
+
+    const unauthorized = code === 401;
+    if (unauthorized) return this.renderUnauthorized();
 
     return (
       <div className={styles.background}>
