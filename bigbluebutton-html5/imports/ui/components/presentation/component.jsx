@@ -111,8 +111,8 @@ class PresentationArea extends PureComponent {
 
     if (layoutSwapped && restoreOnUpdate && isViewer && currentSlide) {
       const slideChanged = currentSlide.id !== prevProps.currentSlide.id;
-      const positionChanged = slidePosition.viewBoxHeight !== prevProps.slidePosition.viewBoxHeight
-        || slidePosition.viewBoxWidth !== prevProps.slidePosition.viewBoxWidth;
+      const positionChanged = slidePosition.x !== prevProps.slidePosition.x
+        || slidePosition.y !== prevProps.slidePosition.y;
       const pollPublished = publishedPoll && !prevProps.publishedPoll;
       if (slideChanged || positionChanged || pollPublished || presentationChanged) {
         toggleSwapLayout();
