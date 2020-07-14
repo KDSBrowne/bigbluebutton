@@ -4,6 +4,7 @@ import WhiteboardOverlayContainer from '/imports/ui/components/whiteboard/whiteb
 import WhiteboardToolbarContainer from '/imports/ui/components/whiteboard/whiteboard-toolbar/container';
 import { HUNDRED_PERCENT, MAX_PERCENT } from '/imports/utils/slideCalcUtils';
 import { defineMessages, injectIntl, intlShape } from 'react-intl';
+import { toast } from 'react-toastify';
 import PresentationToolbarContainer from './presentation-toolbar/container';
 import CursorWrapperContainer from './cursor/cursor-wrapper-container/container';
 import AnnotationGroupContainer from '../whiteboard/annotation-group/container';
@@ -121,8 +122,6 @@ class PresentationArea extends PureComponent {
   componentDidUpdate(prevProps) {
     const {
       currentPresentation,
-      notify,
-      intl,
       slidePosition,
       layoutContextDispatch,
       layoutContextState,
@@ -132,7 +131,6 @@ class PresentationArea extends PureComponent {
       isViewer,
       toggleSwapLayout,
       restoreOnUpdate,
-      currentPresentationId,
     } = this.props;
 
     const { numUsersVideo } = layoutContextState;
@@ -172,23 +170,26 @@ class PresentationArea extends PureComponent {
       }
     }
 
-    const presentationChanged = currentPresentationId !== currentPresentation._id;
-
-    if (presentationChanged) {
-      Session.set('currentPresentationId', currentPresentation._id);
-      notify(
-        `${intl.formatMessage(intlMessages.changeNotification)} ${currentPresentation.name}`,
-        'info',
-        'presentation',
-      );
-    }
     if (layoutSwapped && restoreOnUpdate && isViewer && currentSlide) {
       const slideChanged = currentSlide.id !== prevProps.currentSlide.id;
       const positionChanged = slidePosition.viewBoxHeight !== prevProps.slidePosition.viewBoxHeight
         || slidePosition.viewBoxWidth !== prevProps.slidePosition.viewBoxWidth;
       const pollPublished = publishedPoll && !prevProps.publishedPoll;
-      if (slideChanged || positionChanged || pollPublished || presentationChanged) {
+      if (slideChanged || positionChanged || pollPublished) {
         toggleSwapLayout();
+      }
+    }
+
+    if (prevProps.currentPresentation.name !== currentPresentation.name) {
+      if (this.currentPresentationToastId) {
+        toast.update(this.currentPresentationToastId, {
+          render: this.renderCurrentPresentationToast(),
+        });
+      } else {
+        this.currentPresentationToastId = toast(this.renderCurrentPresentationToast(), {
+          onClose: () => { this.currentPresentationToastId = null; },
+          autoClose: true,
+        });
       }
     }
   }
