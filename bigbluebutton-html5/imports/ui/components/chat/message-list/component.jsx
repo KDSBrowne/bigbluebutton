@@ -289,47 +289,54 @@ class MessageList extends Component {
     } = this.state;
 
     return (
-      [<div className={styles.messageListWrapper} key="chat-list" data-test="chatMessages" ref={node => this.messageListWrapper = node}>
-        <AutoSizer>
-          {({ height, width }) => {
-            if (width !== this.lastWidth) {
-              this.lastWidth = width;
-              this.cache.clearAll();
-            }
+      [
+        <div
+          className={styles.messageListWrapper}
+          key={_.uniqueId('chat-list-')}
+          data-test="chatMessages"
+          ref={node => this.messageListWrapper = node}
+        >
+          <AutoSizer>
+            {({ height, width }) => {
+              if (width !== this.lastWidth) {
+                this.lastWidth = width;
+                this.cache.clearAll();
+              }
 
-            return (
-              <List
-                ref={(ref) => {
-                  if (ref !== null) {
-                    this.listRef = ref;
+              return (
+                <List
+                  ref={(ref) => {
+                    if (ref !== null) {
+                      this.listRef = ref;
 
-                    if (!scrollArea) {
-                      this.setState({ scrollArea: findDOMNode(this.listRef) });
+                      if (!scrollArea) {
+                        this.setState({ scrollArea: findDOMNode(this.listRef) });
+                      }
                     }
-                  }
-                }}
-                rowHeight={this.cache.rowHeight}
-                className={styles.messageList}
-                rowRenderer={this.rowRender}
-                rowCount={messages.length}
-                height={height}
-                width={width}
-                overscanRowCount={5}
-                deferredMeasurementCache={this.cache}
-                onScroll={this.handleScrollChange}
-                scrollToIndex={shouldScrollToBottom ? messages.length - 1 : undefined}
-                scrollTop={
-                    (shouldScrollToPosition && scrollPosition)
-                    && (scrollArea && scrollArea.scrollHeight >= scrollPosition)
-                      ? scrollPosition : undefined
-                  }
-                scrollToAlignment="end"
-              />
-            );
-          }}
-        </AutoSizer>
-      </div>,
-      this.renderUnreadNotification()]
+                  }}
+                  rowHeight={this.cache.rowHeight}
+                  className={styles.messageList}
+                  rowRenderer={this.rowRender}
+                  rowCount={messages.length}
+                  height={height}
+                  width={width}
+                  overscanRowCount={5}
+                  deferredMeasurementCache={this.cache}
+                  onScroll={this.handleScrollChange}
+                  scrollToIndex={shouldScrollToBottom ? messages.length - 1 : undefined}
+                  scrollTop={
+                      (shouldScrollToPosition && scrollPosition)
+                      && (scrollArea && scrollArea.scrollHeight >= scrollPosition)
+                        ? scrollPosition : undefined
+                    }
+                  scrollToAlignment="end"
+                />
+              );
+            }}
+          </AutoSizer>
+        </div>,
+        this.renderUnreadNotification(),
+      ]
     );
   }
 }
