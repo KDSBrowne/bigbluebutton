@@ -9,6 +9,7 @@ import PresentationToolbarContainer from './presentation-toolbar/container';
 import CursorWrapperContainer from './cursor/cursor-wrapper-container/container';
 import AnnotationGroupContainer from '../whiteboard/annotation-group/container';
 import PresentationOverlayContainer from './presentation-overlay/container';
+import PollingContainer from '/imports/ui/components/polling/container';
 import Slide from './slide/component';
 import { styles } from './styles.scss';
 import toastStyles from '/imports/ui/components/toast/styles';
@@ -772,6 +773,7 @@ class PresentationArea extends PureComponent {
       // fitToWidth,
       // presentationAreaWidth,
       localPosition,
+      isFullscreen,
     } = this.state;
 
     let viewBoxDimensions;
@@ -846,6 +848,7 @@ class PresentationArea extends PureComponent {
               : null}
           </div>
         </div>
+        {isFullscreen && <PollingContainer />}
       </div>
     );
   }
