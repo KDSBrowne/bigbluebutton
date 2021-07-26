@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { defineMessages, injectIntl } from "react-intl";
-
+import deviceInfo from '/imports/utils/deviceInfo'
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import { Divider } from "@material-ui/core";
@@ -63,7 +63,7 @@ class BBBMenu extends React.Component {
         style={{ paddingLeft: '4px',paddingRight: '4px',paddingTop: '8px', paddingBottom: '8px', marginLeft: '4px', marginRight: '4px' }}
         onClick={() => { 
           onClick();
-          const close = !label.includes('Set status') && !label.includes('Back');
+          const close = !key.includes('setstatus') && !key.includes('back');
           // prevent menu close for sub menu actions
           if (close) this.handleClose();
         }}>
@@ -84,7 +84,14 @@ class BBBMenu extends React.Component {
     const actionsItems = this.makeMenuItems();
 
     const menuClasses = [styles.menu];
-    if (wide) menuClasses.push(styles.wide)
+    if (wide) menuClasses.push(styles.wide);
+
+    const html = document.getElementsByTagName('html')[0];
+
+    if (html.dir === 'rtl') {
+      opts.anchorOrigin.horizontal = 'left';
+      opts.transformorigin.horizontal = 'left';
+    }
 
     return (
       <div>
@@ -97,7 +104,7 @@ class BBBMenu extends React.Component {
           className={menuClasses.join(' ')}
         >
           {actionsItems}
-          {anchorEl && window.innerWidth < MAX_WIDTH && 
+          {anchorEl && deviceInfo?.isMobile && 
             <Button
               className={styles.closeBtn}
               label={intl.formatMessage(intlMessages.close)}
@@ -123,7 +130,7 @@ BBBMenu.defaultProps = {
     getContentAnchorEl: null,
     fullwidth: "true",
     anchorOrigin: { vertical: 'top', horizontal: 'right' },
-    transformorigin: { vertical: 'top', horizontal: 'top' },
+    transformorigin: { vertical: 'top', horizontal: 'right' },
   },
   onCloseCallback: () => {},
   wide: false,
