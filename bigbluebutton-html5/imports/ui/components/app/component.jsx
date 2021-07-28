@@ -537,6 +537,7 @@ class App extends Component {
               <BannerBarContainer />
               <NotificationsBarContainer />
               <section className={styles.wrapper}>
+                {this.renderPanel()}
                 <div className={
                   sidebarNavigationIsOpen
                     && sidebarContentIsOpen
@@ -548,7 +549,6 @@ class App extends Component {
                   {this.renderMedia()}
                   {this.renderActionsBar()}
                 </div>
-                {this.renderPanel()}
               </section>
               <UploaderContainer />
               <BreakoutRoomInvitation />
@@ -586,9 +586,9 @@ class App extends Component {
                 {this.renderUserInformation()}
                 <BannerBarContainer />
                 <NotificationsBarContainer />
-                <NavBarContainer main="new" />
                 <SidebarNavigationContainer />
                 <SidebarContentContainer />
+                <NavBarContainer main="new" />
                 {this.renderWebcamsContainer()}
                 {shouldShowPresentation ? <PresentationAreaContainer /> : null}
                 {shouldShowScreenshare ? <ScreenshareContainer /> : null}
