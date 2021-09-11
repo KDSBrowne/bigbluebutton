@@ -11,6 +11,7 @@ import { withModalMounter } from '/imports/ui/components/modal/service';
 import HoldButton from '/imports/ui/components/presentation/presentation-toolbar/zoom-tool/holdButton/component';
 import SortList from './sort-user-list/component';
 import styles from './styles';
+import { alertScreenReader } from '/imports/utils/dom-utils';
 
 const ROLE_MODERATOR = Meteor.settings.public.user.role_moderator;
 
@@ -256,6 +257,7 @@ class BreakoutRoom extends PureComponent {
         roomList.removeEventListener('keydown', this.handleMoveEvent, true);
       }
     }
+    this.handleDismiss();
   }
 
   handleShiftUser(activeListSibling) {
@@ -375,7 +377,7 @@ class BreakoutRoom extends PureComponent {
       return;
     }
 
-    this.handleDismiss();
+    this.setState({ preventClosing: false });
 
     const rooms = _.range(1, numberOfRooms + 1).map((seq) => ({
       users: this.getUserByRoom(seq).map((u) => u.userId),
@@ -405,7 +407,7 @@ class BreakoutRoom extends PureComponent {
       breakoutUsers.forEach((user) => sendInvitation(breakoutId, user.userId));
     });
 
-    this.handleDismiss();
+    this.setState({ preventClosing: false });
   }
 
   onAssignRandomly() {
@@ -617,9 +619,13 @@ class BreakoutRoom extends PureComponent {
       });
     };
 
+    if (!leastOneUserIsValid) {
+      alertScreenReader(`YO YO YO YO YO YO YO `);
+    }
+
     return (
       <div className={styles.boxContainer} key="rooms-grid-" ref={(r) => { this.listOfUsers = r; }}>
-        <div className={!leastOneUserIsValid ? styles.changeToWarn : null}>
+        <div role="alert" className={!leastOneUserIsValid ? styles.changeToWarn : null}>
           <p className={styles.freeJoinLabel}>
             <input
               type="text"
@@ -628,12 +634,13 @@ class BreakoutRoom extends PureComponent {
               value={
                 intl.formatMessage(intlMessages.notAssigned, { 0: this.getUserByRoom(0).length })
               }
+              aria-describedby={'leastOneWarnBreakout'}
             />
           </p>
           <div className={styles.breakoutBox} onDrop={drop(0)} onDragOver={allowDrop} tabIndex={0}>
             {this.renderUserItemByRoom(0)}
           </div>
-          <span className={leastOneUserIsValid ? styles.dontShow : styles.spanWarn}>
+          <span id="leastOneWarnBreakout" className={leastOneUserIsValid ? styles.dontShow : styles.spanWarn}>
             {intl.formatMessage(intlMessages.leastOneWarnBreakout)}
           </span>
         </div>
@@ -653,9 +660,9 @@ class BreakoutRoom extends PureComponent {
                   aria-label={`${this.getRoomName(value)}`}
                   aria-describedby={this.getRoomName(value).length === 0 ? `room-error-${value}` : `room-input-${value}`}
                 />
-                <div aria-hidden id={`room-input-${value}`} className={"sr-only"}>
+                <span aria-hidden id={`room-input-${value}`} className={"sr-only"}>
                   {intl.formatMessage(intlMessages.roomNameInputDesc)}
-                </div>
+                </span>
               </p>
               <div className={styles.breakoutBox} onDrop={drop(value)} onDragOver={allowDrop} tabIndex={0}>
                 {this.renderUserItemByRoom(value)}
