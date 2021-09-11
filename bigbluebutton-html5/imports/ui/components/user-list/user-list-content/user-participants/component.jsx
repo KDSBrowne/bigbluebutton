@@ -78,6 +78,11 @@ class UserParticipants extends Component {
         this.handleClickSelectedUser,
       );
     }
+
+    const list = document.getElementsByClassName('list-auto-sizer')[0];
+    if (list) {
+      list.firstChild.setAttribute("aria-label", 'Users List');
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -227,7 +232,7 @@ class UserParticipants extends Component {
           }}
         >
           <span id="participants-destination" />
-          <AutoSizer>
+          <AutoSizer className="list-auto-sizer">
             {({ height, width }) => (
               <List
                 {...{
@@ -251,7 +256,6 @@ class UserParticipants extends Component {
                 className={styles.scrollStyle}
                 overscanRowCount={30}
                 deferredMeasurementCache={this.cache}
-                tabIndex={-1}
               />
             )}
           </AutoSizer>
