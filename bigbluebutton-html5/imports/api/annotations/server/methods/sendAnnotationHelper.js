@@ -38,8 +38,14 @@ export default function sendAnnotationHelper(annotation, meetingId, requesterUse
         userId: String,
         position: Number,
       });
-    } else if (annotation.annotationType === 'rectangle' || annotation.annotationType === 'triangle' || annotation.annotationType === 'ellipse' || annotation.annotationType === 'line' ){
-      // line does not have the 'fill' property but this is necessary as 'fill' is anyway added at ui/components/whiteboard/whiteboard-overlay/shape-draw-listener/component.jsx
+    } else if (
+      annotation.annotationType === 'rectangle' ||
+      annotation.annotationType === 'triangle' ||
+      annotation.annotationType === 'ellipse' ||
+      annotation.annotationType === 'line'
+    ) {
+      // line does not have the 'fill' property but this is necessary as 'fill' is anyway added 
+      // at ui/components/whiteboard/whiteboard-overlay/shape-draw-listener/component.jsx
       // Any other shape excluding pencil and text (e.g., eraser) needs to be added here.
       check(annotation, {
         id: String,
@@ -81,13 +87,19 @@ export default function sendAnnotationHelper(annotation, meetingId, requesterUse
       });
     }
 
+    //drawEndOnly is true when a point is drawn by pencil tool
+    const drawEndOnly = whiteboardMode.synchronizeWBUpdate ? (annotation.pencilPoint == undefined ? true : annotation.pencilPoint) : true;
+    delete annotation.pencilPoint; //unnecessary for akka-apps
+    
     const payload = {
       annotation,
-      drawEndOnly: true,
+      drawEndOnly: drawEndOnly,
     };
 
     return RedisPubSub.publishUserMessage(CHANNEL, EVENT_NAME, meetingId, requesterUserId, payload);
   } catch (err) {
     Logger.error(`Exception while invoking method sendAnnotationHelper ${err.stack}`);
   }
+
+  return null;
 }

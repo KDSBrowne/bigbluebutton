@@ -292,6 +292,7 @@ export default class ShapeDrawListener extends Component {
       userId,
       actions,
       drawSettings,
+      synchronizeWBUpdate,
     } = this.props;
 
     const {
@@ -328,7 +329,7 @@ export default class ShapeDrawListener extends Component {
       position: 0,
     };
 
-    sendAnnotation(annotation, whiteboardId);
+    sendAnnotation(annotation, synchronizeWBUpdate);
   }
 
   discardAnnotation() {
