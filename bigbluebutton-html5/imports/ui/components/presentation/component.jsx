@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import WhiteboardOverlayContainer from '/imports/ui/components/whiteboard/whiteboard-overlay/container';
+import WhiteboardOverlayContainer from '/imports/ui/components/whiteboard/whiteboard-overlay/container'
+import WhiteboardContainer from '/imports/ui/components/whiteboard/container';
 import WhiteboardToolbarContainer from '/imports/ui/components/whiteboard/whiteboard-toolbar/container';
 import { HUNDRED_PERCENT, MAX_PERCENT } from '/imports/utils/slideCalcUtils';
 import { defineMessages, injectIntl } from 'react-intl';
@@ -871,25 +872,29 @@ class Presentation extends PureComponent {
       );
     }
 
-    return (
-      <Styled.PresentationContainer
-        role="region"
-        ref={(ref) => { this.refPresentationContainer = ref; }}
-        style={{
-          top: presentationBounds.top,
-          left: presentationBounds.left,
-          right: presentationBounds.right,
-          width: presentationBounds.width,
-          height: presentationBounds.height,
-          display: layoutSwapped ? 'none' : 'flex',
-          zIndex: fullscreenContext ? presentationBounds.zIndex : undefined,
-          background: layoutType === LAYOUT_TYPE.VIDEO_FOCUS && numCameras > 0 && !fullscreenContext
-            ? colorContentBackground
-            : null,
-        }}
-      >
-        {isFullscreen && <PollingContainer />}
+    
 
+    return (
+      <>   
+        <Styled.PresentationContainer
+          role="region"
+          ref={(ref) => { this.refPresentationContainer = ref; }}
+          style={{
+            top: presentationBounds.top,
+            left: presentationBounds.left,
+            right: presentationBounds.right,
+            width: presentationBounds.width,
+            height: presentationBounds.height,
+            display: layoutSwapped ? 'none' : 'flex',
+            zIndex: fullscreenContext ? presentationBounds.zIndex : undefined,
+            background: layoutType === LAYOUT_TYPE.VIDEO_FOCUS && numCameras > 0 && !fullscreenContext
+              ? colorContentBackground
+              : null,
+          }}
+        >
+          <WhiteboardContainer />
+          {isFullscreen && <PollingContainer />}
+        {/* 
         <Styled.Presentation ref={(ref) => { this.refPresentation = ref; }}>
           <Styled.WhiteboardSizeAvailable ref={(ref) => { this.refWhiteboardArea = ref; }} />
           <Styled.SvgContainer
@@ -918,8 +923,8 @@ class Presentation extends PureComponent {
               )
               : null}
           </Styled.SvgContainer>
-        </Styled.Presentation>
-      </Styled.PresentationContainer>
+        </Styled.Presentation> */}
+      </Styled.PresentationContainer></>
     );
   }
 }

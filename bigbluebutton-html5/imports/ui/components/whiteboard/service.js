@@ -284,7 +284,34 @@ const removeIndividualAccess = (whiteboardId, userId) => {
   makeCall('removeIndividualAccess', whiteboardId, userId);
 };
 
+const DEFAULT_NUM_OF_PAGES = 5;
+
+const initDefaultPages = () => {
+  const pages = {};
+  const pageStates = {};
+  let i = 1;
+  while (i < DEFAULT_NUM_OF_PAGES + 1) {
+    pages[`${i}`] = {
+      id: `${i}`,
+      name: `Slide ${i}`,
+      shapes: {},
+      bindings: {},
+    };
+    pageStates[`${i}`] = {
+      id: `${i}`,
+      selectedIds: [],
+      camera: {
+        point: [0, 0],
+        zoom: 1,
+      },
+    };
+    i++;
+  }
+  return { pages, pageStates };
+};
+
 export {
+  initDefaultPages,
   Annotations,
   UnsentAnnotations,
   sendAnnotation,
