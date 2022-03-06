@@ -16,6 +16,7 @@ export default function Whiteboard(props) {
   const [doc, setDoc] = React.useState(rDocument.current);
 
   const handleChange = React.useCallback((state) => {
+      console.log(state.status)
     rDocument.current = state.document;
   }, []);
 
@@ -24,7 +25,11 @@ export default function Whiteboard(props) {
       document={doc}
       onChange={handleChange}
       onPersist={(e) => {
-        console.log("onPersist : ", e.getShapes());
+        const updatedShapes = [];
+        Object.entries(e?.selectedIds)?.forEach(([k,v]) => {
+          updatedShapes.push(e.getShape(v));
+        });
+        console.log("onPersist - update shapes: ", updatedShapes);
       }}
       showPages={isPresenter}
       showUI={isPresenter}
