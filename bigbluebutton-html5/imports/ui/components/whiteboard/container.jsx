@@ -10,11 +10,14 @@ const WhiteboardContainer = (props) => {
     const { users } = usingUsersContext;
     const currentUser = users[Auth.meetingID][Auth.userID];
     const isPresenter = currentUser.presenter;
-    return <Whiteboard {...{isPresenter}} {...props} />
+    return <Whiteboard {...{isPresenter}} {...props} meetingId={Auth.meetingID} />
 };
 
 export default withTracker(({}) => {
+  const shapes = Service.getShapes();
   return { 
     initDefaultPages: Service.initDefaultPages,
+    persistShape: Service.persistShape,
+    shapes: shapes,
   };
 })(WhiteboardContainer);
