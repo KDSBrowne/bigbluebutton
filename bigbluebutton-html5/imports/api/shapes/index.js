@@ -12,6 +12,7 @@ if (Meteor.isServer) {
   // 2. meetingId, id
   // { connection: Meteor.isClient ? null : true }
   // Shapes._ensureIndex({ });
+  Shapes._ensureIndex({ meetingId: 1, id: 1 });
   Shapes._ensureIndex({ meetingId: 1 });
   Shapes._ensureIndex({ id: 1 });
 }

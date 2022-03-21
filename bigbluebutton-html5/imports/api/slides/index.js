@@ -21,6 +21,10 @@ if (Meteor.isServer) {
     meetingId: 1, podId: 1, presentationId: 1, id: 1,
   });
 
+  Slides._ensureIndex({
+    meetingId: 1, id: 1,
+  });
+
   SlidePositions._ensureIndex({
     meetingId: 1, podId: 1, presentationId: 1, id: 1,
   });

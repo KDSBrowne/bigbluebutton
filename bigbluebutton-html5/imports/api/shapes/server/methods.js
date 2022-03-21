@@ -3,5 +3,5 @@ import { Meteor } from 'meteor/meteor';
 import persistShape from './methods/persistShape';
 
 Meteor.methods({
-  persistShape
+  // persistShape
 });

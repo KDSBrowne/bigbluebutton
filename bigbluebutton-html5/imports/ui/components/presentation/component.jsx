@@ -892,7 +892,7 @@ class Presentation extends PureComponent {
               : null,
           }}
         >
-          <WhiteboardContainer />
+          <WhiteboardContainer getSvgRef={this.getSvgRef}/>
           {isFullscreen && <PollingContainer />}
         {/* 
         <Styled.Presentation ref={(ref) => { this.refPresentation = ref; }}>
