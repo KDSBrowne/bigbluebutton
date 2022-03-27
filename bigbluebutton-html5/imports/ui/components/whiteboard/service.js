@@ -324,8 +324,8 @@ const removeShape = (id) => {
   makeCall("removeShape", id);
 };
 
-const publishCursorUpdate = (userId, name, x, y) => {
-  makeCall("publishCursorUpdate", Auth.meetingID, userId, { userId, name, x, y })
+const publishCursorUpdate = (userId, name, x, y, presenter, isPositionOutside) => {
+  makeCall("publishCursorUpdate", Auth.meetingID, userId, { userId, name, x, y, presenter, isPositionOutside })
 }
 
 const getShapes = () => {

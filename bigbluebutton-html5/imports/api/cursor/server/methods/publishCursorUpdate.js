@@ -13,9 +13,9 @@ export default function publishCursorUpdate(meetingId, requesterUserId, payload)
   console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
   console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
 
-  const { userId, name, x, y } = payload;
+  const { userId, name, x, y, presenter, isPositionOutside } = payload;
 
-  updateCursor(meetingId, userId, name, x, y)
+  updateCursor(meetingId, userId, name, x, y, presenter, isPositionOutside)
 
   // return RedisPubSub.publishUserMessage(CHANNEL, EVENT_NAME, meetingId, requesterUserId, payload);
 }

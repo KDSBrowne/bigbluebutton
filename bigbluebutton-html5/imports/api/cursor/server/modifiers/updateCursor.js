@@ -1,8 +1,8 @@
 import Logger from '/imports/startup/server/logger';
-import Cursor from '/imports/api/cursor';
+import Captions from '/imports/api/captions';
 import { check } from 'meteor/check';
 
-export default function updateCursor(meetingId, userId, name, x, y) {
+export default function updateCursor(meetingId, userId, name, x, y, presenter, isPositionOutside) {
   const selector = {
     meetingId,
     userId,
@@ -15,11 +15,13 @@ export default function updateCursor(meetingId, userId, name, x, y) {
       name,
       x,
       y,
+      presenter,
+      isPositionOutside
     },
   };
 
   try {
-    const { insertedId } = Cursor.upsert(selector, modifier);
+    const { insertedId } = Captions.upsert(selector, modifier);
 
     if (insertedId) {
       Logger.info(`Initialized cursor meeting=${meetingId}`);

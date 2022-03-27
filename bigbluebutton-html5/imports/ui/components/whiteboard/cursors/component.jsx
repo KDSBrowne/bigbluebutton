@@ -54,11 +54,10 @@ const PositionLabel = (props) => {
     publishCursorUpdate,
   } = props;
 
-  const { name, color, userId } = currentUser;
+  const { name, color, userId, presenter } = currentUser;
 
   React.useEffect(() => {
-    console.log("Cursor Position :", x, y, publishCursorUpdate, props);
-    props.publishCursorUpdate(userId, name, x, y)
+    props.publishCursorUpdate(userId, name, x, y, presenter, isPositionOutside)
   }, [x,y])
 
 
@@ -71,9 +70,12 @@ const PositionLabel = (props) => {
 
 export default function Cursors(props) {
   return (
+    <>
     <ReactCursorPosition style={{ height: "100%", cursor: "none" }}>
       <PositionLabel currentUser={props.currentUser} publishCursorUpdate={props.publishCursorUpdate} />
       {props.children}
     </ReactCursorPosition>
+    {props.otherCursors.map(c => props.currentUser.userId !== c.userId && !c.isPositionOutside && renderCursor(c.name, c.presenter ? '#C70039' : '#AFE1AF', c.x, c.y))}
+    </>
   );
 }
