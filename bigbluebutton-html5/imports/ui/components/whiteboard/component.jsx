@@ -41,7 +41,7 @@ export default function Whiteboard(props) {
     changeCurrentSlide,
     whiteboardId,
   } = props;
-  console.log('curPres : ', curPres)
+  // console.log('curPres : ', curPres)
   //console.log('whiteboardId : ', whiteboardId)
   const { pages, pageStates } = initDefaultPages(curPres?.pages.length || 1);
   const rDocument = React.useRef({
@@ -55,7 +55,7 @@ export default function Whiteboard(props) {
   });
   const [doc, setDoc] = React.useState(rDocument.current);
   const [curPage, setCurPage] = React.useState({ id: "1" });
-  const [ass, setAss] = React.useState(assets);
+  const [_assets, setAssets] = React.useState(assets);
   const [command, setCommand] = React.useState("");
   const [selectedIds, setSelectedIds] = React.useState([]);
   const [tldrawAPI, setTLDrawAPI] = React.useState(null);
@@ -68,7 +68,7 @@ export default function Whiteboard(props) {
 
   React.useMemo(() => {
     const currentDoc = rDocument.current;
-    const propShapes = Object.entries(shapes || {})?.map(([k, v]) => v.id);
+    const propShapes = Object.entries(shapes || {})?.map(([k, v]) => v.id).filter(s => s.parentId === curSlide?.activeSlide);
 
     if (!curPage && tldrawAPI) {
       tldrawAPI.getPage();
@@ -78,11 +78,11 @@ export default function Whiteboard(props) {
 
     next.assets = { ...assets };
 
-    const pShapes = Object.entries(shapes || {})?.map(([k, v]) => v.id);
+    const pShapes = Object.entries(shapes || {})?.map(([k, v]) => v.id).filter(s => s.parentId === curSlide?.activeSlide);
     shapes?.forEach((s) => {
       try {
         Object.keys(next.pages[s.parentId].shapes).map((k) => {
-          if (!pShapes.includes(k) && s.parentId === tldrawAPI?.getPage()?.id) {
+          if (!pShapes.includes(k) && s.parentId === curSlide?.activeSlide) {
             delete next.pages[s.parentId].shapes[k];
           }
         });
@@ -109,27 +109,27 @@ export default function Whiteboard(props) {
           type: "image",
         };
 
-    try {
-      next.pages[i + 1]["shapes"]["slide-background-shape"] = {
-        assetId: `slide-background-asset-${i}`,
-        childIndex: 1,
-        id: "slide-background-shape",
-        name: "Image",
-        type: TDShapeType.Image,
-        parentId: `${i + 1}`,
-        childIndex: 1,
-        point: [50, 60],
-        isLocked: true,
-        size: [2560 / 3.5, 1440 / 3.5],
-        style: {
-          dash: DashStyle.Draw,
-          size: SizeStyle.Medium,
-          color: ColorStyle.Blue,
-        },
-      };
-    } catch (err) {
+        try {
+          next.pages[i + 1]["shapes"]["slide-background-shape"] = {
+            assetId: `slide-background-asset-${i}`,
+            childIndex: 1,
+            id: "slide-background-shape",
+            name: "Image",
+            type: TDShapeType.Image,
+            parentId: `${i + 1}`,
+            childIndex: 1,
+            point: [50, 60],
+            isLocked: true,
+            size: [2560 / 3.5, 1440 / 3.5],
+            style: {
+              dash: DashStyle.Draw,
+              size: SizeStyle.Medium,
+              color: ColorStyle.Blue,
+            },
+          };
+        } catch (err) {
 
-    }
+        }
         // setDoc(next);
       });
     }
@@ -150,22 +150,19 @@ export default function Whiteboard(props) {
     }
 
     setDoc(next);
-// 
+
     if (
       tldrawAPI &&
       !_.isEqual(shapes, prevShapes) &&
-      !_.isEqual(assets, ass)
+      !_.isEqual(assets, _assets)
     ) {
-      setAss(assets);
+      setAssets(assets);
       tldrawAPI?.replacePageContent(next?.pages[pageID]?.shapes, {}, assets);
     }
 
-    if (tldrawAPI && !_.isEqual(shapes, prevShapes) && !_.isEqual(assets, ass)) {
+    if (tldrawAPI && !_.isEqual(shapes, prevShapes) && !_.isEqual(assets, _assets)) {
       tldrawAPI?.replacePageContent(next?.pages[pageID]?.shapes, {}, assets);
     }
-    
-    // setDoc(next);
-
   }, [assets, shapes, curPres, tldrawAPI]);
 
   React.useEffect(() => {
@@ -194,6 +191,7 @@ export default function Whiteboard(props) {
           }}
           onMount={(app) => {
             setTLDrawAPI(app);
+            props.setTLDrawAPI(app);
           }}
           onChange={handleChange}
           onPersist={(e) => {

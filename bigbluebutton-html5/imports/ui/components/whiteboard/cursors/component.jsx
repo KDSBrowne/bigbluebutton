@@ -83,6 +83,7 @@ const PositionLabel = (props) => {
   const prevCurrentPoint = usePrevious(currentPoint);
 
   React.useEffect(() => {
+    // console.log('local cursor update', currentPoint, prevCurrentPoint)
     try {
       const point = _.isEqual(currentPoint, prevCurrentPoint)
         ? [x, y]
@@ -107,6 +108,7 @@ const PositionLabel = (props) => {
 };
 
 export default function Cursors(props) {
+  // console.log('CURSOR : - otherCursors : ', props.otherCursors)
   return (
     <>
       <ReactCursorPosition style={{ height: "100%", cursor: "none" }}>

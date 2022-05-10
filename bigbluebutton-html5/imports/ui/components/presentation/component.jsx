@@ -1007,6 +1007,7 @@ class Presentation extends PureComponent {
       zoom: 100,
       fitToWidth: false,
       isFullscreen: false,
+      TLDrawAPI: null,
     };
 
     this.currentPresentationToastId = null;
@@ -1020,6 +1021,7 @@ class Presentation extends PureComponent {
     this.onFullscreenChange = this.onFullscreenChange.bind(this);
     this.getPresentationSizesAvailable = this.getPresentationSizesAvailable.bind(this);
     this.handleResize = this.handleResize.bind(this);
+    this.setTLDrawAPI = this.setTLDrawAPI.bind(this);
 
     this.onResize = () => setTimeout(this.handleResize.bind(this), 0);
     this.renderCurrentPresentationToast = this.renderCurrentPresentationToast.bind(this);
@@ -1207,6 +1209,10 @@ class Presentation extends PureComponent {
         },
       });
     }
+  }
+
+  setTLDrawAPI(api) {
+    this.setState({ TLDrawAPI: api });
   }
 
   handleResize() {
@@ -1628,7 +1634,7 @@ class Presentation extends PureComponent {
     );
   }
 
-  renderPresentationToolbar(svgWidth) {
+  renderPresentationToolbar(svgWidth = 100) {
     const {
       currentSlide,
       podId,
@@ -1644,6 +1650,8 @@ class Presentation extends PureComponent {
     if (!currentSlide) return null;
 
     const { presentationToolbarMinWidth } = DEFAULT_VALUES;
+
+    console.log('PRES ', this.state.TLDrawAPI)
 
     const toolbarWidth = ((this.refWhiteboardArea && svgWidth > presentationToolbarMinWidth)
       || isMobile
@@ -1661,6 +1669,7 @@ class Presentation extends PureComponent {
           fullscreenElementId,
           layoutContextDispatch,
         }}
+        TLDrawAPI={this.state.TLDrawAPI}
         currentSlideNum={currentSlide.num}
         presentationId={currentSlide.presentationId}
         zoomChanger={this.zoomChanger}
@@ -1857,10 +1866,12 @@ class Presentation extends PureComponent {
           }}
         >
           <WhiteboardContainer 
-            whiteboardId={currentSlide.id}
+            whiteboardId={currentSlide?.id}
             getSvgRef={this.getSvgRef}
+            setTLDrawAPI={this.setTLDrawAPI}
           />
           {isFullscreen && <PollingContainer />}
+          {this.renderPresentationToolbar()}
         {/* 
         <Styled.Presentation ref={(ref) => { this.refPresentation = ref; }}>
           <Styled.WhiteboardSizeAvailable ref={(ref) => { this.refWhiteboardArea = ref; }} />

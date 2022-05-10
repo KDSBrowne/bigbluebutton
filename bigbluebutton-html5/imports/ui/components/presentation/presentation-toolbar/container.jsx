@@ -52,6 +52,9 @@ export default withTracker((params) => {
     makeCall('startPoll', PollService.pollTypes, type, id, false, '', false, answers);
   };
 
+
+  console.log('presentation toolbar container : ', params)
+
   return {
     layoutSwapped: MediaService.getSwapLayout() && MediaService.shouldEnableSwapLayout(),
     numberOfSlides: PresentationToolbarService.getNumberOfSlides(podId, presentationId),
@@ -63,6 +66,7 @@ export default withTracker((params) => {
     currentSlidHasContent: PresentationService.currentSlidHasContent(),
     parseCurrentSlideContent: PresentationService.parseCurrentSlideContent,
     startPoll,
+    TLDrawAPI: params.TLDrawAPI,
   };
 })(PresentationToolbarContainer);
 

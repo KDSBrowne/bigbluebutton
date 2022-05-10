@@ -124,6 +124,7 @@ class PresentationToolbar extends PureComponent {
 
     if (event) event.currentTarget.blur();
     skipToSlide(requestedSlideNum, podId);
+    // this.props?.TLDrawAPI?.changePage(requestedSlideNum);
   }
 
   nextSlideHandler(event) {
@@ -136,6 +137,7 @@ class PresentationToolbar extends PureComponent {
 
     if (event) event.currentTarget.blur();
     nextSlide(currentSlideNum, numberOfSlides, podId);
+    // this.props?.TLDrawAPI?.changePage(currentSlideNum);
   }
 
   previousSlideHandler(event) {
@@ -147,6 +149,7 @@ class PresentationToolbar extends PureComponent {
 
     if (event) event.currentTarget.blur();
     previousSlide(currentSlideNum, podId);
+    // this.props?.TLDrawAPI?.changePage(currentSlideNum);
   }
 
   fullscreenToggleHandler() {
@@ -256,12 +259,17 @@ class PresentationToolbar extends PureComponent {
       ? intl.formatMessage(intlMessages.nextSlideLabel)
       : `${intl.formatMessage(intlMessages.nextSlideLabel)} (${currentSlideNum >= 1 ? (currentSlideNum + 1) : ''})`;
 
+
+      console.log('PRES TOOLBAR ', this.props.TLDrawAPI);
+
+
     return (
       <Styled.PresentationToolbarWrapper
         id="presentationToolbarWrapper"
         style={
           {
-            width: toolbarWidth,
+            width: '100%',
+            zIndex: '2',
           }
         }>
         {this.renderAriaDescs()}
@@ -336,6 +344,7 @@ class PresentationToolbar extends PureComponent {
                 ? (
                   <TooltipContainer>
                     <ZoomTool
+                      TLDrawAPI={this.props.TLDrawAPI}
                       zoomValue={zoom}
                       change={this.change}
                       minBound={HUNDRED_PERCENT}
@@ -347,7 +356,7 @@ class PresentationToolbar extends PureComponent {
                 )
                 : null
             }
-            <Styled.FitToWidthButton
+            {/* <Styled.FitToWidthButton
               role="button"
               aria-describedby={fitToWidth ? 'fitPageDesc' : 'fitWidthDesc'}
               aria-label={fitToWidth
@@ -365,7 +374,7 @@ class PresentationToolbar extends PureComponent {
                 : intl.formatMessage(intlMessages.fitToWidth)
               }
               hideLabel
-            />
+            /> */}
           </Styled.PresentationZoomControls>
         }
       </Styled.PresentationToolbarWrapper>

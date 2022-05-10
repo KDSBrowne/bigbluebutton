@@ -160,6 +160,8 @@ class ZoomTool extends PureComponent {
 
     const stateZoomPct = intl.formatNumber((stateZoomValue / 100), { style: 'percent' });
 
+    console.log('zoomtool props', this.props?.TLDrawAPI)
+
     return (
       [
         (
@@ -175,8 +177,9 @@ class ZoomTool extends PureComponent {
               aria-label={zoomOutAriaLabel}
               label={intl.formatMessage(intlMessages.zoomOutLabel)}
               icon="substract"
-              onClick={() => { }}
-              disabled={(zoomValue <= minBound) || !isMeteorConnected}
+              onClick={() => this.props.TLDrawAPI.zoomOut()}
+              // disabled={(zoomValue <= minBound) || !isMeteorConnected}
+              disabled={!isMeteorConnected}
               hideLabel
             />
             <div id="zoomOutDescription" hidden>{intl.formatMessage(intlMessages.zoomOutDesc)}</div>
@@ -187,11 +190,12 @@ class ZoomTool extends PureComponent {
             <Styled.ResetZoomButton
               aria-label={intl.formatMessage(intlMessages.resetZoomLabel)}
               aria-describedby="resetZoomDescription"
-              disabled={(stateZoomValue === minBound) || !isMeteorConnected}
+              disabled={!isMeteorConnected}
               color="default"
-              customIcon={stateZoomPct}
+              customIcon={`${this.props?.TLDrawAPI?.getPageState()?.camera?.zoom * 100}%`}
               size="md"
-              onClick={() => this.resetZoom()}
+              // onClick={() => this.resetZoom()}
+              onClick={() => this.props.TLDrawAPI.resetZoom()}
               label={intl.formatMessage(intlMessages.resetZoomLabel)}
               hideLabel
             />
@@ -214,8 +218,9 @@ class ZoomTool extends PureComponent {
               label={intl.formatMessage(intlMessages.zoomInLabel)}
               data-test="zoomInBtn"
               icon="add"
-              onClick={() => { }}
-              disabled={(zoomValue >= maxBound) || !isMeteorConnected}
+              // onClick={() => { }}
+              onClick={() => this.props.TLDrawAPI.zoomIn()}
+              disabled={!isMeteorConnected}
               hideLabel
             />
             <div id="zoomInDescription" hidden>{intl.formatMessage(intlMessages.zoomInDesc)}</div>

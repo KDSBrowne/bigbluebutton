@@ -6,7 +6,7 @@ const getCurrentCursors = (whiteboardId) => {
   const selector = { whiteboardId };
   const filter = {};
   const cursors = Cursor.find(selector, filter).fetch();
-  //console.log('CURSORS!!!!!!!!! : ',cursors);
+  // console.log('CURSORS!!!!!!!!! : ',cursors);
   return cursors.map(cursor => {
     const { userId } = cursor;
     const user = Users.findOne({ userId }, { fields: { name: 1, presenter: 1, userId: 1, role: 1 } });
