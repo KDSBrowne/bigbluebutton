@@ -132,8 +132,8 @@ export default function Cursors(props) {
   
   const end = () => {
     publishCursorUpdate({
-      xPercent: -1.0,
-      yPercent: -1.0,
+      xPercent: 0,
+      yPercent: 0,
       whiteboardId: whiteboardId,
     });
     setActive(false);
