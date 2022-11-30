@@ -7,6 +7,7 @@ import SlideCalcUtil, {HUNDRED_PERCENT} from '/imports/utils/slideCalcUtils';
 import { Utils } from "@tldraw/core";
 import Settings from '/imports/ui/services/settings';
 import GridLayout from "react-grid-layout";
+import { Responsive as ResponsiveGridLayout } from "react-grid-layout";
 import Vision from './vision';
 
 import '/node_modules/react-grid-layout/css/styles.css';
@@ -118,6 +119,7 @@ export default function Whiteboard(props) {
   const [tldrawAPI, setTLDrawAPI] = React.useState(null);
   const [history, setHistory] = React.useState(null);
   const [forcePanning, setForcePanning] = React.useState(false);
+  const [objAPI, setObjAPI] = React.useState({});
   const [zoom, setZoom] = React.useState(HUNDRED_PERCENT);
   const [isMounting, setIsMounting] = React.useState(true);
   const prevShapes = usePrevious(shapes);
@@ -758,6 +760,7 @@ if (wbVision) {
   const formattedData = {};
 
   Object.values(users[0]).map(v => {
+    if (props?.hasMultiUserAccess(whiteboardId, v?.userId)) {
       const userShapes = {};
       Object.entries(shapes).map(l => {
         if (!l[1]?.userId || l[1]?.userId === v?.userId) {
@@ -769,39 +772,54 @@ if (wbVision) {
         name: v?.name,
         id: v?.userId,
         presenter: v?.presenter,
+        color: v?.color,
         shapes: userShapes,
       }
+    }
   });
 
-  const layout = [];
   const gridItems = [];
+  let xVal = 0;
+  let yVal = 0;
     
   Object.entries(formattedData).map((f, index) => {
+
     if (f[1]?.presenter === false) {
-      layout.push({ i: f[0], x: index - 1, y: 0, w: 1, h: 3 });
+      if (xVal === 4) {
+        xVal = 0;
+        yVal++;
+      }
+
       gridItems.push(
-        <div style={{ color: 'white', backgroundColor: 'gray'  }} key={f[0]}>
-          <div style={{ display: 'flex', flexFlow: 'row' }}>
-            <div style={{ marginRight: '5px' }}>{f[1]?.name}</div>
+        <div style={{ color: 'white', backgroundColor: `${f[1]?.color}` }} key={f[0]} data-grid={{ i: f[0], x: xVal, y: yVal, w: 1, h: 2 }}>
+          <div style={{ display: 'flex', flexFlow: 'row', justifyContent: 'space-between', padding: '.3rem' }}>
+            <div>{f[1]?.name}</div>
+            
+            <div title="Center" onClick={() => {
+              objAPI[f[0]]?.zoomToFit();
+            }} style={{ cursor: 'pointer', height: '10px', width: '10px', backgroundColor: 'gray' }}></div>
           </div>
-          <Vision key={f[0]} uid={f[0]} assets={assets} shapes={f[1]?.shapes} doc={doc}/>
+
+          <Vision {...{objAPI, setObjAPI}} key={f[0]} uid={f[0]} whiteboardId={whiteboardId} assets={assets} shapes={f[1]?.shapes} doc={doc}/>
         </div>
       );
+
+      xVal++;
     }
   });
 
   return (
-    <GridLayout
+    <ResponsiveGridLayout
       key={'grid'}
       className="layout"
-      layout={layout}
-      cols={8}
-      rowHeight={25}
+      rowHeight={50}
       width={slidePosition.viewBoxWidth}
-      margin={[10, 25]}
+      margin={[10, 35]}
+      breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+      cols={{ lg: 8, md: 6, sm: 4, xs: 2, xxs: 1 }}
     >
       {gridItems}
-    </GridLayout>
+    </ResponsiveGridLayout>
   );
 }
 

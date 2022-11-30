@@ -1021,14 +1021,14 @@ class Presentation extends PureComponent {
                 height: svgHeight + toolbarHeight,
               }}
             >
-              <div
+              <Styled.Scrollable
                 style={{
                   position: 'absolute',
                   width: svgDimensions.width < 0 ? 0 : svgDimensions.width,
                   height: svgDimensions.height < 0 ? 0 : svgDimensions.height,
                   textAlign: 'center',
                   display: !presentationIsOpen ? 'none' : 'block',
-                  overflow: this.state.wbVision ? 'auto' : 'hidden',
+                  overflow: this.state.wbVision ? 'auto' : 'hidden', 
                 }}
               >
                 <Styled.VisuallyHidden id="currentSlideText">{slideContent}</Styled.VisuallyHidden>
@@ -1053,7 +1053,7 @@ class Presentation extends PureComponent {
                   setTldrawIsMounting={this.setTldrawIsMounting}
                 />
                 {isFullscreen && <PollingContainer />}
-              </div>
+              </Styled.Scrollable>
               {!tldrawIsMounting && (
                 <Styled.PresentationToolbar
                   ref={(ref) => { this.refPresentationToolbar = ref; }}

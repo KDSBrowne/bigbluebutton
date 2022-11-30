@@ -1,6 +1,7 @@
 import * as React from "react";
 import _ from "lodash";
 import { createGlobalStyle } from "styled-components";
+import { Utils } from "@tldraw/core";
 import {
     ColorStyle,
     DashStyle,
@@ -15,6 +16,7 @@ import GridLayout from "react-grid-layout";
 
 import '/node_modules/react-grid-layout/css/styles.css';
 import '/node_modules/react-resizable/css/styles.css';
+import './override.css';
 
 function usePrevious(value) {
     const ref = React.useRef();
@@ -25,16 +27,18 @@ function usePrevious(value) {
 }
 
 export default function Vision(props) {
+    const { shapes, objAPI, setObjAPI } = props;
     const prevShapes = usePrevious(props.shapes);
-    const [docCpy, setDoc] = React.useState({
-        "name": props.uid,
-        "version": 15.5,
-        "id": "64b45b61d101b1398f19adfa0c9525604f418834-1669726825979/1",
+    const [api, setApi] = React.useState(null);
+    const rDocument = React.useRef({
+        name: `preview-${props.uid}`,
+        version: TldrawApp.version,
+        id: props.whiteboardId,
         "pages": {
             "1": {
                 "id": "1",
-                "name": "Slide 1",
-                "shapes": {},
+                "name": `preview-${props.uid}`,
+                "shapes": props.shapes,
                 "bindings": {}
             },
         },
@@ -48,36 +52,65 @@ export default function Vision(props) {
                 }
             },
         },
-        "bindings": {},
-        "assets": props.assets
-    });
+        bindings: {},
+        assets: props.assets,
+      });
 
-    if (!_.isEqual(prevShapes, props.shapes)) {
-        docCpy.pages[1].shapes = props.shapes;
-    } else {
-        docCpy.pages[1].shapes = prevShapes;
-    }
+      const doc = React.useMemo(() => {
+        const currentDoc = rDocument.current;
+    
+        let next = { ...currentDoc };
+    
+        let changed = false;
+    
+        if (next.pageStates[1] && !_.isEqual(prevShapes, shapes)) {
+          const editingShape = api?.getShape(api?.getPageState()?.editingId);
+    
+          if (editingShape) {
+            shapes[editingShape?.id] = editingShape;
+          }
+    
+          next.pages[1].shapes = shapes;
+          changed = true;
+        }
+    
+        if (changed && api) {
+          // merge patch manually (this improves performance and reduce side effects on fast updates)
+          const patch = {
+            document: {
+              pages: {
+                [1]: { shapes: shapes }
+              },
+            },
+          };
+          const prevState = api._state;
+          const nextState = Utils.deepMerge(api._state, patch);
+          const final = api.cleanup(nextState, prevState, patch, '');
+          api._state = final;
+          api?.forceUpdate();
+        }
+    
+        return currentDoc;
+      }, [props.shapes]);
 
     return (
 
           <Tldraw
             key={props.uid}
-            document={docCpy}
+            document={doc}
             onMount={(api) => {
                 api?.setSetting('isDarkMode', false);
-                // api?.zoomToFit();
+                setApi(api);
+                objAPI[props.uid] = api;
+                setObjAPI(objAPI);
                 const resizeHandles = document.getElementsByClassName('react-resizable-handle react-resizable-handle-se');
                 for (var i = 0; i < resizeHandles.length; i++) {
                   resizeHandles[i].style.zIndex = 10;
-                  resizeHandles[i].style.bottom = '-28px';
+                  resizeHandles[i].style.bottom = '-35px';
                   resizeHandles[i].style.marginBottom = '10px';
                 }
             }}
-            // disable the ability to drag and drop files onto the whiteboard
-            // until we handle saving of assets in akka.
             disableAssets={true}
-            // Disable automatic focus. Users were losing focus on shared notes
-            // and chat on presentation mount.
             autofocus={false}
             showPages={false}
             showZoom={false}

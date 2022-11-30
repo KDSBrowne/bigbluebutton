@@ -163,6 +163,26 @@ const PresentationToolbar = styled.div`
   bottom: 0;
 `;
 
+const Scrollable = styled.div`
+  /* width & height*/
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 3px grey;
+    border-radius: 10px;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background:  ${colorPrimary};
+    border-radius: 10px;
+  }
+`;
+
 const ToastSeparator = styled(ToastStyled.Separator)``;
 
 export default {
@@ -181,4 +201,5 @@ export default {
   WhiteboardSizeAvailable,
   PresentationToolbar,
   ToastSeparator,
+  Scrollable
 };
