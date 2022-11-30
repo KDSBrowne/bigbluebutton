@@ -28,6 +28,9 @@ import { colorContentBackground } from '/imports/ui/stylesheets/styled-component
 import browserInfo from '/imports/utils/browserInfo';
 import { addNewAlert } from '../screenreader-alert/service';
 import { clearCursors } from '/imports/ui/components/cursor/service';
+import Vision from '/imports/ui/components/whiteboard/vision';
+
+import Service from '/imports/ui/components/whiteboard/service';
 
 const intlMessages = defineMessages({
   presentationLabel: {
@@ -79,10 +82,12 @@ class Presentation extends PureComponent {
       tldrawAPI: null,
       isPanning: false,
       tldrawIsMounting: true,
+      wbVision: false,
     };
 
     this.currentPresentationToastId = null;
 
+    this.toggleVision = this.toggleVision.bind(this);
     this.getSvgRef = this.getSvgRef.bind(this);
     this.setFitToWidth = this.setFitToWidth.bind(this);
     this.zoomChanger = this.zoomChanger.bind(this);
@@ -318,6 +323,13 @@ class Presentation extends PureComponent {
         },
       });
     }
+  }
+
+  toggleVision() {
+    const { wbVision } = this.state;
+    this.setState({
+      wbVision: !wbVision,
+    });    
   }
 
   setTldrawAPI(api) {
@@ -746,7 +758,7 @@ class Presentation extends PureComponent {
       presentationIsOpen,
       slidePosition,
     } = this.props;
-    const { zoom, fitToWidth } = this.state;
+    const { zoom, fitToWidth, wbVision } = this.state;
 
     if (!currentSlide) return null;
 
@@ -769,7 +781,9 @@ class Presentation extends PureComponent {
           fullscreenElementId,
           layoutContextDispatch,
           presentationIsOpen,
+          wbVision,
         }}
+        toggleVision={this.toggleVision}
         setIsPanning={this.setIsPanning}
         isPanning={this.state.isPanning}
         curPageId={this.state.tldrawAPI?.getPage()?.id}
@@ -1014,11 +1028,13 @@ class Presentation extends PureComponent {
                   height: svgDimensions.height < 0 ? 0 : svgDimensions.height,
                   textAlign: 'center',
                   display: !presentationIsOpen ? 'none' : 'block',
+                  overflow: this.state.wbVision ? 'auto' : 'hidden',
                 }}
               >
                 <Styled.VisuallyHidden id="currentSlideText">{slideContent}</Styled.VisuallyHidden>
-                {!tldrawIsMounting && currentSlide && this.renderPresentationMenu()}
+                {!tldrawIsMounting && currentSlide && !this.state.wbVision && this.renderPresentationMenu()}
                 <WhiteboardContainer
+                  wbVision={this.state.wbVision}
                   whiteboardId={currentSlide?.id}
                   podId={podId}
                   slidePosition={slidePosition}

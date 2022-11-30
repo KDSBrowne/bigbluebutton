@@ -2,10 +2,15 @@ import * as React from "react";
 import _ from "lodash";
 import { createGlobalStyle } from "styled-components";
 import Cursors from "./cursors/container";
-import { TldrawApp, Tldraw } from "@tldraw/tldraw";
+import { ColorStyle, TDShapeType, Tldraw, TldrawApp } from '@tldraw/tldraw';
 import SlideCalcUtil, {HUNDRED_PERCENT} from '/imports/utils/slideCalcUtils';
 import { Utils } from "@tldraw/core";
 import Settings from '/imports/ui/services/settings';
+import GridLayout from "react-grid-layout";
+import Vision from './vision';
+
+import '/node_modules/react-grid-layout/css/styles.css';
+import '/node_modules/react-resizable/css/styles.css';
 
 function usePrevious(value) {
   const ref = React.useRef();
@@ -97,6 +102,7 @@ export default function Whiteboard(props) {
     intl,
     svgUri,
     maxStickyNoteLength,
+    wbVision,
   } = props;
 
   const { pages, pageStates } = initDefaultPages(curPres?.pages.length || 1);
@@ -402,7 +408,7 @@ export default function Whiteboard(props) {
   const hasWBAccess = props?.hasMultiUserAccess(props.whiteboardId, props.currentUser.userId);
 
   React.useEffect(() => {
-    if (hasWBAccess || isPresenter) {
+    if ((hasWBAccess || isPresenter) && !wbVision) {
       tldrawAPI?.setSetting('dockPosition', isRTL ? 'left' : 'right');
       const tdToolsDots = document.getElementById("TD-Tools-Dots");
       const tdDelete = document.getElementById("TD-Delete");
@@ -423,14 +429,16 @@ export default function Whiteboard(props) {
           item.style.width = `${size}px`;
         }
       }
-      if (((props.height < SMALLEST_HEIGHT) || (props.width < SMALLEST_WIDTH)) && tdTools) {
+      if (((props.height < SMALLEST_HEIGHT) || (props.width < SMALLEST_WIDTH)) && tdTools && !wbVision) {
         tldrawAPI?.setSetting('dockPosition', 'bottom');
         tdTools.parentElement.style.bottom = `${TOOLBAR_OFFSET}px`;
       }
       // removes tldraw native help menu button
       tdTools?.parentElement?.nextSibling?.remove();
       // removes image tool from the tldraw toolbar
-      document.getElementById("TD-PrimaryTools-Image").style.display = 'none';
+      if (!wbVision && (hasWBAccess || isPresenter)) {
+        document.getElementById("TD-PrimaryTools-Image").style.display = 'none';
+      }
     }
 
     if (tldrawAPI) {
@@ -449,20 +457,24 @@ export default function Whiteboard(props) {
   }, [language]);
 
   const onMount = (app) => {
-    const menu = document.getElementById("TD-Styles")?.parentElement;
-    if (menu) {
-      const MENU_OFFSET = `48px`;
-      menu.style.position = `relative`;
-      if (isRTL) {
-        menu.style.left = MENU_OFFSET;
-      } else {
-        menu.style.right = MENU_OFFSET;
-      }
 
-      [...menu.children]
-        .sort((a,b)=> a?.id>b?.id?-1:1)
-        .forEach(n=> menu.appendChild(n));
+    if (!wbVision && (hasWBAccess || isPresenter)) {
+      const menu = document.getElementById("TD-Styles")?.parentElement;
+      if (menu) {
+        const MENU_OFFSET = `48px`;
+        menu.style.position = `relative`;
+        if (isRTL) {
+          menu.style.left = MENU_OFFSET;
+        } else {
+          menu.style.right = MENU_OFFSET;
+        }
+  
+        [...menu.children]
+          .sort((a,b)=> a?.id>b?.id?-1:1)
+          .forEach(n=> menu.appendChild(n));
+      }
     }
+
     app.setSetting('language', language);
     app?.setSetting('isDarkMode', false);
     app?.patchState(
@@ -739,6 +751,59 @@ export default function Whiteboard(props) {
       onPatch={onPatch}
     />
   );
+
+
+if (wbVision) {
+  const users = Object.values(props.users)
+  const formattedData = {};
+
+  Object.values(users[0]).map(v => {
+      const userShapes = {};
+      Object.entries(shapes).map(l => {
+        if (!l[1]?.userId || l[1]?.userId === v?.userId) {
+          userShapes[l[0]] = l[1];
+        };
+      });
+  
+      formattedData[v?.userId] = {
+        name: v?.name,
+        id: v?.userId,
+        presenter: v?.presenter,
+        shapes: userShapes,
+      }
+  });
+
+  const layout = [];
+  const gridItems = [];
+    
+  Object.entries(formattedData).map((f, index) => {
+    if (f[1]?.presenter === false) {
+      layout.push({ i: f[0], x: index - 1, y: 0, w: 1, h: 3 });
+      gridItems.push(
+        <div style={{ color: 'white', backgroundColor: 'gray'  }} key={f[0]}>
+          <div style={{ display: 'flex', flexFlow: 'row' }}>
+            <div style={{ marginRight: '5px' }}>{f[1]?.name}</div>
+          </div>
+          <Vision key={f[0]} uid={f[0]} assets={assets} shapes={f[1]?.shapes} doc={doc}/>
+        </div>
+      );
+    }
+  });
+
+  return (
+    <GridLayout
+      key={'grid'}
+      className="layout"
+      layout={layout}
+      cols={8}
+      rowHeight={25}
+      width={slidePosition.viewBoxWidth}
+      margin={[10, 25]}
+    >
+      {gridItems}
+    </GridLayout>
+  );
+}
 
   return (
     <>
