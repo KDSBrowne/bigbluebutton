@@ -113,6 +113,8 @@ export default lockContextContainer(
     }
   }
 
+  const m = Meetings.findOne({ meetingId: Auth.meetingID });
+
   return {
     currentSlide,
     slidePosition,
@@ -139,5 +141,6 @@ export default lockContextContainer(
     multiUserSize: WhiteboardService.getMultiUserSize(currentSlide?.id),
     isViewersCursorLocked,
     clearFakeAnnotations: WhiteboardService.clearFakeAnnotations,
+    meeting: m,
   };
 })(PresentationContainer));

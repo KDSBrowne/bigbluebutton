@@ -4,6 +4,7 @@ import Whiteboard from "./component";
 import React, { useContext } from "react";
 import { UsersContext } from "../components-data/users-context/context";
 import Auth from "/imports/ui/services/auth";
+import Meetings from '/imports/api/meetings';
 import PresentationToolbarService from '../presentation/presentation-toolbar/service';
 import { layoutSelect } from '../layout/context';
 import {
@@ -72,5 +73,10 @@ export default withTracker(({ whiteboardId, curPageId, intl, zoomChanger, slideP
     skipToSlide: PresentationToolbarService.skipToSlide,
     zoomChanger: zoomChanger,
     notifyNotAllowedChange: Service.notifyNotAllowedChange,
+    hideViewersAnnotation: Meetings.findOne({ meetingId: Auth.meetingID }, {
+      fields: {
+        lockSettingsProps: 1,
+      }
+    })?.lockSettingsProps?.hideViewersAnnotation,
   };
 })(WhiteboardContainer);

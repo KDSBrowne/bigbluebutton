@@ -514,6 +514,7 @@ class App extends Component {
       isPresenter,
       selectedLayout,
       presentationIsOpen,
+      currentMeeting,
     } = this.props;
 
     return (

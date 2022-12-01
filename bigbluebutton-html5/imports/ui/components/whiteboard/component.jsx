@@ -81,7 +81,7 @@ export default function Whiteboard(props) {
     initDefaultPages,
     persistShape,
     notifyNotAllowedChange,
-    shapes,
+    shapes: s,
     assets,
     currentUser,
     curPres,
@@ -104,7 +104,17 @@ export default function Whiteboard(props) {
     svgUri,
     maxStickyNoteLength,
     wbVision,
+    hideViewersAnnotation,
   } = props;
+
+  let shapes = s;
+  if (hideViewersAnnotation) {
+    shapes = Object.fromEntries(Object.entries(shapes)?.filter(v => {
+      if ((v[1]?.userId === currentUser?.userId || v[1]?.id?.includes("slide-background-shape")) || currentUser?.presenter) {
+        return v
+      }
+    }));
+  }
 
   const { pages, pageStates } = initDefaultPages(curPres?.pages.length || 1);
   const rDocument = React.useRef({

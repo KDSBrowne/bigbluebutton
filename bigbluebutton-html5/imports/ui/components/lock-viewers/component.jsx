@@ -380,6 +380,32 @@ class LockViewersComponent extends Component {
                 </Styled.FormElementRight>
               </Styled.Col>
             </Styled.Row>
+
+            <Styled.Row data-test="hideViewersAnnotation">
+              <Styled.Col aria-hidden="true">
+                <Styled.FormElement>
+                  <Styled.Label>
+                    {'See other viewers annotations'}
+                  </Styled.Label>
+                </Styled.FormElement>
+              </Styled.Col>
+              <Styled.Col>
+                <Styled.FormElementRight>
+                  {this.displayLockStatus(lockSettingsProps.hideViewersAnnotation)}
+                  <Toggle
+                    icons={false}
+                    defaultChecked={lockSettingsProps.hideViewersAnnotation}
+                    onChange={() => {
+                      this.toggleLockSettings('hideViewersAnnotation');
+                    }}
+                    ariaLabel={'See other viewers annotations'}
+                    showToggleLabel={showToggleLabel}
+                    invertColors={invertColors}
+                    data-test="hideViewersAnnotation"
+                  />
+                </Styled.FormElementRight>
+              </Styled.Col>
+            </Styled.Row>
           </Styled.Form>
         </Styled.Container>
         <Styled.Footer>
