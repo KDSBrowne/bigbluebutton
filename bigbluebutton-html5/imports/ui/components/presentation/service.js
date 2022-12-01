@@ -73,15 +73,24 @@ const currentSlidHasContent = () => {
   return !!content.length;
 };
 
+const getCoverCoords = () => {
+  const currentSlide = getCurrentSlide('DEFAULT_PRESENTATION_POD');
+  let content = currentSlide?.content || '';
+
+  const coverReq = /bbb-cover\(.*,.*\)/gm;
+  const hasCover = safeMatch(coverReq, content, false);
+  if (hasCover) {
+    return hasCover[0]?.replace('bbb-cover(', '')?.replace(')', '').split(',');
+  }
+  return null;
+}
+
 const parseCurrentSlideContent = (yesValue, noValue, abstentionValue, trueValue, falseValue) => {
   const { pollTypes } = PollService;
   const currentSlide = getCurrentSlide('DEFAULT_PRESENTATION_POD');
   const quickPollOptions = [];
   if (!currentSlide) return quickPollOptions;
-
-  let {
-    content,
-  } = currentSlide;
+  let content = currentSlide?.content || '';
 
   const questionRegex = /.*?\?$/gm;
   const question = safeMatch(questionRegex, content, '');
@@ -208,4 +217,5 @@ export default {
   currentSlidHasContent,
   parseCurrentSlideContent,
   getCurrentPresentation,
+  getCoverCoords,
 };

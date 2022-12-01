@@ -105,6 +105,7 @@ export default function Whiteboard(props) {
     maxStickyNoteLength,
     wbVision,
     hideViewersAnnotation,
+    coverCoords,
   } = props;
 
   let shapes = s;
@@ -213,7 +214,7 @@ export default function Whiteboard(props) {
 
   const doc = React.useMemo(() => {
     const currentDoc = rDocument.current;
-
+console.log('shapes', shapes)
     let next = { ...currentDoc };
 
     let changed = false;
@@ -468,8 +469,52 @@ export default function Whiteboard(props) {
     tldrawAPI?.setSetting('language', language);
   }, [language]);
 
-  const onMount = (app) => {
+  React.useEffect(() => {
+    if (!coverCoords) return;
+    console.log('On mount get cover coords ', coverCoords);
+    console.log(tldrawAPI)
 
+      console.log('tldrawAPI?.getShape() = ', tldrawAPI?.getShape('rect1'))
+      const cover = tldrawAPI?.getShape('rect1');
+
+      if (!cover && tldrawAPI) {
+        tldrawAPI?.createShapes(
+          {
+            id: 'rect1',
+            type: TDShapeType.Rectangle,
+            name: 'Rectangle',
+            childIndex: 3,
+            point: [0, 0],
+            size: [100, 100],
+            style: {
+              "isFilled": true,
+              "size": "small",
+              "scale": 1,
+              "color": "green",
+              "dash": "draw"
+            },
+          },
+        )
+        tldrawAPI.patchState(
+          {
+            document: {
+              pageStates: {
+                [tldrawAPI.getPage()?.id]: {
+                  selectedIds: [],
+                },
+              },
+            },
+          }
+        );
+      }
+
+  }, [coverCoords]);
+
+
+  // coverCoords
+  // console.log('On mount get cover coords ', getCoverCoords()); 
+
+  const onMount = (app) => {
     if (!wbVision && (hasWBAccess || isPresenter)) {
       const menu = document.getElementById("TD-Styles")?.parentElement;
       if (menu) {
