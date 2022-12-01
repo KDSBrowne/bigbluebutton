@@ -214,7 +214,6 @@ export default function Whiteboard(props) {
 
   const doc = React.useMemo(() => {
     const currentDoc = rDocument.current;
-console.log('shapes', shapes)
     let next = { ...currentDoc };
 
     let changed = false;
@@ -471,48 +470,44 @@ console.log('shapes', shapes)
 
   React.useEffect(() => {
     if (!coverCoords) return;
-    console.log('On mount get cover coords ', coverCoords);
-    console.log(tldrawAPI)
-
-      console.log('tldrawAPI?.getShape() = ', tldrawAPI?.getShape('rect1'))
-      const cover = tldrawAPI?.getShape('rect1');
-
-      if (!cover && tldrawAPI) {
-        tldrawAPI?.createShapes(
-          {
-            id: 'rect1',
-            type: TDShapeType.Rectangle,
-            name: 'Rectangle',
-            childIndex: 3,
-            point: [0, 0],
-            size: [100, 100],
-            style: {
-              "isFilled": true,
-              "size": "small",
-              "scale": 1,
-              "color": "green",
-              "dash": "draw"
-            },
-          },
-        )
-        tldrawAPI.patchState(
-          {
-            document: {
-              pageStates: {
-                [tldrawAPI.getPage()?.id]: {
-                  selectedIds: [],
-                },
-              },
-            },
-          }
-        );
+    const cover = tldrawAPI?.getShape('slide-cover');
+    if (!cover && tldrawAPI) {
+      let point = [0, 0];
+      let size = [100, 100];
+      point = [parseInt(coverCoords[0]), parseInt(coverCoords[1])];
+      if (coverCoords.length === 4) {
+        size = [parseInt(coverCoords[2]), parseInt(coverCoords[3])];
       }
 
+      tldrawAPI?.createShapes(
+        {
+          id: 'slide-cover',
+          type: TDShapeType.Rectangle,
+          name: 'Rectangle',
+          childIndex: 3,
+          point,
+          size,
+          style: {
+            "isFilled": true,
+            "color": "black",
+            "dash": "draw"
+          },
+        },
+      )
+      tldrawAPI.patchState(
+        {
+          document: {
+            pageStates: {
+              [tldrawAPI.getPage()?.id]: {
+                selectedIds: [],
+              },
+            },
+          },
+        }
+      );
+    }
+
   }, [coverCoords]);
-
-
-  // coverCoords
-  // console.log('On mount get cover coords ', getCoverCoords()); 
 
   const onMount = (app) => {
     if (!wbVision && (hasWBAccess || isPresenter)) {
