@@ -80,5 +80,6 @@ export default withTracker(({ whiteboardId, curPageId, intl, zoomChanger, slideP
       }
     })?.lockSettingsProps?.hideViewersAnnotation,
     coverCoords: PresentationService?.getCoverCoords(),
+    isPresenterShape: Service.isPresenterShape,
   };
 })(WhiteboardContainer);

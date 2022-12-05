@@ -9,6 +9,7 @@ import BBBMenu from "/imports/ui/components/common/menu/component";
 import TooltipContainer from '/imports/ui/components/common/tooltip/container';
 import { ACTIONS } from '/imports/ui/components/layout/enums';
 import browserInfo from '/imports/utils/browserInfo';
+import SmartLinkShareContainer from './smart-link-share/container';
 
 const OLD_MINIMIZE_BUTTON_ENABLED = Meteor.settings.public.presentation.oldMinimizeButton;
 
@@ -99,7 +100,9 @@ const PresentationMenu = (props) => {
     layoutContextDispatch,
     meetingName,
     isIphone,
-    isRTL
+    isRTL,
+    currentSlide,
+    userIsPresenter
   } = props;
 
   const [state, setState] = useState({
@@ -257,16 +260,17 @@ const PresentationMenu = (props) => {
 
   const options = getAvailableOptions();
 
-  if (options.length === 0) {
+  if (options?.length === 0) {
     const undoCtrls = document.getElementById('TD-Styles')?.nextSibling;
     if (undoCtrls?.style) {
       undoCtrls.style = "padding:0px";
     }
-    return null
+    // return null
   };
 
   return (
     <Styled.Right>
+      <SmartLinkShareContainer {...{ intl, currentSlide, userIsPresenter }} />
       <BBBMenu 
         trigger={
           <TooltipContainer title={intl.formatMessage(intlMessages.optionsLabel)}>

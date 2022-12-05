@@ -268,6 +268,7 @@ class PresentationToolbar extends PureComponent {
       setIsPanning,
       isPanning,
       wbVision,
+      hideViewersAnnotation,
     } = this.props;
 
     const { isMobile } = deviceInfo;
@@ -293,17 +294,6 @@ class PresentationToolbar extends PureComponent {
       >
         {this.renderAriaDescs()}
         <div style={{ display: 'flex' }}>
-        <Styled.PrevSlideButton
-            role="button"
-            color="light"
-            circle
-            icon={!wbVision ? "whiteboard" : "multi_whiteboard"}
-            size="md"
-            onClick={this.props.toggleVision}
-            label={'Whiteboard Vision'}
-            hideLabel
-            data-test="whiteboardVision"
-          />
           {isPollingEnabled ? (
             <Styled.QuickPollButton
               {...{
@@ -372,6 +362,18 @@ class PresentationToolbar extends PureComponent {
           />
         </Styled.PresentationSlideControls>
         <Styled.PresentationZoomControls>
+        {multiUser && hideViewersAnnotation ? <Styled.PrevSlideButton
+              role="button"
+              color="light"
+              circle
+              icon={!wbVision ? "whiteboard" : "multi_whiteboard"}
+              size="md"
+              onClick={this.props.toggleVision}
+              label={'Whiteboard Vision'}
+              hideLabel
+              data-test="whiteboardVision"
+            /> : null
+          }
           <Styled.WBAccessButton
             data-test={multiUser ? 'turnMultiUsersWhiteboardOff' : 'turnMultiUsersWhiteboardOn'}
             role="button"

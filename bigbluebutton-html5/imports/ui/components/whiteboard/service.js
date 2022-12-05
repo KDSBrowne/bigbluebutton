@@ -205,6 +205,11 @@ Users.find(
   },
 });
 
+const isPresenterShape = (id) => {
+  if (!id) return null;
+  return Users.findOne({ meetingId: Auth.meetingID, userId: id })?.presenter;
+}
+
 const getMultiUser = (whiteboardId) => {
   const data = WhiteboardMultiUser.findOne(
     {
@@ -421,4 +426,5 @@ export {
   changeCurrentSlide,
   clearFakeAnnotations,
   notifyNotAllowedChange,
+  isPresenterShape,
 };

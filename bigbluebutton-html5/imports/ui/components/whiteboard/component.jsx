@@ -8,6 +8,7 @@ import { Utils } from "@tldraw/core";
 import Settings from '/imports/ui/services/settings';
 import GridLayout from "react-grid-layout";
 import { Responsive as ResponsiveGridLayout } from "react-grid-layout";
+import injectWbResizeEvent from '/imports/ui/components/presentation/resize-wrapper/component';
 import Vision from './vision';
 
 import '/node_modules/react-grid-layout/css/styles.css';
@@ -73,7 +74,7 @@ const TldrawGlobalStyle = createGlobalStyle`
   }
 `;
 
-export default function Whiteboard(props) {
+function Whiteboard(props) {
   const {
     isPresenter,
     isModerator,
@@ -106,18 +107,19 @@ export default function Whiteboard(props) {
     wbVision,
     hideViewersAnnotation,
     coverCoords,
+    isPresenterShape,
   } = props;
 
   let shapes = s;
   if (hideViewersAnnotation) {
     shapes = Object.fromEntries(Object.entries(shapes)?.filter(v => {
-      if ((v[1]?.userId === currentUser?.userId || v[1]?.id?.includes("slide-background-shape")) || currentUser?.presenter) {
+      if (isPresenterShape(v[1]?.userId) || (v[1]?.userId === currentUser?.userId || v[1]?.id?.includes("slide-background-shape") || v[1]?.id?.includes("slide-cover")) || currentUser?.presenter) {
         return v
       }
     }));
   }
 
-  const { pages, pageStates } = initDefaultPages(curPres?.pages.length || 1);
+  const { pages, pageStates } = initDefaultPages(curPres?.pages?.length || 1);
   const rDocument = React.useRef({
     name: "test",
     version: TldrawApp.version,
@@ -232,7 +234,7 @@ export default function Whiteboard(props) {
       });
 
       const removed = prevShapes && findRemoved(Object.keys(prevShapes),Object.keys((shapes)))
-      if (removed && removed.length > 0) {
+      if (removed && removed?.length > 0) {
         tldrawAPI?.patchState(
           {
             document: {
@@ -471,11 +473,11 @@ export default function Whiteboard(props) {
   React.useEffect(() => {
     if (!coverCoords) return;
     const cover = tldrawAPI?.getShape('slide-cover');
-    if (!cover && tldrawAPI) {
+    if (!cover && tldrawAPI && isPresenter) {
       let point = [0, 0];
       let size = [100, 100];
       point = [parseInt(coverCoords[0]), parseInt(coverCoords[1])];
-      if (coverCoords.length === 4) {
+      if (coverCoords?.length === 4) {
         size = [parseInt(coverCoords[2]), parseInt(coverCoords[3])];
       }
 
@@ -810,10 +812,11 @@ if (wbVision) {
   const formattedData = {};
 
   Object.values(users[0]).map(v => {
-    if (props?.hasMultiUserAccess(whiteboardId, v?.userId)) {
+    // if (props?.hasMultiUserAccess(whiteboardId, v?.userId)) {
       const userShapes = {};
       Object.entries(shapes).map(l => {
-        if (!l[1]?.userId || l[1]?.userId === v?.userId) {
+        if (!l[1]?.userId || l[1]?.userId === v?.userId || isPresenterShape(l[1]?.userId)) {
+          l[1].parentId = "1";
           userShapes[l[0]] = l[1];
         };
       });
@@ -825,7 +828,7 @@ if (wbVision) {
         color: v?.color,
         shapes: userShapes,
       }
-    }
+    // }
   });
 
   const gridItems = [];
@@ -850,7 +853,7 @@ if (wbVision) {
             }} style={{ cursor: 'pointer', height: '10px', width: '10px', backgroundColor: 'gray' }}></div>
           </div>
 
-          <Vision {...{objAPI, setObjAPI}} key={f[0]} uid={f[0]} whiteboardId={whiteboardId} assets={assets} shapes={f[1]?.shapes} doc={doc}/>
+          <Vision {...{objAPI, setObjAPI}} pages={pages} pageStates={pageStates} key={f[0]} uid={f[0]} whiteboardId={whiteboardId} assets={assets} shapes={f[1]?.shapes} doc={doc}/>
         </div>
       );
 
@@ -862,11 +865,11 @@ if (wbVision) {
     <ResponsiveGridLayout
       key={'grid'}
       className="layout"
-      rowHeight={50}
+      rowHeight={30}
       width={slidePosition.viewBoxWidth}
       margin={[10, 35]}
       breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-      cols={{ lg: 8, md: 6, sm: 4, xs: 2, xxs: 1 }}
+      cols={{ lg: 11, md: 8, sm: 4, xs: 2, xxs: 1 }}
     >
       {gridItems}
     </ResponsiveGridLayout>
@@ -893,3 +896,5 @@ if (wbVision) {
     </>
   );
 }
+
+export default Whiteboard;

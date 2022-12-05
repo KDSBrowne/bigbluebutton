@@ -70,7 +70,7 @@ const currentSlidHasContent = () => {
     content,
   } = currentSlide;
 
-  return !!content.length;
+  return !!content?.length;
 };
 
 const getCoverCoords = () => {
@@ -148,13 +148,13 @@ const parseCurrentSlideContent = (yesValue, noValue, abstentionValue, trueValue,
     return acc;
   }, []).filter(({
     options,
-  }) => options.length > 1 && options.length < 10).forEach((p) => {
+  }) => options?.length > 1 && options?.length < 10).forEach((p) => {
     const poll = p;
     if (doubleQuestion) poll.multiResp = true;
-    if (poll.options.length <= 5 || MAX_CUSTOM_FIELDS <= 5) {
-      const maxAnswer = poll.options.length > MAX_CUSTOM_FIELDS
+    if (poll.options?.length <= 5 || MAX_CUSTOM_FIELDS <= 5) {
+      const maxAnswer = poll.options?.length > MAX_CUSTOM_FIELDS
         ? MAX_CUSTOM_FIELDS
-        : poll.options.length;
+        : poll.options?.length;
       quickPollOptions.push({
         type: `${pollTypes.Letter}${maxAnswer}`,
         poll,
@@ -167,7 +167,7 @@ const parseCurrentSlideContent = (yesValue, noValue, abstentionValue, trueValue,
     }
   });
 
-  if (question.length > 0 && optionsPoll.length === 0 && !doubleQuestion && !hasYN) {
+  if (question?.length > 0 && optionsPoll?.length === 0 && !doubleQuestion && !hasYN) {
     quickPollOptions.push({
       type: 'R-',
       poll: {
@@ -176,7 +176,7 @@ const parseCurrentSlideContent = (yesValue, noValue, abstentionValue, trueValue,
     });
   }
 
-  if (quickPollOptions.length > 0) {
+  if (quickPollOptions?.length > 0) {
     content = content.replace(new RegExp(pollRegex), '');
   }
 

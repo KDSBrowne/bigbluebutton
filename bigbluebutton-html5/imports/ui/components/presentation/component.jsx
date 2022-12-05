@@ -29,7 +29,6 @@ import browserInfo from '/imports/utils/browserInfo';
 import { addNewAlert } from '../screenreader-alert/service';
 import { clearCursors } from '/imports/ui/components/cursor/service';
 import Vision from '/imports/ui/components/whiteboard/vision';
-
 import Service from '/imports/ui/components/whiteboard/service';
 
 const intlMessages = defineMessages({
@@ -340,7 +339,7 @@ class Presentation extends PureComponent {
 
   handleResize() {
     const presentationSizes = this.getPresentationSizesAvailable();
-    if (Object.keys(presentationSizes).length > 0) {
+    if (Object.keys(presentationSizes)?.length > 0) {
       // updating the size of the space available for the slide
       if (!Session.get('componentPresentationWillUnmount')) {
         this.setState({
@@ -406,7 +405,7 @@ class Presentation extends PureComponent {
     // space for the svg) on the initial load
 
     const presentationSizes = this.getPresentationSizesAvailable();
-    if (Object.keys(presentationSizes).length > 0) {
+    if (Object.keys(presentationSizes)?.length > 0) {
       // setting the state of the available space for the svg
       // and set the showSlide to true to start rendering the slide
       this.setState({
@@ -897,6 +896,8 @@ class Presentation extends PureComponent {
       intl,
       fullscreenElementId,
       layoutContextDispatch,
+      currentSlide,
+      userIsPresenter,
     } = this.props;
 
     return (
@@ -907,6 +908,8 @@ class Presentation extends PureComponent {
         elementId={fullscreenElementId}
         toggleSwapLayout={MediaService.toggleSwapLayout}
         layoutContextDispatch={layoutContextDispatch}
+        currentSlide={currentSlide}
+        userIsPresenter={userIsPresenter}
       />
     );
   }
@@ -1032,7 +1035,8 @@ class Presentation extends PureComponent {
                 }}
               >
                 <Styled.VisuallyHidden id="currentSlideText">{slideContent}</Styled.VisuallyHidden>
-                {!tldrawIsMounting && currentSlide && !this.state.wbVision && this.renderPresentationMenu()}
+                {/* {!tldrawIsMounting && currentSlide && !this.state.wbVision && this.renderPresentationMenu()} */}
+                {!this.state.wbVision && this.renderPresentationMenu()}
                 <WhiteboardContainer
                   wbVision={this.state.wbVision}
                   whiteboardId={currentSlide?.id}

@@ -27,7 +27,8 @@ function usePrevious(value) {
 }
 
 export default function Vision(props) {
-    const { shapes, objAPI, setObjAPI } = props;
+    const { shapes, objAPI, setObjAPI,     pages,
+      pageStates } = props;
     const prevShapes = usePrevious(props.shapes);
     const [api, setApi] = React.useState(null);
     const rDocument = React.useRef({
@@ -64,12 +65,6 @@ export default function Vision(props) {
         let changed = false;
     
         if (next.pageStates[1] && !_.isEqual(prevShapes, shapes)) {
-          const editingShape = api?.getShape(api?.getPageState()?.editingId);
-    
-          if (editingShape) {
-            shapes[editingShape?.id] = editingShape;
-          }
-    
           next.pages[1].shapes = shapes;
           changed = true;
         }
