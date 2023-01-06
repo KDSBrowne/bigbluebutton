@@ -51,6 +51,8 @@ import AudioService from '/imports/ui/components/audio/service';
 import NotesContainer from '/imports/ui/components/notes/container';
 import DEFAULT_VALUES from '../layout/defaultValues';
 
+import "@fontsource/source-sans-pro";
+
 const MOBILE_MEDIA = 'only screen and (max-width: 40em)';
 const APP_CONFIG = Meteor.settings.public.app;
 const DESKTOP_FONT_SIZE = APP_CONFIG.desktopFontSize;
