@@ -1,19 +1,26 @@
 import { check } from 'meteor/check';
+import _ from 'lodash';
 
-export default function addAnnotation(meetingId, whiteboardId, userId, annotation) {
+async function addAnnotation(meetingId, whiteboardId, userId, annotation, Annotations) {
   check(meetingId, String);
   check(whiteboardId, String);
   check(annotation, Object);
 
   const {
-    id, annotationInfo, wbId, 
+    id, wbId,
   } = annotation;
+
+  let { annotationInfo } = annotation;
 
   const selector = {
     meetingId,
     id,
-    userId,
   };
+
+  const oldAnnotation = await Annotations.findOneAsync(selector);
+  if (oldAnnotation) {
+    annotationInfo = _.merge(oldAnnotation.annotationInfo, annotationInfo);
+  }
 
   const modifier = {
     $set: {
@@ -27,3 +34,5 @@ export default function addAnnotation(meetingId, whiteboardId, userId, annotatio
 
   return { selector, modifier };
 }
+
+export default addAnnotation;

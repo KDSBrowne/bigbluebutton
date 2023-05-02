@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { withTracker } from 'meteor/react-meteor-data';
-import { defineMessages, injectIntl } from 'react-intl';
 import Auth from '/imports/ui/services/auth';
 import Users from '/imports/api/users';
 import Meetings, { LayoutMeetings } from '/imports/api/meetings';
@@ -15,6 +14,7 @@ import UserInfos from '/imports/api/users-infos';
 import Settings from '/imports/ui/services/settings';
 import MediaService from '/imports/ui/components/media/service';
 import LayoutService from '/imports/ui/components/layout/service';
+import { isPresentationEnabled } from '/imports/ui/services/features';
 import _ from 'lodash';
 import {
   layoutSelect,
@@ -37,13 +37,6 @@ import App from './component';
 
 const CUSTOM_STYLE_URL = Meteor.settings.public.app.customStyleUrl;
 
-const intlMessages = defineMessages({
-  waitingApprovalMessage: {
-    id: 'app.guest.waiting',
-    description: 'Message while a guest is waiting to be approved',
-  },
-});
-
 const endMeeting = (code, ejectedReason) => {
   Session.set('codeError', code);
   Session.set('errorMessageDescription', ejectedReason);
@@ -59,6 +52,8 @@ const AppContainer = (props) => {
     return ref.current;
   }
 
+  const layoutType = useRef(null);
+
   const {
     actionsbar,
     selectedLayout,
@@ -73,7 +68,7 @@ const AppContainer = (props) => {
     meetingLayout,
     meetingLayoutUpdatedAt,
     meetingPresentationIsOpen,
-    isLayoutMeetingResizing,
+    isMeetingLayoutResizing,
     meetingLayoutCameraPosition,
     meetingLayoutFocusedCamera,
     meetingLayoutVideoRate,
@@ -92,11 +87,22 @@ const AppContainer = (props) => {
 
   const { sidebarContentPanel, isOpen: sidebarContentIsOpen } = sidebarContent;
   const { sidebarNavPanel, isOpen: sidebarNavigationIsOpen } = sidebarNavigation;
-  const { isOpen: presentationIsOpen } = presentation;
-  const shouldShowPresentation = propsShouldShowPresentation
-    && (presentationIsOpen || presentationRestoreOnUpdate);
+  const { isOpen } = presentation;
+  const presentationIsOpen = isOpen;
+
+  const shouldShowPresentation = (propsShouldShowPresentation
+    && (presentationIsOpen || presentationRestoreOnUpdate)) && isPresentationEnabled();
 
   const { focusedId } = cameraDock;
+
+  if(
+    layoutContextDispatch 
+    &&  (typeof meetingLayout != "undefined")
+    && (layoutType.current != meetingLayout)
+    ) {
+      layoutType.current = meetingLayout;
+      MediaService.setPresentationIsOpen(layoutContextDispatch, true);
+  }
 
   const horizontalPosition = cameraDock.position === 'contentLeft' || cameraDock.position === 'contentRight';
   // this is not exactly right yet
@@ -132,6 +138,9 @@ const AppContainer = (props) => {
     });
   };
 
+  useEffect(() => {
+    MediaService.buildLayoutWhenPresentationAreaIsDisabled(layoutContextDispatch)});
+  
   return currentUserId
     ? (
       <App
@@ -154,7 +163,7 @@ const AppContainer = (props) => {
           cameraHeight: cameraDock.height,
           cameraIsResizing: cameraDockInput.isResizing,
           meetingPresentationIsOpen,
-          isLayoutMeetingResizing,
+          isMeetingLayoutResizing,
           meetingLayoutCameraPosition,
           meetingLayoutFocusedCamera,
           meetingLayoutVideoRate,
@@ -168,6 +177,7 @@ const AppContainer = (props) => {
           shouldShowPresentation,
           mountRandomUserModal,
           isPresenter,
+          numCameras: cameraDockInput.numCameras,
         }}
         {...otherProps}
       />
@@ -186,7 +196,7 @@ const currentUserEmoji = (currentUser) => (currentUser
   }
 );
 
-export default injectIntl(withModalMounter(withTracker(({ intl, baseControls }) => {
+export default withModalMounter(withTracker(() => {
   Users.find({ userId: Auth.userID, meetingId: Auth.meetingID }).observe({
     removed(userData) {
       // wait 3secs (before endMeeting), client will try to authenticate again
@@ -194,7 +204,16 @@ export default injectIntl(withModalMounter(withTracker(({ intl, baseControls }) 
       setTimeout(() => {
         const queryCurrentUser = Users.find({ userId: Auth.userID, meetingId: Auth.meetingID });
         if (queryCurrentUser.count() === 0) {
-          endMeeting(403, userData.ejectedReason || null);
+          if (userData.ejected) {
+            endMeeting('403', userData.ejectedReason);
+          } else {
+            // Either authentication process hasn't finished yet or user did authenticate but Users
+            // collection is unsynchronized. In both cases user may be able to rejoin.
+            const description = Auth.isAuthenticating || Auth.loggedIn
+              ? 'able_to_rejoin_user_disconnected_reason'
+              : null;
+            endMeeting('503', description);
+          }
         }
       }, delayForReconnection);
     },
@@ -233,10 +252,6 @@ export default injectIntl(withModalMounter(withTracker(({ intl, baseControls }) 
     presentationVideoRate: meetingLayoutVideoRate,
   } = meetingLayoutObj;
 
-  if (currentUser && !currentUser.approved) {
-    baseControls.updateLoadingState(intl.formatMessage(intlMessages.waitingApprovalMessage));
-  }
-
   const UserInfo = UserInfos.find({
     meetingId: Auth.meetingID,
     requesterUserId: Auth.userID,
@@ -245,6 +260,7 @@ export default injectIntl(withModalMounter(withTracker(({ intl, baseControls }) 
   const AppSettings = Settings.application;
   const { selectedLayout, pushLayout } = AppSettings;
   const { viewScreenshare } = Settings.dataSaving;
+  const shouldShowSharedNotes = MediaService.shouldShowSharedNotes();
   const shouldShowExternalVideo = MediaService.shouldShowExternalVideo();
   const shouldShowScreenshare = MediaService.shouldShowScreenshare()
     && (viewScreenshare || currentUser?.presenter);
@@ -289,15 +305,17 @@ export default injectIntl(withModalMounter(withTracker(({ intl, baseControls }) 
     pushAlertEnabled: AppSettings.chatPushAlerts,
     darkTheme: AppSettings.darkTheme,
     shouldShowScreenshare,
-    shouldShowPresentation: !shouldShowScreenshare && !shouldShowExternalVideo,
+    shouldShowPresentation: !shouldShowScreenshare && !shouldShowExternalVideo && !shouldShowSharedNotes,
     shouldShowExternalVideo,
+    shouldShowSharedNotes,
     isLargeFont: Session.get('isLargeFont'),
     presentationRestoreOnUpdate: getFromUserSettings(
       'bbb_force_restore_presentation_on_new_events',
       Meteor.settings.public.presentation.restoreOnUpdate,
     ),
-    hidePresentation: getFromUserSettings('bbb_hide_presentation', LAYOUT_CONFIG.hidePresentation),
+    hidePresentationOnJoin: getFromUserSettings('bbb_hide_presentation_on_join', LAYOUT_CONFIG.hidePresentationOnJoin),
     hideActionsBar: getFromUserSettings('bbb_hide_actions_bar', false),
     isModalOpen: !!getModal(),
+    ignorePollNotifications: Session.get('ignorePollNotifications'),
   };
-})(AppContainer)));
+})(AppContainer));

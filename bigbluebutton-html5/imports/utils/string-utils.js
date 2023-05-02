@@ -37,7 +37,18 @@ export const formatLocaleCode = (locale) => {
   return {
     language: formattedLocale?.split('-')[0],
     formattedLocale,
-  }
+  };
+};
+
+export const safeMatch = (regex, content, defaultValue) => {
+  const regexLimit = 50000;
+
+  if (content.length > regexLimit) return defaultValue;
+  return content.match(regex) || defaultValue;
+};
+
+export const lowercaseTrim = (text) => {
+  return text.trim().toLowerCase();
 }
 
 export default {
@@ -47,4 +58,6 @@ export default {
   escapeHtml,
   unescapeHtml,
   formatLocaleCode,
+  safeMatch,
+  lowercaseTrim,
 };

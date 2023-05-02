@@ -150,11 +150,14 @@ class Settings extends Component {
     });
   }
 
-  displaySettingsStatus(status) {
+  displaySettingsStatus(status, textOnly = false) {
     const { intl } = this.props;
-
+    if (textOnly) {
+      return status ? intl.formatMessage(intlMessages.on)
+          : intl.formatMessage(intlMessages.off)
+    }
     return (
-      <Styled.ToggleLabel>
+      <Styled.ToggleLabel aria-hidden>
         {status ? intl.formatMessage(intlMessages.on)
           : intl.formatMessage(intlMessages.off)}
       </Styled.ToggleLabel>
@@ -268,7 +271,7 @@ class Settings extends Component {
         title={intl.formatMessage(intlMessages.SettingsLabel)}
         confirm={{
           callback: () => {
-            this.updateSettings(current, intl.formatMessage(intlMessages.savedAlertLabel));
+            this.updateSettings(current, intlMessages.savedAlertLabel);
 
             if (saved.application.locale !== current.application.locale) {
               const { language } = formatLocaleCode(saved.application.locale);

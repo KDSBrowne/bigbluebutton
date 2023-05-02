@@ -30,7 +30,7 @@ import PresentationAreaContainer from '../presentation/presentation-area/contain
 import ScreenshareContainer from '../screenshare/container';
 import ExternalVideoContainer from '../external-video-player/container';
 import Styled from './styles';
-import { DEVICE_TYPE, ACTIONS, SMALL_VIEWPORT_BREAKPOINT } from '../layout/enums';
+import { DEVICE_TYPE, ACTIONS, SMALL_VIEWPORT_BREAKPOINT, PANELS } from '../layout/enums';
 import {
   isMobile, isTablet, isTabletPortrait, isTabletLandscape, isDesktop,
 } from '../layout/utils';
@@ -40,19 +40,23 @@ import SidebarNavigationContainer from '../sidebar-navigation/container';
 import SidebarContentContainer from '../sidebar-content/container';
 import { makeCall } from '/imports/ui/services/api';
 import ConnectionStatusService from '/imports/ui/components/connection-status/service';
-import DarkReader from 'darkreader';
 import Settings from '/imports/ui/services/settings';
 import { registerTitleView } from '/imports/utils/dom-utils';
 import Notifications from '../notifications/container';
 import GlobalStyles from '/imports/ui/stylesheets/styled-components/globalStyles';
 import ActionsBarContainer from '../actions-bar/container';
 import PushLayoutEngine from '../layout/push-layout/pushLayoutEngine';
+import AudioService from '/imports/ui/components/audio/service';
+import NotesContainer from '/imports/ui/components/notes/container';
+import DEFAULT_VALUES from '../layout/defaultValues';
+import AppService from '/imports/ui/components/app/service';
 
 const MOBILE_MEDIA = 'only screen and (max-width: 40em)';
 const APP_CONFIG = Meteor.settings.public.app;
 const DESKTOP_FONT_SIZE = APP_CONFIG.desktopFontSize;
 const MOBILE_FONT_SIZE = APP_CONFIG.mobileFontSize;
 const LAYOUT_CONFIG = Meteor.settings.public.layout;
+const CONFIRMATION_ON_LEAVE = Meteor.settings.public.app.askForConfirmationOnLeave;
 
 const intlMessages = defineMessages({
   userListLabel: {
@@ -194,6 +198,16 @@ class App extends Component {
     window.ondragover = (e) => { e.preventDefault(); };
     window.ondrop = (e) => { e.preventDefault(); };
 
+    if (CONFIRMATION_ON_LEAVE) {
+      window.onbeforeunload = (event) => {
+        AudioService.muteMicrophone();
+        event.stopImmediatePropagation();
+        event.preventDefault();
+        // eslint-disable-next-line no-param-reassign
+        event.returnValue = '';
+      };
+    }
+
     if (deviceInfo.isMobile) makeCall('setMobileUser');
 
     ConnectionStatusService.startRoundTripTime();
@@ -209,6 +223,12 @@ class App extends Component {
       mountModal,
       deviceType,
       mountRandomUserModal,
+      selectedLayout,
+      sidebarContentIsOpen,
+      layoutContextDispatch,
+      numCameras,
+      presentationIsOpen,
+      ignorePollNotifications,
     } = this.props;
 
     this.renderDarkMode();
@@ -242,10 +262,35 @@ class App extends Component {
     }
 
     if (deviceType === null || prevProps.deviceType !== deviceType) this.throttledDeviceType();
+
+    if (
+      selectedLayout !== prevProps.selectedLayout
+      && selectedLayout?.toLowerCase?.()?.includes?.('focus')
+      && !sidebarContentIsOpen
+      && deviceType !== DEVICE_TYPE.MOBILE
+      && numCameras > 0
+      && presentationIsOpen
+    ) {
+      setTimeout(() => {
+        layoutContextDispatch({
+          type: ACTIONS.SET_SIDEBAR_CONTENT_IS_OPEN,
+          value: true,
+        });
+        layoutContextDispatch({
+          type: ACTIONS.SET_ID_CHAT_OPEN,
+          value: DEFAULT_VALUES.idChatOpen,
+        });
+        layoutContextDispatch({
+          type: ACTIONS.SET_SIDEBAR_CONTENT_PANEL,
+          value: PANELS.CHAT,
+        });
+      }, 0);
+    }
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleWindowResize, false);
+    window.onbeforeunload = null;
     ConnectionStatusService.stopRoundTripTime();
   }
 
@@ -402,12 +447,7 @@ class App extends Component {
   renderDarkMode() {
     const { darkTheme } = this.props;
 
-    return darkTheme
-      ? DarkReader.enable(
-        { brightness: 100, contrast: 90 },
-        { invert: [Styled.DtfInvert], ignoreInlineStyle: [Styled.DtfCss] },
-      )
-      : DarkReader.disable();
+    AppService.setDarkTheme(darkTheme);
   }
 
   mountPushLayoutEngine() {
@@ -418,7 +458,7 @@ class App extends Component {
       cameraPosition,
       focusedCamera,
       horizontalPosition,
-      isLayoutMeetingResizing,
+      isMeetingLayoutResizing,
       isPresenter,
       isModerator,
       layoutContextDispatch,
@@ -434,6 +474,7 @@ class App extends Component {
       pushLayoutMeeting,
       selectedLayout,
       setMeetingLayout,
+      setPushLayout,
       shouldShowScreenshare,
       shouldShowExternalVideo,
     } = this.props;
@@ -447,7 +488,7 @@ class App extends Component {
           cameraPosition,
           focusedCamera,
           horizontalPosition,
-          isLayoutMeetingResizing,
+          isMeetingLayoutResizing,
           isPresenter,
           isModerator,
           layoutContextDispatch,
@@ -463,6 +504,7 @@ class App extends Component {
           pushLayoutMeeting,
           selectedLayout,
           setMeetingLayout,
+          setPushLayout,
           shouldShowScreenshare,
           shouldShowExternalVideo,
         }}
@@ -479,9 +521,11 @@ class App extends Component {
       shouldShowPresentation,
       shouldShowScreenshare,
       shouldShowExternalVideo,
+      shouldShowSharedNotes,
       isPresenter,
       selectedLayout,
       presentationIsOpen,
+      darkTheme,
     } = this.props;
 
     return (
@@ -503,16 +547,24 @@ class App extends Component {
           <BannerBarContainer />
           <NotificationsBarContainer />
           <SidebarNavigationContainer />
-          <SidebarContentContainer />
+          <SidebarContentContainer isSharedNotesPinned={shouldShowSharedNotes} />
           <NavBarContainer main="new" />
           <NewWebcamContainer isLayoutSwapped={!presentationIsOpen} />
-          {shouldShowPresentation ? <PresentationAreaContainer presentationIsOpen={presentationIsOpen} /> : null}
+          <Styled.TextMeasure id="text-measure" />
+          {shouldShowPresentation ? <PresentationAreaContainer darkTheme={darkTheme} presentationIsOpen={presentationIsOpen} /> : null}
           {shouldShowScreenshare ? <ScreenshareContainer isLayoutSwapped={!presentationIsOpen} /> : null}
           {
             shouldShowExternalVideo
               ? <ExternalVideoContainer isLayoutSwapped={!presentationIsOpen} isPresenter={isPresenter} />
               : null
           }
+          {shouldShowSharedNotes 
+            ? (
+              <NotesContainer
+                area="media"
+                layoutType={selectedLayout}
+              />
+            ) : null}
           {this.renderCaptions()}
           <AudioCaptionsSpeechContainer />
           {this.renderAudioCaptions()}

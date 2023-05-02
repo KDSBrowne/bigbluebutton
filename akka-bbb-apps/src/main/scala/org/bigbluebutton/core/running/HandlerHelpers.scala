@@ -63,9 +63,11 @@ trait HandlerHelpers extends SystemConfiguration {
         guestStatus = regUser.guestStatus,
         emoji = "none",
         pin = false,
+        mobile = false,
         presenter = false,
         locked = MeetingStatus2x.getPermissions(liveMeeting.status).lockOnJoin,
         avatar = regUser.avatarURL,
+        color = regUser.color,
         clientType = clientType,
         pickExempted = false,
         userLeftFlag = UserLeftFlag(false, 0)
@@ -226,7 +228,7 @@ trait HandlerHelpers extends SystemConfiguration {
       model <- state.breakout
     } yield {
       model.rooms.values.foreach { room =>
-        eventBus.publish(BigBlueButtonEvent(room.id, EndBreakoutRoomInternalMsg(liveMeeting.props.breakoutProps.parentId, room.id, reason)))
+        eventBus.publish(BigBlueButtonEvent(room.id, EndBreakoutRoomInternalMsg(liveMeeting.props.meetingProp.intId, room.id, reason)))
       }
     }
 

@@ -1,4 +1,5 @@
 const { test } = require('@playwright/test');
+const { linkIssue } = require('../core/helpers');
 const { Chat } = require('./chat');
 const { PrivateChat } = require('./privateChat');
 
@@ -24,7 +25,7 @@ test.describe.parallel('Chat', () => {
   });
 
   test('Copy chat', async ({ browser, context, page }, testInfo) => {
-    test.fixme(testInfo.project.use.headless, 'Only works in headed mode');
+    test.skip(testInfo.project.use.headless, 'Only works in headed mode');
     const chat = new Chat(browser, page);
     await chat.init(true, true);
     await chat.copyChat(context);
@@ -50,6 +51,13 @@ test.describe.parallel('Chat', () => {
     await chat.emptyMessage();
   });
 
+  test('Copy and paste public message', async ({ browser, page }) => {
+    linkIssue('15948');
+    const chat = new Chat(browser, page);
+    await chat.init(true, true);
+    await chat.copyPastePublicMessage();
+  });
+
   test('Close private chat @ci', async ({ browser, context, page }) => {
     const privateChat = new PrivateChat(browser, context);
     await privateChat.initPages(page);
@@ -70,7 +78,7 @@ test.describe.parallel('Chat', () => {
     });
 
     test('Copy chat with emoji', async ({ browser, context, page }, testInfo) => {
-      test.fixme(testInfo.project.use.headless, 'Only works in headed mode');
+      test.skip(testInfo.project.use.headless, 'Only works in headed mode');
       const emoji = new Chat(browser, page);
       await emoji.init(true, true);
       await emoji.emojiCopyChat(context);
@@ -95,7 +103,7 @@ test.describe.parallel('Chat', () => {
     });
 
     test('Copy chat with auto converted emoji', async ({ browser, context, page }, testInfo) => {
-      test.fixme(testInfo.project.use.headless, 'Only works in headed mode');
+      test.skip(testInfo.project.use.headless, 'Only works in headed mode');
       const emoji = new Chat(browser, page);
       await emoji.init(true, true);
       await emoji.autoConvertEmojiCopyChat(context);

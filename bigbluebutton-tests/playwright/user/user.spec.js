@@ -16,6 +16,12 @@ test.describe.parallel('User', () => {
       await multiusers.raiseAndLowerHand();
     });
 
+    test('Raise Hand Rejected', async ({ browser, context, page }) => {
+      const multiusers = new MultiUsers(browser, context);
+      await multiusers.initModPage(page, true);
+      await multiusers.raiseHandRejected();
+    });
+
     test('Toggle user list @ci', async ({ browser, context, page }) => {
       const multiusers = new MultiUsers(browser, context);
       await multiusers.initModPage(page);
@@ -64,14 +70,74 @@ test.describe.parallel('User', () => {
       await multiusers.initModPage2();
       await multiusers.demoteToViewer();
     });
+
+    test('Give and remove whiteboard access', async ({ browser, context, page }) => {
+      const multiusers = new MultiUsers(browser, context);
+      await multiusers.initModPage(page);
+      await multiusers.initModPage2();
+      await multiusers.giveAndRemoveWhiteboardAccess();
+    });
+
+    test('Remove user', async ({ browser, context, page }) => {
+      const multiusers = new MultiUsers(browser, context);
+      await multiusers.initModPage(page, true);
+      await multiusers.initModPage2(true);
+      await multiusers.removeUser();
+    });
+
+    test('Remove user and prevent rejoining', async ({ browser, context, page }) => {
+      const multiusers = new MultiUsers(browser, context);
+      await multiusers.initModPage(page, true);
+      await multiusers.initModPage2(true, context, { customParameter: 'userID=Moderator2' });
+      await multiusers.removeUserAndPreventRejoining(context);
+    });
   });
 
   test.describe.parallel('Manage', () => {
     test.describe.parallel('Guest policy', () => {
-      test('ASK_MODERATOR', async ({ browser, context, page }) => {
-        const guestPolicy = new GuestPolicy(browser, context);
-        await guestPolicy.initModPage(page);
-        await guestPolicy.askModerator();
+      test.describe.parallel('ASK_MODERATOR', () => {
+        // https://docs.bigbluebutton.org/2.6/release-tests.html#ask-moderator
+        test('Message to guest lobby', async ({ browser, context, page }) => {
+          const guestPolicy = new GuestPolicy(browser, context);
+          await guestPolicy.initModPage(page);
+          await guestPolicy.messageToGuestLobby();
+        });
+        test('Allow Everyone', async ({ browser, context, page }) => {
+          const guestPolicy = new GuestPolicy(browser, context);
+          await guestPolicy.initModPage(page);
+          await guestPolicy.allowEveryone();
+        });
+        test('Deny Everyone', async ({ browser, context, page }) => {
+          const guestPolicy = new GuestPolicy(browser, context);
+          await guestPolicy.initModPage(page);
+          await guestPolicy.denyEveryone();
+        });
+
+        test('Remember choice', async ({ browser, context, page }) => {
+          const guestPolicy = new GuestPolicy(browser, context);
+          await guestPolicy.initModPage(page);
+          await guestPolicy.rememberChoice();
+        });
+
+        test.describe.parallel('Actions to specific pending user', () => {
+          test('Message', async ({ browser, context, page }) => {
+            const guestPolicy = new GuestPolicy(browser, context);
+            await guestPolicy.initModPage(page);
+            await guestPolicy.messageToSpecificUser();
+          });
+
+          test('Accept', async ({ browser, context, page }) => {
+            const guestPolicy = new GuestPolicy(browser, context);
+            await guestPolicy.initModPage(page);
+            await guestPolicy.acceptSpecificUser();
+          });
+
+          test('Deny', async ({ browser, context, page }) => {
+            const guestPolicy = new GuestPolicy(browser, context);
+            await guestPolicy.initModPage(page);
+            await guestPolicy.denySpecificUser();
+          });
+        });
       });
 
       test('ALWAYS_ACCEPT', async ({ browser, context, page }) => {
@@ -79,7 +145,7 @@ test.describe.parallel('User', () => {
         await guestPolicy.initModPage(page);
         await guestPolicy.alwaysAccept();
       });
-
+      // https://docs.bigbluebutton.org/2.6/release-tests.html#always-deny
       test('ALWAYS_DENY', async ({ browser, context, page }) => {
         const guestPolicy = new GuestPolicy(browser, context);
         await guestPolicy.initModPage(page);
@@ -164,6 +230,29 @@ test.describe.parallel('User', () => {
       await multiusers.initModPage(page);
       await multiusers.selectRandomUser();
     });
+
+    test('Mute all users', async ({ browser, context, page }) => {
+      const multiusers = new MultiUsers(browser, context);
+      await multiusers.initModPage(page, false);
+      await multiusers.initModPage2(false);
+      await multiusers.initUserPage(false);
+      await multiusers.muteAllUsers();
+    });
+
+    test('Mute all users except presenter', async ({ browser, context, page }) => {
+      const multiusers = new MultiUsers(browser, context);
+      await multiusers.initModPage(page, false);
+      await multiusers.initModPage2(false);
+      await multiusers.initUserPage(false);
+      await multiusers.muteAllUsersExceptPresenter();
+    });
+
+    test('Write closed captions', async ({ browser, context, page }) => {
+      const multiusers = new MultiUsers(browser, context);
+      await multiusers.initModPage(page, true);
+      await multiusers.initModPage2(true);
+      await multiusers.writeClosedCaptions();
+    });
   });
 
   test.describe.parallel('Mobile devices', () => {
@@ -179,7 +268,7 @@ test.describe.parallel('User', () => {
       await mobileDevices.mobileTagName();
     });
 
-    test('Whiteboard should not be accessible when chat panel or userlist are active on mobile devices', async ({ browser }) => {
+    test('Whiteboard should not be accessible when chat panel or user list are active on mobile devices', async ({ browser }) => {
       test.fixme();
       const iphoneContext = await browser.newContext({ ...iPhone11 });
       const motoContext = await browser.newContext({ ...motoG4 });
@@ -190,17 +279,17 @@ test.describe.parallel('User', () => {
       await mobileDevices.whiteboardNotAppearOnMobile();
     });
 
-    test('Userslist should not appear when Chat Panel or Whiteboard are active on mobile devices', async ({ browser }) => {
+    test('User List should not appear when Chat Panel or Whiteboard are active on mobile devices', async ({ browser }) => {
       const iphoneContext = await browser.newContext({ ...iPhone11 });
       const motoContext = await browser.newContext({ ...motoG4 });
       const modPage = await iphoneContext.newPage();
       const mobileDevices = new MobileDevices(browser, iphoneContext);
       await mobileDevices.initModPage(modPage);
       await mobileDevices.initUserPage(true, motoContext);
-      await mobileDevices.userlistNotAppearOnMobile();
+      await mobileDevices.userListNotAppearOnMobile();
     });
 
-    test('Chat Panel should not appear when Userlist or Whiteboard are active on mobile devices', async ({ browser }) => {
+    test('Chat Panel should not appear when UserList or Whiteboard are active on mobile devices', async ({ browser }) => {
       const iphoneContext = await browser.newContext({ ...iPhone11 });
       const motoContext = await browser.newContext({ ...motoG4 });
       const modPage = await iphoneContext.newPage();

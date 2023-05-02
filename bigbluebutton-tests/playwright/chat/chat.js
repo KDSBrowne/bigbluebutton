@@ -13,25 +13,22 @@ class Chat extends Page {
 
   async sendPublicMessage() {
     await openChat(this);
-    const message = this.getLocator(e.chatUserMessageText);
-    await expect(message).toHaveCount(0);
+    await this.checkElementCount(e.chatUserMessageText, 0);
 
     await this.type(e.chatBox, e.message);
     await this.waitAndClick(e.sendButton);
-    await this.waitForSelector(e.chatUserMessageText);
-    await expect(message).toHaveCount(1);
+    await this.checkElementCount(e.chatUserMessageText, 1);
   }
 
   async clearChat() {
     await openChat(this);
-    const message = this.getLocator(e.chatUserMessageText);
 
     await this.type(e.chatBox, e.message);
     await this.waitAndClick(e.sendButton);
     await this.waitForSelector(e.chatUserMessageText);
 
     // 1 message
-    await expect(message).toHaveCount(1);
+    await this.checkElementCount(e.chatUserMessageText, 1);
 
     // clear
     await this.waitAndClick(e.chatOptions);
@@ -68,7 +65,8 @@ class Chat extends Page {
     await this.waitAndClick(e.sendButton);
     await this.waitForSelector(e.chatUserMessageText);
     await this.waitAndClick(e.chatOptions);
-    const { content } = await this.handleDownload(e.chatSave, testInfo);
+    const chatSaveLocator = this.getLocator(e.chatSave);
+    const { content } = await this.handleDownload(chatSaveLocator, testInfo);
 
     const dataToCheck = [
       this.meetingId,
@@ -80,27 +78,25 @@ class Chat extends Page {
 
   async characterLimit() {
     await openChat(this);
-    const messageLocator = this.getLocator(e.chatUserMessageText);
 
     const { maxMessageLength } = getSettings();
     await this.page.fill(e.chatBox, e.uniqueCharacterMessage.repeat(maxMessageLength));
     await this.waitAndClick(e.sendButton);
     await this.waitForSelector(e.chatUserMessageText);
-    await expect(messageLocator).toHaveCount(1);
+    await this.checkElementCount(e.chatUserMessageText, 1);
 
     await this.page.fill(e.chatBox, e.uniqueCharacterMessage.repeat(maxMessageLength + 1));
     await this.waitForSelector(e.typingIndicator);
     await this.waitAndClick(e.sendButton);
     await this.waitForSelector(e.chatUserMessageText);
-    await expect(messageLocator).toHaveCount(1);
+    await this.checkElementCount(e.chatUserMessageText, 1);
   }
 
   async emptyMessage() {
     await openChat(this);
-    const messageLocator = this.getLocator(e.chatUserMessageText);
 
     await this.waitAndClick(e.sendButton);
-    await expect(messageLocator).toHaveCount(0);
+    await this.checkElementCount(e.chatUserMessageText, 0);
   }
 
   // Emojis
@@ -149,7 +145,8 @@ class Chat extends Page {
     await this.waitAndClick(e.sendButton);
     await this.waitForSelector(e.chatUserMessageText);
     await this.waitAndClick(e.chatOptions);
-    const { content } = await this.handleDownload(e.chatSave, testInfo);
+    const chatSaveLocator = this.getLocator(e.chatSave);
+    const { content } = await this.handleDownload(chatSaveLocator, testInfo);
 
     const dataToCheck = [
       this.meetingId,
@@ -200,7 +197,8 @@ class Chat extends Page {
     await this.waitAndClick(e.sendButton);
     await this.waitForSelector(e.chatUserMessageText);
     await this.waitAndClick(e.chatOptions);
-    const { content } = await this.handleDownload(e.chatSave, testInfo);
+    const chatSaveLocator = this.getLocator(e.chatSave);
+    const { content } = await this.handleDownload(chatSaveLocator, testInfo);
 
     const dataToCheck = [
       this.meetingId,
@@ -208,6 +206,22 @@ class Chat extends Page {
       e.convertedEmojiMessage,
     ];
     await checkTextContent(content, dataToCheck);
+  }
+
+  async copyPastePublicMessage() {
+    await this.type(e.chatBox, 'test');
+    await this.waitAndClick(e.sendButton);
+    await this.hasText(e.chatUserMessageText, /test/);
+
+    const text = await this.getLocator(e.chatUserMessageText).boundingBox();
+
+    await this.mouseDoubleClick(text.x, text.y);
+    await this.press('Control+KeyC');
+    await this.getLocator(e.chatBox).focus();
+    await this.press('Control+KeyV');
+    await this.waitAndClick(e.sendButton);
+
+    await this.hasText(e.secondChatUserMessageText, /test/);
   }
 }
 

@@ -2,7 +2,7 @@ import { check } from 'meteor/check';
 import Presentations from '/imports/api/presentations';
 import Logger from '/imports/startup/server/logger';
 
-export default function setPresentationExporting(meetingId, presentationId, exportation) {
+export default async function setPresentationExporting(meetingId, presentationId, exportation) {
   check(meetingId, String);
   check(presentationId, String);
   check(exportation, Object);
@@ -19,11 +19,10 @@ export default function setPresentationExporting(meetingId, presentationId, expo
   };
 
   try {
-    const { numberAffected } = Presentations.upsert(selector, modifier);
+    const { numberAffected } = await Presentations.upsertAsync(selector, modifier);
 
-    if (numberAffected) {
-      const status = `isRunning=${exportation.isRunning} error=${exportation.error}`;
-      Logger.info(`Set exporting status on presentation ${presentationId} in meeting ${meetingId} ${status}`);
+    if (numberAffected && ['RUNNING', 'EXPORTED'].includes(exportation?.status)) {
+      Logger.info(`Set exporting status on presentation ${presentationId} in meeting ${meetingId} status=${exportation.status}`);
     }
   } catch (err) {
     Logger.error(`Could not set exporting status on pres ${presentationId} in meeting ${meetingId} ${err}`);

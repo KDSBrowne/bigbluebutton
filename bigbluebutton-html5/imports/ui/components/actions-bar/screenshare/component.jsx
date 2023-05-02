@@ -16,7 +16,7 @@ import { SCREENSHARING_ERRORS } from '/imports/api/screenshare/client/bridge/err
 import Button from '/imports/ui/components/common/button/component';
 
 const { isMobile } = deviceInfo;
-const { isSafari, isMobileApp } = browserInfo;
+const { isSafari, isTabletApp } = browserInfo;
 
 const propTypes = {
   intl: PropTypes.objectOf(Object).isRequired,
@@ -125,7 +125,7 @@ const ScreenshareButton = ({
   const handleFailure = (error) => {
     const {
       errorCode = SCREENSHARING_ERRORS.UNKNOWN_ERROR.errorCode,
-      errorMessage,
+      errorMessage = error.message,
     } = error;
 
     const localizedError = getErrorLocale(errorCode);
@@ -163,7 +163,7 @@ const ScreenshareButton = ({
     ? intlMessages.stopDesktopShareDesc : intlMessages.desktopShareDesc;
 
   const shouldAllowScreensharing = enabled
-    && ( !isMobile || isMobileApp)
+    && ( !isMobile || isTabletApp)
     && amIPresenter;
 
   const dataTest = isVideoBroadcasting ? 'stopScreenShare' : 'startScreenShare';
