@@ -1250,7 +1250,7 @@ Finally, run the following command to reload configuration:
 BigBlueButton has the ability to use Chrome's built-in speech-to-text API to give users the option to have their audio live captioned for other users in the session.  When live captions are enabled on the server, a user can choose their language from the drop-down list when joining audio.
 
 <p align="center">
-  <img src="/images/html5-lock-webcam.png"/>
+  <img src="/img/26-auto-transcription.png"/>
 </p>
 
 These captions will automatically appear in the recordings.  To enable live captions, edit `/etc/bigbluebutton/bbb-html5.yml` and add the following
@@ -1258,12 +1258,12 @@ These captions will automatically appear in the recordings.  To enable live capt
 ```
 public:
   app:
-    ...
+    # You may have other setting itms here
     audioCaptions:
       enabled: true
 ```
 
-Restart BigBlueButton with `sudo bbb-conf --restart` and you should now wee the options for live captions when joining audio.
+Restart BigBlueButton with `sudo bbb-conf --restart` and you should now see the options for live captions when joining audio.
 
 
 ### Configuration of global settings
