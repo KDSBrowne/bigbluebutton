@@ -992,13 +992,15 @@ export default function Whiteboard(props) {
   const size = ((height < SMALL_HEIGHT) || (width < SMALL_WIDTH))
     ? TOOLBAR_SMALL : TOOLBAR_LARGE;
 
-  if (hasWBAccess || isPresenter) {
-    if (((height < SMALLEST_HEIGHT) || (width < SMALLEST_WIDTH))) {
-      tldrawAPI?.setSetting('dockPosition', 'bottom');
-    } else {
-      tldrawAPI?.setSetting('dockPosition', isRTL ? 'left' : 'right');
+  React.useEffect(() => {
+    if ((hasWBAccess || isPresenter) && tldrawAPI) {
+      if (((height < SMALLEST_HEIGHT) || (width < SMALLEST_WIDTH))) {
+        tldrawAPI?.setSetting('dockPosition', 'bottom');
+      } else {
+        tldrawAPI?.setSetting('dockPosition', isRTL ? 'left' : 'right');
+      }
     }
-  }
+  }, [hasWBAccess, isPresenter, height, width, isRTL, tldrawAPI]);
 
   const menuOffsetValues = {
     true: {
