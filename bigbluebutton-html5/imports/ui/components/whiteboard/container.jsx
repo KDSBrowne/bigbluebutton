@@ -99,30 +99,34 @@ export default withTracker(({
   const curPres = getCurrentPres();
   const { isIphone } = deviceInfo;
 
-  shapes['slide-background-shape'] = {
-    assetId: `slide-background-asset-${curPageId}`,
-    childIndex: -1,
-    id: 'slide-background-shape',
-    name: 'Image',
-    type: TDShapeType.Image,
-    parentId: `${curPageId}`,
-    point: [0, 0],
-    isLocked: true,
-    size: [slidePosition?.width || 0, slidePosition?.height || 0],
-    style: {
-      dash: DashStyle.Draw,
-      size: SizeStyle.Medium,
-      color: ColorStyle.Blue,
-    },
-  };
+
+  // console.log('shapes', shapes)
+  // console.log('svgUri', svgUri)
+
+  // shapes['slide-background-shape'] = {
+  //   assetId: `slide-background-asset-${curPageId}`,
+  //   childIndex: -1,
+  //   id: 'slide-background-shape',
+  //   name: 'Image',
+  //   // type: TDShapeType.Image,
+  //   parentId: `${curPageId}`,
+  //   point: [0, 0],
+  //   isLocked: true,
+  //   size: [slidePosition?.width || 0, slidePosition?.height || 0],
+  //   style: {
+  //     // dash: DashStyle.Draw,
+  //     // size: SizeStyle.Medium,
+  //     // color: ColorStyle.Blue,
+  //   },
+  // };
 
   const assets = {};
-  assets[`slide-background-asset-${curPageId}`] = {
-    id: `slide-background-asset-${curPageId}`,
-    size: [slidePosition?.width || 0, slidePosition?.height || 0],
-    src: svgUri,
-    type: 'image',
-  };
+  // assets[`slide-background-asset-${curPageId}`] = {
+  //   id: `slide-background-asset-${curPageId}`,
+  //   size: [slidePosition?.width || 0, slidePosition?.height || 0],
+  //   src: svgUri,
+  //   type: 'image',
+  // };
 
   return {
     initDefaultPages,
@@ -146,6 +150,8 @@ export default withTracker(({
     animations: SettingsService?.application?.animations,
     toggleToolsAnimations,
     isIphone,
+    svgUri,
+    slidePosition,
   };
 })(WhiteboardContainer);
 

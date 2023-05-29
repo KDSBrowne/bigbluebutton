@@ -552,6 +552,9 @@ class Presentation extends PureComponent {
       zoom, fitToWidth, isPanning,
     } = this.state;
 
+
+    console.log('renderPresentationToolbar func ')
+
     if (!currentSlide) return null;
 
     const { presentationToolbarMinWidth } = DEFAULT_VALUES;
@@ -574,8 +577,8 @@ class Presentation extends PureComponent {
           layoutContextDispatch,
           presentationIsOpen,
         }}
-        setIsPanning={this.setIsPanning}
-        isPanning={isPanning}
+        // setIsPanning={this.setIsPanning}
+        // isPanning={isPanning}
         currentSlideNum={currentSlide.num}
         presentationId={currentSlide.presentationId}
         zoomChanger={this.zoomChanger}

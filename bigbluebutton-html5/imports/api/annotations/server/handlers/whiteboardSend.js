@@ -45,7 +45,7 @@ export default async function handleWhiteboardSend({ envelope, header, body }, m
   }
   // we use a for loop here instead of a map because we need to guarantee the order of the annotations.
   for (const annotation of annotations) {
-    annotationsQueue[meetingId].push({ meetingId, whiteboardId, userId: annotation.userId, annotation });
+    annotationsQueue[meetingId]?.push({ meetingId, whiteboardId, userId: annotation.userId, annotation });
     if (instanceIdFromMessage === myInstanceId) {
       await addAnnotation(meetingId, whiteboardId, annotation.userId, annotation);
     }

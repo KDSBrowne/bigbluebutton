@@ -105,6 +105,7 @@ class PresentationToolbar extends PureComponent {
 
   componentDidMount() {
     document.addEventListener('keydown', this.switchSlide);
+    console.log('DID MOUNT PRES TOOLBAR')
   }
 
   componentDidUpdate(prevProps) {
@@ -270,6 +271,9 @@ class PresentationToolbar extends PureComponent {
       multiUserSize,
       multiUser,
     } = this.props;
+
+
+    console.log('render render PRES TOOLBAR')
 
     const { isMobile } = deviceInfo;
 
