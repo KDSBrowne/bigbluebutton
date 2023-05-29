@@ -66,6 +66,16 @@ export default function Whiteboard(props) {
   const prevFitToWidth = usePrevious(fitToWidth);
 
 
+  const setDockPosition = (setSetting) => {
+    if (hasWBAccess || isPresenter) {
+      if (((height < SMALLEST_HEIGHT) || (width < SMALLEST_WIDTH))) {
+        setSetting('dockPosition', 'bottom');
+      } else {
+        setSetting('dockPosition', isRTL ? 'left' : 'right');
+      }
+    }
+  }
+
   React.useEffect(() => {
     const currentZoom = tldrawApi?.zoomLevel;
     if (currentZoom !== tldrawZoom) {
@@ -324,7 +334,6 @@ export default function Whiteboard(props) {
         const remoteShapeToAdd = Object.values(newShapes);
         // Use the API to create / add new shapes
         tldrawApi.createShapes(remoteShapeToAdd);
-
         // Use the API to delete the shapes
         tldrawApi?.store?.remove(Object.keys(shapesToDelete));
       });
