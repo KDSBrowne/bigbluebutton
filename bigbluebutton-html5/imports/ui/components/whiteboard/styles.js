@@ -6,6 +6,50 @@ import {
 } from '/imports/ui/stylesheets/styled-components/typography';
 import Button from '/imports/ui/components/common/button/component';
 
+const TldrawV2GlobalStyle = createGlobalStyle`
+  #presentationInnerWrapper > div:last-child {
+    position: relative;
+    height: 100%;
+  }
+
+  #presentationInnerWrapper > div:last-child > * {
+    position: relative; 
+    height: 100%;
+  }
+
+  #presentationInnerWrapper > div:last-child .tl-overlays {
+    left: 0px;
+    bottom: 0px;
+  }
+
+  .tlui-help-menu,
+  .tlui-debug-panel {
+    display: none;
+  }
+
+  .tlui-menu-zone {
+    left: 3.5rem;
+  }
+
+  .tlui-style-panel__wrapper {
+    right: 4rem;
+    position: relative;
+  }
+
+  // Add the following lines to override height and width attributes for .tl-overlays__item
+  .tl-overlays__item {
+    height: auto !important; // Using !important to ensure it overrides other styles
+    width: auto !important;  // Using !important to ensure it overrides other styles
+  }
+
+  .tlui-menu-zone__controls > :nth-child(1),
+  .tlui-menu-zone__controls > :nth-child(2),
+  .tlui-menu-zone__controls > :nth-child(3),
+  .tlui-menu-zone__controls > :nth-child(4) {
+    display: none;
+  }
+`;
+
 const TldrawGlobalStyle = createGlobalStyle`
   ${({ hideContextMenu }) => hideContextMenu && `
     #TD-ContextMenu {
@@ -146,6 +190,7 @@ const PanTool = styled(Button)`
 
 export default {
   TldrawGlobalStyle,
+  TldrawV2GlobalStyle,
   EditableWBWrapper,
   PanTool,
 };

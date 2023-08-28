@@ -67,6 +67,8 @@ class WhiteboardModel extends SystemConfiguration {
         println(s"Adding annotation to page [${wb.id}]. After numAnnotations=[${newAnnotationsMap.size}].")
       } else {
         println(s"New annotation [${annotation.id}] with no type, ignoring (probably received a remove message before and now the shape is incomplete, ignoring...")
+        println(s"New annotation ${annotation}")
+        println(s"New annotation.annotationInfo ${annotation.annotationInfo}")
       }
     }
     val newWb = wb.copy(annotationsMap = newAnnotationsMap)

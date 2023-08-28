@@ -262,7 +262,7 @@ const changeWhiteboardAccess = (userId, access) => {
 const persistShape = (shape, whiteboardId, isModerator) => {
   const annotation = {
     id: shape.id,
-    annotationInfo: { ...shape, isModerator },
+    annotationInfo: { ...shape, isModerator, owner: Auth.userID },
     wbId: whiteboardId,
     userId: Auth.userID,
   };
@@ -278,71 +278,84 @@ const changeCurrentSlide = (s) => {
 
 const getShapes = (whiteboardId, curPageId, intl, isLocked) => {
   const unlockedSelector = { whiteboardId };
-  const lockedSelector = {
-    whiteboardId,
-    $or: [
-      { 'annotationInfo.isModerator': true },
-      { 'annotationInfo.userId': Auth.userID },
-    ],
-  };
+  // const lockedSelector = {
+  //   whiteboardId,
+  //   $or: [
+  //     { 'annotationInfo.isModerator': true },
+  //     { 'annotationInfo.userId': Auth.userID },
+  //   ],
+  // };
 
   const annotations = Annotations.find(
-    isLocked ? lockedSelector : unlockedSelector,
+    // isLocked ? lockedSelector : unlockedSelector,
+    {meetingId: Auth.meetingID},
+
     {
       fields: { annotationInfo: 1, userId: 1 },
     },
   ).fetch();
 
+
+
+  // console.log('getShapes ')
+  // console.log('getShapes - annotations : ', annotations)
+  // console.log('getShapes - whiteboardId : ', whiteboardId)
+  // console.log('getShapes - curPageId : ', curPageId)
+  // console.log('getShapes - isLocked : ', isLocked)
+  // console.log('getShapes - intl : ', intl)
   const result = {};
 
   annotations.forEach((annotation) => {
-    if (annotation.annotationInfo.questionType) {
-      const modAnnotation = annotation;
-      // poll result, convert it to text and create tldraw shape
-      modAnnotation.annotationInfo.answers = annotation.annotationInfo.answers.reduce(
-        caseInsensitiveReducer, [],
-      );
-      let pollResult = PollService.getPollResultString(annotation.annotationInfo, intl)
-        .split('<br/>').join('\n').replace(/(<([^>]+)>)/ig, '');
+    // if (annotation.annotationInfo.questionType) {
+    //   const modAnnotation = annotation;
+    //   // poll result, convert it to text and create tldraw shape
+    //   modAnnotation.annotationInfo.answers = annotation.annotationInfo.answers.reduce(
+    //     caseInsensitiveReducer, [],
+    //   );
+    //   let pollResult = PollService.getPollResultString(annotation.annotationInfo, intl)
+    //     .split('<br/>').join('\n').replace(/(<([^>]+)>)/ig, '');
 
-      const lines = pollResult.split('\n');
-      const longestLine = lines.reduce((a, b) => a.length > b.length ? a : b, '').length;
+    //   const lines = pollResult.split('\n');
+    //   const longestLine = lines.reduce((a, b) => a.length > b.length ? a : b, '').length;
 
-      // add empty spaces before first | in each of the lines to make them all the same length
-      pollResult = lines.map((line) => {
-        if (!line.includes('|') || line.length === longestLine) return line;
+    //   // add empty spaces before first | in each of the lines to make them all the same length
+    //   pollResult = lines.map((line) => {
+    //     if (!line.includes('|') || line.length === longestLine) return line;
 
-        const splitLine = line.split(' |');
-        const spaces = ' '.repeat(longestLine - line.length);
-        return `${splitLine[0]} ${spaces}|${splitLine[1]}`;
-      }).join('\n');
+    //     const splitLine = line.split(' |');
+    //     const spaces = ' '.repeat(longestLine - line.length);
+    //     return `${splitLine[0]} ${spaces}|${splitLine[1]}`;
+    //   }).join('\n');
 
-      const style = {
-        color: 'white',
-        dash: 'solid',
-        font: 'mono',
-        isFilled: true,
-        size: 'small',
-        scale: 1,
-      };
+    //   const style = {
+    //     color: 'white',
+    //     dash: 'solid',
+    //     font: 'mono',
+    //     isFilled: true,
+    //     size: 'small',
+    //     scale: 1,
+    //   };
 
-      const textSize = getTextSize(pollResult, style, padding = 20);
+    //   const textSize = getTextSize(pollResult, style, padding = 20);
 
-      modAnnotation.annotationInfo = {
-        childIndex: 0,
-        id: annotation.annotationInfo.id,
-        name: `poll-result-${annotation.annotationInfo.id}`,
-        type: 'rectangle',
-        label: pollResult,
-        labelPoint: [0.5, 0.5],
-        parentId: `${curPageId}`,
-        point: [0, 0],
-        size: textSize,
-        style,
-      };
-      modAnnotation.annotationInfo.questionType = false;
-    }
+    //   modAnnotation.annotationInfo = {
+    //     childIndex: 0,
+    //     id: annotation.annotationInfo.id,
+    //     name: `poll-result-${annotation.annotationInfo.id}`,
+    //     type: 'rectangle',
+    //     label: pollResult,
+    //     labelPoint: [0.5, 0.5],
+    //     parentId: `${curPageId}`,
+    //     point: [0, 0],
+    //     size: textSize,
+    //     style,
+    //   };
+    //   modAnnotation.annotationInfo.questionType = false;
+    // }
+
+    // console.log('ANNOATION ##################### ', annotation)
     result[annotation.annotationInfo.id] = annotation.annotationInfo;
+  //   console.log(result[annotation.annotationInfo.id])
   });
   return result;
 };
