@@ -101,8 +101,6 @@ const sendShapeChanges = (
   intl,
   redo = false,
 ) => {
-
-  console.log('DOES THIS GET CALLED?')
   let isModerator = currentUser?.role === ROLE_MODERATOR;
 
   const invalidChange = Object.keys(changedShapes)

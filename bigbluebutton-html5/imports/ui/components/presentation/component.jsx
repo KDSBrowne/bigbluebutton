@@ -77,7 +77,6 @@ class Presentation extends PureComponent {
       zoom: 100,
       isFullscreen: false,
       tldrawAPI: null,
-      isPanning: false,
       tldrawIsMounting: true,
       isToolbarVisible: true,
       hadPresentation: false,
@@ -94,9 +93,7 @@ class Presentation extends PureComponent {
     this.getPresentationSizesAvailable = this.getPresentationSizesAvailable.bind(this);
     this.handleResize = debounce(this.handleResize.bind(this), 200);
     this.setTldrawAPI = this.setTldrawAPI.bind(this);
-    this.setIsPanning = this.setIsPanning.bind(this);
     this.setIsToolbarVisible = this.setIsToolbarVisible.bind(this);
-    this.handlePanShortcut = this.handlePanShortcut.bind(this);
     this.renderPresentationMenu = this.renderPresentationMenu.bind(this);
 
     this.onResize = () => setTimeout(this.handleResize.bind(this), 0);
@@ -141,14 +138,6 @@ class Presentation extends PureComponent {
 
   componentDidMount() {
     this.getInitialPresentationSizes();
-    this.refPresentationContainer.addEventListener(
-      'keydown',
-      this.handlePanShortcut
-    );
-    this.refPresentationContainer.addEventListener(
-      'keyup',
-      this.handlePanShortcut
-    );
     this.refPresentationContainer.addEventListener(
       FULLSCREEN_CHANGE_EVENT,
       this.onFullscreenChange
@@ -211,7 +200,6 @@ class Presentation extends PureComponent {
       presentationWidth,
       presentationHeight,
       zoom,
-      isPanning,
       presentationId,
       hadPresentation,
     } = this.state;
@@ -357,13 +345,6 @@ class Presentation extends PureComponent {
         value: currentSlide.num,
       });
     }
-
-    if (
-      (zoom <= HUNDRED_PERCENT && isPanning && !fitToWidth) ||
-      (!userIsPresenter && prevProps.userIsPresenter)
-    ) {
-      this.setIsPanning();
-    }
   }
 
   componentWillUnmount() {
@@ -375,14 +356,6 @@ class Presentation extends PureComponent {
       FULLSCREEN_CHANGE_EVENT,
       this.onFullscreenChange
     );
-    this.refPresentationContainer.removeEventListener(
-      'keydown',
-      this.handlePanShortcut
-    );
-    this.refPresentationContainer.removeEventListener(
-      'keyup',
-      this.handlePanShortcut
-    );
 
     if (fullscreenContext) {
       layoutContextDispatch({
@@ -393,21 +366,6 @@ class Presentation extends PureComponent {
         },
       });
     }
-  }
-
-  handlePanShortcut(e) {
-    const { userIsPresenter } = this.props;
-    const { isPanning } = this.state;
-    if (e.keyCode === SPACE && userIsPresenter) {
-      switch (e.type) {
-        case 'keyup':
-          return isPanning && this.setIsPanning();
-        case 'keydown':
-          return !isPanning && this.setIsPanning();
-        default:
-      }
-    }
-    return null;
   }
 
   handleResize() {
@@ -441,12 +399,6 @@ class Presentation extends PureComponent {
 
   setTldrawIsMounting(value) {
     this.setState({ tldrawIsMounting: value });
-  }
-
-  setIsPanning() {
-    this.setState((prevState) => ({
-      isPanning: !prevState.isPanning,
-    }));
   }
 
   setIsToolbarVisible(isVisible) {
@@ -600,7 +552,7 @@ class Presentation extends PureComponent {
       multiUser,
       fitToWidth,
     } = this.props;
-    const { zoom, isPanning } = this.state;
+    const { zoom } = this.state;
 
     if (!currentSlide) return null;
 
@@ -625,8 +577,6 @@ class Presentation extends PureComponent {
           layoutContextDispatch,
           presentationIsOpen,
         }}
-        setIsPanning={this.setIsPanning}
-        isPanning={isPanning}
         currentSlideNum={currentSlide.num}
         presentationId={currentSlide.presentationId}
         zoomChanger={this.zoomChanger}
@@ -750,7 +700,6 @@ class Presentation extends PureComponent {
       localPosition,
       zoom,
       tldrawIsMounting,
-      isPanning,
       tldrawAPI,
       isToolbarVisible,
     } = this.state;
@@ -868,7 +817,6 @@ class Presentation extends PureComponent {
                   presentationAreaHeight={presentationBounds?.height}
                   presentationAreaWidth={presentationBounds?.width}
                   isViewersCursorLocked={isViewersCursorLocked}
-                  isPanning={isPanning}
                   zoomChanger={this.zoomChanger}
                   fitToWidth={fitToWidth}
                   zoomValue={zoom}

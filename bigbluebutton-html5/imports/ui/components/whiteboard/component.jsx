@@ -1,40 +1,38 @@
-import * as React from "react";
-import PropTypes from "prop-types";
-import { Tldraw, track, useEditor } from "@tldraw/tldraw";
-import "@tldraw/tldraw/tldraw.css";
-import SlideCalcUtil, { HUNDRED_PERCENT } from "/imports/utils/slideCalcUtils";
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import { Tldraw, track, useEditor } from '@tldraw/tldraw';
+import '@tldraw/tldraw/tldraw.css';
+import SlideCalcUtil, { HUNDRED_PERCENT } from '/imports/utils/slideCalcUtils';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import Cursors from "./cursors/container";
-import Settings from "/imports/ui/services/settings";
-import logger from "/imports/startup/client/logger";
-import KEY_CODES from "/imports/utils/keyCodes";
+import Settings from '/imports/ui/services/settings';
+import logger from '/imports/startup/client/logger';
+import KEY_CODES from '/imports/utils/keyCodes';
 import {
   presentationMenuHeight,
   styleMenuOffset,
   styleMenuOffsetSmall,
-} from "/imports/ui/stylesheets/styled-components/general";
-import Styled from "./styles";
-import PanToolInjector from "./pan-tool-injector/component";
+} from '/imports/ui/stylesheets/styled-components/general';
+import Styled from './styles';
 import {
   findRemoved,
   filterInvalidShapes,
   mapLanguage,
   sendShapeChanges,
   usePrevious,
-} from "./utils";
+} from './utils';
 // import { throttle } from "/imports/utils/throttle";
-import { isEqual, clone } from "radash";
-import { InstancePresenceRecordType } from "@tldraw/tldraw";
+import { isEqual, clone } from 'radash';
+import { InstancePresenceRecordType } from '@tldraw/tldraw';
 import {
   AssetRecordType,
   createShapeId,
   TLAsset,
   TLExternalAssetContent,
   getHashForString,
-} from "@tldraw/tldraw";
-import { PageRecordType } from "@tldraw/editor";
-import { useRef } from "react";
-import { debounce, throttle } from "radash";
+} from '@tldraw/tldraw';
+import { PageRecordType } from '@tldraw/editor';
+import { useRef } from 'react';
+import { debounce, throttle } from 'radash';
 
 const SMALL_HEIGHT = 435;
 const SMALLEST_DOCK_HEIGHT = 475;
@@ -60,45 +58,45 @@ const deepCloneUsingShallow = (obj) => {
 const getBackgroundShapesAndAssets = (curPres, slidePosition) => {
   const bgAssets = [];
   const bgShapes = [];
-  
-  curPres?.pages?.forEach((entry) => {
-      const assetId = AssetRecordType.createId(entry?.id);
-      bgAssets.push({
-          id: assetId,
-          typeName: "asset",
-          type: "image",
-          props: {
-              w: 1,
-              h: 1,
-              src: entry?.svgUri,
-              name: "",
-              isAnimated: false,
-              mimeType: null,
-          },
-          meta: {},
-      });
 
-      bgShapes.push({
-          x: 1,
-          y: 1,
-          rotation: 0,
-          isLocked: true,
-          opacity: 1,
-          meta: {},
-          id: `shape:${entry?.id}`,
-          type: "image",
-          props: {
-              w: slidePosition?.width || 1,
-              h: slidePosition?.height || 1,
-              assetId: assetId,
-              playing: true,
-              url: "",
-              crop: null,
-          },
-          parentId: `page:${entry?.num}`,
-          index: "a0",
-          typeName: "shape",
-      });
+  curPres?.pages?.forEach((entry) => {
+    const assetId = AssetRecordType.createId(entry?.id);
+    bgAssets.push({
+      id: assetId,
+      typeName: 'asset',
+      type: 'image',
+      props: {
+        w: 1,
+        h: 1,
+        src: entry?.svgUri,
+        name: '',
+        isAnimated: false,
+        mimeType: null,
+      },
+      meta: {},
+    });
+
+    bgShapes.push({
+      x: 1,
+      y: 1,
+      rotation: 0,
+      isLocked: true,
+      opacity: 1,
+      meta: {},
+      id: `shape:${entry?.id}`,
+      type: 'image',
+      props: {
+        w: slidePosition?.width || 1,
+        h: slidePosition?.height || 1,
+        assetId: assetId,
+        playing: true,
+        url: '',
+        crop: null,
+      },
+      parentId: `page:${entry?.num}`,
+      index: 'a0',
+      typeName: 'shape',
+    });
   });
 
   return { bgAssets, bgShapes };
@@ -138,7 +136,6 @@ export default function Whiteboard(props) {
     maxNumberOfAnnotations,
     notifyShapeNumberExceeded,
     darkTheme,
-    isPanning: shortcutPanning,
     setTldrawIsMounting,
     width,
     height,
@@ -157,95 +154,101 @@ export default function Whiteboard(props) {
     isShapeOwner,
   } = props;
 
-  if (curPageId === "0" || !curPageId) return null;
+  if (curPageId === '0' || !curPageId) return null;
 
   const [tlEditor, setTlEditor] = React.useState(null);
   const [cursorX, setCursorX] = React.useState(0);
   const [cursorY, setCursorY] = React.useState(0);
 
+  const zoomValueRef = React.useRef(zoomValue);
   const prevShapesRef = React.useRef(shapes);
 
   React.useEffect(() => {
-      if (isEqual(prevShapesRef.current, shapes)) {
-          return; // Exit early if they are the same
+    zoomValueRef.current = zoomValue;
+  }, [zoomValue]);
+
+  React.useEffect(() => {
+    //TODO: figure out why shapes effect is happening without shape updates
+    if (isEqual(prevShapesRef.current, shapes)) {
+      return;
+    }
+
+    // Update the ref to store the current value of shapes
+    prevShapesRef.current = shapes;
+
+    const localShapes = tlEditor?.store?.allRecords();
+    const filteredShapes = localShapes?.filter(
+      (item) => item.typeName === 'shape' && item?.index !== 'a0'
+    ) || [];
+    const localLookup = new Map(filteredShapes.map((shape) => [shape.id, shape]));
+    const remoteShapeIds = Object.keys(shapes);
+    const shapesToAdd = [];
+    const shapesToUpdate = [];
+    const shapesToRemove = [];
+
+    filteredShapes.forEach((localShape) => {
+      // If a local shape does not exist in the remote shapes, it should be removed
+      if (!remoteShapeIds.includes(localShape.id)) {
+        shapesToRemove.push(localShape);
       }
+    });
 
-      // Update the ref to store the current value of shapes
-      prevShapesRef.current = shapes;
+    Object.values(shapes).forEach((remoteShape) => {
+      const localShape = localLookup.get(remoteShape.id);
 
-      const localShapes = tlEditor?.store?.allRecords();
-      const filteredShapes = localShapes?.filter(
-          (item) => item.typeName === "shape" && item?.index !== "a0"
-      ) || [];
-      const localLookup = new Map(filteredShapes.map((shape) => [shape.id, shape]));
-      const remoteShapeIds = Object.keys(shapes);
-      const shapesToAdd = [];
-      const shapesToUpdate = [];
-      const shapesToRemove = [];
-  
-      filteredShapes.forEach((localShape) => {
-          // If a local shape does not exist in the remote shapes, it should be removed
-          if (!remoteShapeIds.includes(localShape.id)) {
-              shapesToRemove.push(localShape);
+      // Create a deep clone of remoteShape and remove the isModerator property
+      const comparisonRemoteShape = deepCloneUsingShallow(remoteShape);
+      delete comparisonRemoteShape.isModerator;
+      delete comparisonRemoteShape.owner;
+
+      if (!localShape) {
+        // If the shape does not exist in local, add it to shapesToAdd
+        shapesToAdd.push(remoteShape);
+      } else if (!isEqual(localShape, comparisonRemoteShape)) {
+        // Capture the differences
+        const diff = {
+          id: remoteShape.id,
+          type: remoteShape.type,
+          typeName: remoteShape.typeName,
+        };
+
+        // Compare each property
+        Object.keys(remoteShape).forEach((key) => {
+          if (key !== 'isModerator' && key !== 'owner' && !isEqual(remoteShape[key], localShape[key])) {
+            diff[key] = remoteShape[key];
           }
-      });
-  
-      Object.values(shapes).forEach((remoteShape) => {
-          const localShape = localLookup.get(remoteShape.id);
-  
-          // Create a deep clone of remoteShape and remove the isModerator property
-          const comparisonRemoteShape = deepCloneUsingShallow(remoteShape);
-          delete comparisonRemoteShape.isModerator;
-          delete comparisonRemoteShape.owner;
-  
-          if (!localShape) {
-              // If the shape does not exist in local, add it to shapesToAdd
-              shapesToAdd.push(remoteShape);
-          } else if (!isEqual(localShape, comparisonRemoteShape)) {
-              // Capture the differences
-              const diff = {
-                  id: remoteShape.id,
-                  type: remoteShape.type,
-                  typeName: remoteShape.typeName,
-              };
-  
-              // Compare each property
-              Object.keys(remoteShape).forEach((key) => {
-                  if (key !== "isModerator" && key !== "owner" && !isEqual(remoteShape[key], localShape[key])) {
-                      diff[key] = remoteShape[key];
-                  }
-              });
-  
-              if (remoteShape.props) {
-                  Object.keys(remoteShape.props).forEach((key) => {
-                      if (!isEqual(remoteShape.props[key], localShape.props[key])) {
-                          diff.props = diff.props || {};
-                          diff.props[key] = remoteShape.props[key];
-                      }
-                  });
-              }
-  
-              shapesToUpdate.push(diff);
-          }
-      });
-  
-      tlEditor?.store?.mergeRemoteChanges(() => {
-          // Now, handle the shapesToRemove if needed
-          if (shapesToRemove.length > 0) {
-              tlEditor?.store?.remove(shapesToRemove.map((shape) => shape.id));
-          }
-          if (shapesToAdd && shapesToAdd.length) {
-              // Remove isModerator property from each shape in shapesToAdd
-              shapesToAdd.forEach((shape) => {
-                  delete shape.isModerator;
-                  delete shape.owner;
-              });
-              tlEditor?.store?.put(shapesToAdd);
-          }
-          if (shapesToUpdate && shapesToUpdate.length) {
-              tlEditor?.updateShapes(shapesToUpdate);
-          }
-      });
+        });
+
+        if (remoteShape.props) {
+          Object.keys(remoteShape.props).forEach((key) => {
+            if (!isEqual(remoteShape.props[key], localShape.props[key])) {
+              diff.props = diff.props || {};
+              diff.props[key] = remoteShape.props[key];
+            }
+          });
+        }
+
+        shapesToUpdate.push(diff);
+      }
+    });
+
+    tlEditor?.store?.mergeRemoteChanges(() => {
+      // Now, handle the shapesToRemove if needed
+      if (shapesToRemove.length > 0) {
+        tlEditor?.store?.remove(shapesToRemove.map((shape) => shape.id));
+      }
+      if (shapesToAdd && shapesToAdd.length) {
+        // Remove isModerator property from each shape in shapesToAdd
+        shapesToAdd.forEach((shape) => {
+          delete shape.isModerator;
+          delete shape.owner;
+        });
+        tlEditor?.store?.put(shapesToAdd);
+      }
+      if (shapesToUpdate && shapesToUpdate.length) {
+        tlEditor?.updateShapes(shapesToUpdate);
+      }
+    });
   }, [shapes]);
 
   // Updating presences in tldraw store based on changes in cursors
@@ -258,10 +261,10 @@ export default function Whiteboard(props) {
           const cursor = {
             x: xPercent,
             y: yPercent,
-            type: "default",
+            type: 'default',
             rotation: 0,
           };
-          const color = presenter ? "#FF0000" : "#70DB70";
+          const color = presenter ? '#FF0000' : '#70DB70';
           const c = {
             ...InstancePresenceRecordType.create({
               id,
@@ -297,7 +300,7 @@ export default function Whiteboard(props) {
 
   // set current tldraw page when presentation id updates
   React.useEffect(() => {
-    if (tlEditor && curPageId !== "0") {
+    if (tlEditor && curPageId !== '0') {
       tlEditor?.setCurrentPage(`page:${curPageId}`);
     }
   }, [curPageId]);
@@ -311,7 +314,7 @@ export default function Whiteboard(props) {
           props: {
             w: slidePosition?.width,
             h: slidePosition?.height,
-            name: "bg",
+            name: 'bg',
             isAnimated: false,
             mimeType: null,
             src: tlEditor.store?.get(`asset:${whiteboardId}`)?.props?.src,
@@ -398,28 +401,27 @@ export default function Whiteboard(props) {
         slidePosition?.viewBoxHeight
       );
 
-      tlEditor?.setCamera({
-        x: slidePosition?.x,
-        y: slidePosition?.y,
-        z: currentZoom,
-      });
+      setTimeout(() => {
+        tlEditor?.setCamera({
+          x: slidePosition?.x,
+          y: slidePosition?.y,
+          z: currentZoom,
+        });
+      }, 50);
     }
   }, [slidePosition?.viewBoxWidth, slidePosition?.viewBoxHeight]);
 
   // update zoom according to toolbar
   React.useEffect(() => {
-    if (
-      tlEditor &&
-      isPresenter &&
-      curPageId &&
-      slidePosition &&
-      zoom !== zoomValue
-    ) {
-
-      tlEditor?.zoomIn();
+    if (tlEditor && isPresenter && curPageId && slidePosition && zoom !== zoomValueRef.current) {
+      console.log('zoomValue update : ', zoomValueRef.current, zoom, tlEditor)
+      const zoomFitSlide = calculateZoom(slidePosition.width, slidePosition.height);
+      const zoomCamera = (zoomFitSlide * zoomValueRef.current) / HUNDRED_PERCENT;
+      setTimeout(() => {
+        tlEditor?.setCamera({ x: tlEditor?.camera.x, y: tlEditor?.camera.x, z: zoomCamera });
+      }, 0);
     }
-  }, [zoomValue]);
-
+  }, [zoomValueRef.current]);
 
   const [zoom, setZoom] = React.useState(HUNDRED_PERCENT);
   const [tldrawZoom, setTldrawZoom] = React.useState(1);
@@ -438,12 +440,6 @@ export default function Whiteboard(props) {
     };
   }, []);
 
-  const setSafeTLDrawAPI = (api) => {
-    if (isMountedRef.current) {
-      setTldrawAPI(api);
-    }
-  };
-
   React.useEffect(() => {
     if (whiteboardToolbarAutoHide) {
       toggleToolsAnimations("fade-in", "fade-out", animations ? "3s" : "0s");
@@ -456,9 +452,9 @@ export default function Whiteboard(props) {
     const calcedZoom = fitToWidth
       ? presentationWidth / localWidth
       : Math.min(
-          presentationWidth / localWidth,
-          presentationHeight / localHeight
-        );
+        presentationWidth / localWidth,
+        presentationHeight / localHeight
+      );
 
     return calcedZoom === 0 || calcedZoom === Infinity
       ? HUNDRED_PERCENT
@@ -468,71 +464,6 @@ export default function Whiteboard(props) {
   React.useEffect(() => {
     setTldrawIsMounting(true);
   }, []);
-
-  // when presentationSizes change, update tldraw camera
-  // React.useEffect(() => {
-  //   if (
-  //     curPageId &&
-  //     slidePosition &&
-  //     tldrawAPI &&
-  //     presentationWidth > 0 &&
-  //     presentationHeight > 0
-  //   ) {
-  //     if (prevFitToWidth !== null && fitToWidth !== prevFitToWidth) {
-  //       const newZoom = calculateZoom(
-  //         slidePosition.width,
-  //         slidePosition.height
-  //       );
-  //       tldrawAPI?.setCamera([0, 0], newZoom);
-  //       const viewedRegionH = SlideCalcUtil.calcViewedRegionHeight(
-  //         tldrawAPI?.viewport.height,
-  //         slidePosition.height
-  //       );
-  //       setZoom(HUNDRED_PERCENT);
-  //       zoomChanger(HUNDRED_PERCENT);
-  //       zoomSlide(
-  //         parseInt(curPageId, 10),
-  //         podId,
-  //         HUNDRED_PERCENT,
-  //         viewedRegionH,
-  //         0,
-  //         0
-  //       );
-  //     } else {
-  //       const currentAspectRatio =
-  //         Math.round((presentationWidth / presentationHeight) * 100) / 100;
-  //       const previousAspectRatio =
-  //         Math.round(
-  //           (slidePosition.viewBoxWidth / slidePosition.viewBoxHeight) * 100
-  //         ) / 100;
-  //       if (fitToWidth && currentAspectRatio !== previousAspectRatio) {
-  //         // we need this to ensure tldraw updates the viewport size after re-mounting
-  //         setTimeout(() => {
-  //           const newZoom = calculateZoom(
-  //             slidePosition.viewBoxWidth,
-  //             slidePosition.viewBoxHeight
-  //           );
-  //           tldrawAPI.setCamera(
-  //             [slidePosition.x, slidePosition.y],
-  //             newZoom,
-  //             "zoomed"
-  //           );
-  //         }, 50);
-  //       } else {
-  //         const newZoom = calculateZoom(
-  //           slidePosition.viewBoxWidth,
-  //           slidePosition.viewBoxHeight
-  //         );
-  //         tldrawAPI?.setCamera([slidePosition.x, slidePosition.y], newZoom);
-  //       }
-  //     }
-  //   }
-  // }, [
-  //   presentationWidth,
-  //   presentationHeight,
-  //   curPageId,
-  //   document?.documentElement?.dir,
-  // ]);
 
   React.useEffect(() => {
     if (presentationWidth > 0 && presentationHeight > 0 && slidePosition) {
@@ -561,7 +492,7 @@ export default function Whiteboard(props) {
             tldrawAPI?.setCamera(
               [slidePosition.x, slidePosition.y],
               newzoom,
-              "zoomed"
+              'zoomed'
             );
           }, 50);
         } else {
@@ -579,95 +510,122 @@ export default function Whiteboard(props) {
 
   const handleTldrawMount = (editor) => {
     setTlEditor(editor);
+    // console.log('EDITOR : ', editor, editor.pointerDown)
     const debouncePersistShape = debounce({ delay: 50 }, persistShape);
     const { bgAssets, bgShapes } = getBackgroundShapesAndAssets(curPres, slidePosition);
-    
+
     if (editor && curPres) {
-        const pages = curPres.pages
-            .map((entry) => ({
-                meta: {},
-                id: `page:${entry?.num}`,
-                name: `Slide ${entry.num}`,
-                index: `a1`,
-                typeName: "page",
-            }))
-            .reverse();
+      const pages = curPres.pages
+        .map((entry) => ({
+          meta: {},
+          id: `page:${entry?.num}`,
+          name: `Slide ${entry.num}`,
+          index: `a1`,
+          typeName: 'page',
+        }))
+        .reverse();
 
-        editor.store.mergeRemoteChanges(() => {
-            editor.batch(() => {
-                editor.store.put(pages);
-                editor.deletePage(editor.currentPageId);
-                editor.setCurrentPage(`page:${curPageId}`);
-                editor.store.put(bgAssets);
-                editor.createShapes(bgShapes);
-                editor.history.clear();
-            });
+      editor.store.mergeRemoteChanges(() => {
+        editor.batch(() => {
+          editor.store.put(pages);
+          editor.deletePage(editor.currentPageId);
+          editor.setCurrentPage(`page:${curPageId}`);
+          editor.store.put(bgAssets);
+          editor.createShapes(bgShapes);
+          editor.history.clear();
         });
+      });
 
-        const remoteShapes = props.getShapes(whiteboardId, curPageId, intl, false);
-        const localShapes = editor.store.allRecords();
-        const filteredShapes = localShapes.filter(item => item.typeName === "shape") || [];
+      const remoteShapes = props.getShapes(whiteboardId, curPageId, intl, false);
+      const localShapes = editor.store.allRecords();
+      const filteredShapes = localShapes.filter(item => item.typeName === 'shape') || [];
 
-        const localShapesObj = {};
-        filteredShapes.forEach(shape => {
-            localShapesObj[shape.id] = shape;
-        });
+      const localShapesObj = {};
+      filteredShapes.forEach(shape => {
+        localShapesObj[shape.id] = shape;
+      });
 
-        const shapesToAdd = [];
-        for (let id in remoteShapes) {
-            if (!localShapesObj[id] ||
-                JSON.stringify(remoteShapes[id]) !== JSON.stringify(localShapesObj[id])) {
-                shapesToAdd.push(remoteShapes[id]);
-            }
+      const shapesToAdd = [];
+      for (let id in remoteShapes) {
+        if (!localShapesObj[id] ||
+          JSON.stringify(remoteShapes[id]) !== JSON.stringify(localShapesObj[id])) {
+          shapesToAdd.push(remoteShapes[id]);
+        }
+      }
+
+      editor.store.mergeRemoteChanges(() => {
+        if (shapesToAdd && shapesToAdd.length) {
+          shapesToAdd.forEach(shape => {
+            delete shape.isModerator;
+            delete shape.owner;
+          });
+          editor.store.put(shapesToAdd);
+        }
+      });
+
+      editor.store.onBeforeChange = (prev, next, source) => {
+        const camera = editor?.camera;
+        const panned = next?.id?.includes('camera') && ((prev.x !== next.x) || (prev.y !== next.y));
+        const zoomed = next?.id?.includes('camera') && (prev.z !== next.z);
+        if (panned) {
+          console.log(zoomValue, zoom, zoomValueRef.current)
+          if (zoomValueRef.current <= HUNDRED_PERCENT) return prev;
+          // // limit bounds
+          if (editor?.viewportPageBounds?.maxX > slidePosition?.width) {
+            next.x += editor.viewportPageBounds.maxX - slidePosition.width;
+          }
+          if (editor?.viewportPageBounds?.maxY > slidePosition?.height) {
+            next.y += editor.viewportPageBounds.maxY - slidePosition.height;
+          }
+          if (next.x > 0 || editor.viewportPageBounds.minX < 0) {
+            next.x = 0;
+          }
+          if (next.y > 0 || editor.viewportPageBounds.minY < 0) {
+            next.y = 0;
+          }
         }
 
-        editor.store.mergeRemoteChanges(() => {
-            if (shapesToAdd && shapesToAdd.length) {
-                shapesToAdd.forEach(shape => {
-                    delete shape.isModerator;
-                    delete shape.owner;
-                });
-                editor.store.put(shapesToAdd);
-            }
-        });
+        return next
+      }
 
-        editor.store.onAfterChange = (prev, next, source) => {
-            if (next?.id?.includes("pointer")) {
-                setCursorX(next?.x);
-                setCursorY(next?.y);
-            }
+      editor.store.onAfterChange = (prev, next, source) => {
+        if (next?.id?.includes('pointer')) {
+          setCursorX(next?.x);
+          setCursorY(next?.y);
+        }
 
-            if (next?.id?.includes("shape") && whiteboardId) {
-                debouncePersistShape(next, whiteboardId, isModerator);
-            }
-        };
+        if (next?.id?.includes('shape') && whiteboardId) {
+          debouncePersistShape(next, whiteboardId, isModerator);
+        }
+      };
 
-        editor.store.onAfterDelete = (record, source) => {
-            removeShapes([record.id], whiteboardId);
-        };
+      editor.store.onAfterDelete = (record, source) => {
+        removeShapes([record.id], whiteboardId);
+      };
     }
   };
 
   const editableWB = (
-      <Tldraw 
-          key={`editableWB-${hasWBAccess}`}
-          forceMobileModeLayout 
-          onMount={handleTldrawMount} 
-      />
+    <Tldraw
+      key={`editableWB-${hasWBAccess}`}
+      forceMobileModeLayout
+      onMount={handleTldrawMount}
+    />
   );
 
   const readOnlyWB = (
-      <Tldraw
-          key={`readOnlyWB-${hasWBAccess}`}
-          onMount={handleTldrawMount} 
-          hideUi
-      />
+    <Tldraw
+      key={`readOnlyWB-${hasWBAccess}`}
+      forceMobileModeLayout
+      hideUi
+      onMount={handleTldrawMount}
+    />
   );
 
   return (
-    <div id={"whiteboard-element"} key={`animations=-${animations}`}>
+    <div id={'whiteboard-element'} key={`animations=-${animations}-${hasWBAccess}`}>
       {hasWBAccess || isPresenter ? editableWB : readOnlyWB}
-      <Styled.TldrawV2GlobalStyle />
+      <Styled.TldrawV2GlobalStyle {...{ hasWBAccess, isPresenter }} />
     </div>
   );
 }
@@ -721,7 +679,6 @@ Whiteboard.propTypes = {
   maxNumberOfAnnotations: PropTypes.number.isRequired,
   notifyShapeNumberExceeded: PropTypes.func.isRequired,
   darkTheme: PropTypes.bool.isRequired,
-  isPanning: PropTypes.bool.isRequired,
   setTldrawIsMounting: PropTypes.func.isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
@@ -746,3 +703,5 @@ Whiteboard.defaultProps = {
   whiteboardId: undefined,
   sidebarNavigationWidth: 0,
 };
+
+

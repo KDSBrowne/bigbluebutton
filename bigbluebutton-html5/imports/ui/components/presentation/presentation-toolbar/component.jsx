@@ -83,10 +83,6 @@ const intlMessages = defineMessages({
     id: 'app.whiteboard.toolbar.multiUserOff',
     description: 'Whiteboard toolbar turn multi-user off menu',
   },
-  pan: {
-    id: 'app.whiteboard.toolbar.tools.hand',
-    description: 'presentation toolbar pan label',
-  },
 });
 
 class PresentationToolbar extends PureComponent {
@@ -114,10 +110,8 @@ class PresentationToolbar extends PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    const { zoom, setIsPanning, fitToWidth, fitToWidthHandler, currentSlideNum } = this.props;
+    const { zoom, fitToWidth, fitToWidthHandler, currentSlideNum } = this.props;
     const { wasFTWActive } = this.state;
-
-    if (zoom <= HUNDRED_PERCENT && zoom !== prevProps.zoom && !fitToWidth) setIsPanning();
 
     if ((prevProps?.currentSlideNum !== currentSlideNum) && (!fitToWidth && wasFTWActive)) {
       setTimeout(() => {
@@ -484,7 +478,6 @@ PresentationToolbar.propTypes = {
   fullscreenAction: PropTypes.string.isRequired,
   isFullscreen: PropTypes.bool.isRequired,
   layoutContextDispatch: PropTypes.func.isRequired,
-  setIsPanning: PropTypes.func.isRequired,
   multiUser: PropTypes.bool.isRequired,
   whiteboardId: PropTypes.string.isRequired,
   removeWhiteboardGlobalAccess: PropTypes.func.isRequired,
