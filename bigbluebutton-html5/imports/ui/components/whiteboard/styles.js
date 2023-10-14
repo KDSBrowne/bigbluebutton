@@ -99,6 +99,24 @@ const TldrawGlobalStyle = createGlobalStyle`
     }
   `}
 
+  .tl-centered-g path[stroke-width="4"] {
+    stroke-width: 2 !important;
+  }
+
+  .tl-centered-g path[stroke-width="6.25"] {
+    stroke-width: 4.25 !important;
+  }
+
+  .tl-centered-g path[stroke-width="8.5"] {
+    stroke-width: 6.5 !important;
+  }
+
+  .tl-centered-g path[stroke-width="1"] {
+    stroke-width: 0.1 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+  }
+
   ${({ isToolbarVisible }) => (!isToolbarVisible) && `
     #TD-Tools {
       visibility: hidden;
