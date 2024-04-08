@@ -343,6 +343,9 @@ class PresentationToolbar extends PureComponent {
       slidePosition,
       multiUserSize,
       multiUser,
+      tldrawAPI,
+      count,
+      whiteboardWriters,
     } = this.props;
 
     const { isMobile } = deviceInfo;
@@ -433,6 +436,114 @@ class PresentationToolbar extends PureComponent {
           />
         </Styled.PresentationSlideControls>
         <Styled.PresentationZoomControls>
+        <Styled.WBAccessButton
+            role="button"
+            aria-label={
+              multiUser
+                ? intl.formatMessage(intlMessages.toolbarMultiUserOff)
+                : intl.formatMessage(intlMessages.toolbarMultiUserOn)
+            }
+            color="light"
+            disabled={!isMeteorConnected}
+            icon={'multi_whiteboard'}
+            size="md"
+            circle
+            onClick={() => {
+              console.log('handle click', tldrawAPI);
+            
+              tldrawAPI.setCamera({ x: -50, y: -50, z: .1 }, false);
+            
+              // Generate a unique asset ID using the current slide number
+              const assetId = `asset:${currentSlideNum}`;
+            
+              // Create the asset object
+              const asset = [{
+                id: assetId,
+                typeName: 'asset',
+                type: 'image',
+                meta: {},
+                props: {
+                  w: this.props.currentPresentationPage.scaledWidth,
+                  h: this.props.currentPresentationPage.scaledHeight,
+                  src: this.props.currentPresentationPage.svgUrl,
+                  name: 'Example Image',
+                  isAnimated: false,
+                  mimeType: 'image/svg+xml', // Adjust based on your image's MIME type
+                },
+              }];
+            
+              // Add the asset to the tldrawAPI store
+              tldrawAPI.store.put(asset);
+            
+              // Use the dimensions from the current presentation page
+              const maxFrameWidth = this.props.currentPresentationPage.width;
+              const maxFrameHeight = this.props.currentPresentationPage.height;
+            
+              // Calculate the scaling factor to maintain aspect ratio
+              const scaleX = maxFrameWidth / this.props.currentPresentationPage.scaledWidth;
+              const scaleY = maxFrameHeight / this.props.currentPresentationPage.scaledHeight;
+              const scaleFactor = Math.min(scaleX, scaleY); // Use the smallest scaling factor
+            
+              // Apply the scaling factor to get the new frame size
+              const frameWidth = this.props.currentPresentationPage.scaledWidth * scaleFactor;
+              const frameHeight = this.props.currentPresentationPage.scaledHeight * scaleFactor;
+            
+              const margin = 150; // Margin between frames
+              const allShapes = [];
+            
+              // Loop over whiteboardWriters to create frames
+              this.props.whiteboardWriters.forEach((writer, index) => {
+                const frameX = index * (frameWidth + margin) + 150;
+                const frameY = 850;
+            
+                const frameId = `frame-${writer.userId}`; // Use userId in frameId
+            
+                const frameShape = {
+                  id: `shape:${frameId}`,
+                  type: 'frame',
+                  x: frameX,
+                  y: frameY,
+                  // isLocked: true,
+                  props: {
+                    w: frameWidth,
+                    h: frameHeight,
+                    name: writer.userId, // Set the userId as the frame name
+                  },
+                  meta: {
+                    assignedTo: writer.userId,
+                  }
+                };
+            
+                // Define an image shape associated with this frame using the asset
+                const imageShape = {
+                  id: `shape:image-${writer.userId}`, // Use userId in imageId
+                  type: 'image',
+                  x: 0, // Position at the top-left corner of the frame
+                  y: 0,
+                  isLocked: true,
+                  props: {
+                    w: frameWidth,
+                    h: frameHeight,
+                    assetId,
+                  },
+                  parentId: `shape:${frameId}`,
+                };
+            
+                allShapes.push(frameShape, imageShape);
+              });
+            
+              // Create the frame shapes and their associated image shapes
+              tldrawAPI.createShapes(allShapes);
+            }}
+            
+            
+            label={
+              multiUser
+                ? 'enable puw'
+                : 'disable puw'
+            }
+            hideLabel
+          />
           <Styled.WBAccessButton
             data-test={multiUser ? 'turnMultiUsersWhiteboardOff' : 'turnMultiUsersWhiteboardOn'}
             role="button"

@@ -632,6 +632,7 @@ class Presentation extends PureComponent {
         multiUser={multiUser}
         whiteboardId={currentSlide?.id}
         numberOfSlides={totalPages}
+        tldrawAPI={this.state.tldrawAPI}
       />
     );
   }

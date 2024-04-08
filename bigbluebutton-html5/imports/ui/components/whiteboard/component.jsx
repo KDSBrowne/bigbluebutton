@@ -421,27 +421,27 @@ const Whiteboard = React.memo(function Whiteboard(props) {
           return next;
         }
 
-        const camera = editor?.getCamera();
-        const { maxX, maxY, minX, minY } = editor.getViewportPageBounds();
-        const panned =
-          next?.id?.includes("camera") &&
-          (prev.x !== next.x || prev.y !== next.y);
-        const zoomed = next?.id?.includes("camera") && prev.z !== next.z;
-        if (panned) {
-          // // limit bounds
-          if (maxX > currentPresentationPage?.scaledWidth) {
-            next.x += maxX - currentPresentationPage?.scaledWidth;
-          }
-          if (maxY > currentPresentationPage?.scaledHeight) {
-            next.y += maxY - currentPresentationPage?.scaledHeight;
-          }
-          if (next.x > 0 || minX < 0) {
-            next.x = 0;
-          }
-          if (next.y > 0 || minY < 0) {
-            next.y = 0;
-          }
-        }
+        // const camera = editor?.getCamera();
+        // const { maxX, maxY, minX, minY } = editor.getViewportPageBounds();
+        // const panned =
+        //   next?.id?.includes("camera") &&
+        //   (prev.x !== next.x || prev.y !== next.y);
+        // const zoomed = next?.id?.includes("camera") && prev.z !== next.z;
+        // if (panned) {
+        //   // // limit bounds
+        //   if (maxX > currentPresentationPage?.scaledWidth) {
+        //     next.x += maxX - currentPresentationPage?.scaledWidth;
+        //   }
+        //   if (maxY > currentPresentationPage?.scaledHeight) {
+        //     next.y += maxY - currentPresentationPage?.scaledHeight;
+        //   }
+        //   if (next.x > 0 || minX < 0) {
+        //     next.x = 0;
+        //   }
+        //   if (next.y > 0 || minY < 0) {
+        //     next.y = 0;
+        //   }
+        // }
         return next;
       };
     }

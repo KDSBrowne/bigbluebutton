@@ -8,6 +8,8 @@ import { PluginsContext } from '/imports/ui/components/components-data/plugin-co
 import { useSubscription, useMutation } from '@apollo/client';
 import POLL_SUBSCRIPTION from '/imports/ui/core/graphql/queries/pollSubscription';
 import { POLL_CANCEL, POLL_CREATE } from '/imports/ui/components/poll/mutations';
+import Service from '/imports/ui/components/user-list/service';
+import { gql, useQuery } from '@apollo/client';
 import { PRESENTATION_SET_PAGE } from '../mutations';
 
 const PresentationToolbarContainer = (props) => {
@@ -81,6 +83,71 @@ const PresentationToolbarContainer = (props) => {
     const pluginProvidedPresentationToolbarItems = pluginsExtensibleAreasAggregatedState
       ?.presentationToolbarItems;
 
+
+      const USER_AGGREGATE_COUNT_SUBSCRIPTION = gql`
+subscription UsersCount {
+  user_aggregate {
+    aggregate {
+      count
+    }
+  }
+}
+`;
+
+const CURRENT_PRESENTATION_PAGE_SUBSCRIPTION = gql`subscription CurrentPresentationPagesSubscription {
+  pres_page_curr {
+    height
+    isCurrentPage
+    num
+    pageId
+    scaledHeight
+    scaledViewBoxHeight
+    scaledViewBoxWidth
+    scaledWidth
+    svgUrl: urlsJson(path: "$.svg")
+    width
+    xOffset
+    yOffset
+    presentationId
+    content
+    downloadFileUri
+    totalPages
+    downloadable
+    presentationName
+    isDefaultPresentation
+  }  
+}`;
+
+const CURRENT_PAGE_WRITERS_SUBSCRIPTION = gql`
+  subscription currentPageWritersSubscription($pageId: String!) {
+    pres_page_writers(where: { pageId: { _eq: $pageId } }) {
+      userId
+    }
+  }
+`;
+
+export const CURRENT_PAGE_WRITERS_QUERY = gql`query currentPageWritersQuery {
+  pres_page_writers {
+    userId
+    pageId
+  }
+}`;
+
+      const {
+        data: countData,
+      } = useSubscription(USER_AGGREGATE_COUNT_SUBSCRIPTION);
+      const count = countData?.user_aggregate?.aggregate?.count - 1 || 0;
+
+      const { data: presentationPageData } = useSubscription(CURRENT_PRESENTATION_PAGE_SUBSCRIPTION);
+      const { pres_page_curr: presentationPageArray } = (presentationPageData || {});
+      const currentPresentationPage = presentationPageArray && presentationPageArray[0];
+
+      const { data: whiteboardWritersData, error } = useQuery(CURRENT_PAGE_WRITERS_QUERY);
+      if (error) console.log("Subscription error: ", error);
+      const whiteboardWriters = whiteboardWritersData?.pres_page_writers || [];
+
+     console.log('====== USERS ======= ', Service.getUsers(), count, currentPresentationPage, whiteboardWritersData)
+
     return (
       <PresentationToolbar
         {...props}
@@ -93,6 +160,9 @@ const PresentationToolbarContainer = (props) => {
           previousSlide,
           nextSlide,
           skipToSlide,
+          count,
+          currentPresentationPage,
+          whiteboardWriters,
         }}
       />
     );
