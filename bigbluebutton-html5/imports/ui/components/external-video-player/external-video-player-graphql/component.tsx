@@ -414,7 +414,7 @@ const ExternalVideoPlayer: React.FC<ExternalVideoPlayerProps> = ({
   );
 };
 
-const ExternalVideoPlayerContainer: React.FC = () => {
+const ExternalVideoPlayerContainer: React.FC = (props) => {
   /* eslint no-underscore-dangle: "off" */
   // @ts-ignore - temporary while hybrid (meteor+GraphQl)
   const isEchoTest = useReactiveVar(audioManager._isEchoTest.value) as boolean;

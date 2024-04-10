@@ -21,6 +21,14 @@ import Styled from "./styles";
 import { mapLanguage } from "./utils";
 import { useMouseEvents, useCursor } from "./hooks";
 
+
+
+
+import { CardShapeTool } from './CardShape/CardShapeTool'
+import { CardShapeUtil } from './CardShape/CardShapeUtil'
+import { components, uiOverrides } from './ui-overrides'
+
+
 // Helper functions
 const deleteLocalStorageItemsWithPrefix = (prefix) => {
   const keysToRemove = Object.keys(localStorage).filter((key) =>
@@ -122,6 +130,9 @@ const Whiteboard = React.memo(function Whiteboard(props) {
   const lastKnownWidth = React.useRef(presentationAreaWidth);
 
   const [shapesVersion, setShapesVersion] = React.useState(0);
+
+  const customShapeUtils = [CardShapeUtil]
+  const customTools = [CardShapeTool]
 
   const setIsMouseDown = (val) => {
     isMouseDownRef.current = val;
@@ -1132,6 +1143,15 @@ const Whiteboard = React.memo(function Whiteboard(props) {
         forceMobile={true}
         hideUi={hasWBAccessRef.current || isPresenter ? false : true}
         onMount={handleTldrawMount}
+
+        				// Pass in the array of custom shape classes
+				shapeUtils={customShapeUtils}
+				// Pass in the array of custom tool classes
+				tools={customTools}
+				// Pass in any overrides to the user interface
+				overrides={uiOverrides}
+				// Pass in the new Keybaord Shortcuts component
+				components={components}
       />
       <Styled.TldrawV2GlobalStyle
         {...{

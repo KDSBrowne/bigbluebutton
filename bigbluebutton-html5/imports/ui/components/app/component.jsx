@@ -624,7 +624,7 @@ setRandomUserSelectModalIsOpen(value) {
           <SidebarContentContainer isSharedNotesPinned={shouldShowSharedNotes} />
           <NavBarContainer main="new" />
           <WebcamContainer isLayoutSwapped={!presentationIsOpen} layoutType={selectedLayout} />
-          <ExternalVideoPlayerContainer />
+          {/* <ExternalVideoPlayerContainer /> */}
           <GenericComponentContainer
             genericComponentId={genericComponentId}
           />
@@ -639,7 +639,15 @@ setRandomUserSelectModalIsOpen(value) {
                 layoutType={selectedLayout}
               />
             )
-            : null
+            : (
+              <PresentationContainer
+              setPresentationFitToWidth={this.setPresentationFitToWidth}
+              fitToWidth={presentationFitToWidth}
+              darkTheme={darkTheme}
+              presentationIsOpen={presentationIsOpen}
+              layoutType={selectedLayout}
+            />
+            )
             }
           {
           shouldShowScreenshare
