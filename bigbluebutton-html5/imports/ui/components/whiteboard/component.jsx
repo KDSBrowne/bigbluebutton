@@ -21,6 +21,10 @@ import Styled from "./styles";
 import { mapLanguage } from "./utils";
 import { useMouseEvents, useCursor } from "./hooks";
 
+import { FrameShapeTool } from './shapes/frame/FrameShapeTool'
+import { FrameShapeUtil } from './shapes/frame/FrameShapeUtil'
+import { components, uiOverrides } from './ui-overrides'
+
 // Helper functions
 const deleteLocalStorageItemsWithPrefix = (prefix) => {
   const keysToRemove = Object.keys(localStorage).filter((key) =>
@@ -507,6 +511,12 @@ const Whiteboard = React.memo(function Whiteboard(props) {
         toUpdate.push(diff);
       }
     });
+
+    console.log({
+      shapesToAdd: toAdd,
+      shapesToUpdate: toUpdate,
+      shapesToRemove: toRemove,
+    })
 
     return {
       shapesToAdd: toAdd,
@@ -1121,6 +1131,10 @@ const Whiteboard = React.memo(function Whiteboard(props) {
     presentationAreaHeight,
   ]);
 
+// [1]
+const customShapeUtils = [FrameShapeUtil]
+const customTools = [FrameShapeTool]
+
   return (
     <div
       ref={whiteboardRef}
@@ -1132,6 +1146,14 @@ const Whiteboard = React.memo(function Whiteboard(props) {
         forceMobile={true}
         hideUi={hasWBAccessRef.current || isPresenter ? false : true}
         onMount={handleTldrawMount}
+				// Pass in the array of custom shape classes
+				shapeUtils={customShapeUtils}
+				// Pass in the array of custom tool classes
+				tools={customTools}
+				// Pass in any overrides to the user interface
+				overrides={uiOverrides}
+				// Pass in the new Keybaord Shortcuts component
+				components={components}
       />
       <Styled.TldrawV2GlobalStyle
         {...{

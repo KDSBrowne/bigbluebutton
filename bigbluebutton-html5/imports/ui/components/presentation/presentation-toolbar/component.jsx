@@ -101,6 +101,7 @@ class PresentationToolbar extends PureComponent {
 
     this.state = {
       wasFTWActive: false,
+      frameFocus: false, 
     };
 
     this.setWasActive = this.setWasActive.bind(this);
@@ -450,7 +451,10 @@ class PresentationToolbar extends PureComponent {
             circle
             onClick={() => {
               console.log('handle click', tldrawAPI);
-            
+
+
+
+
               tldrawAPI.setCamera({ x: -50, y: -50, z: .1 }, false);
             
               // Generate a unique asset ID using the current slide number
@@ -496,11 +500,11 @@ class PresentationToolbar extends PureComponent {
                 const frameX = index * (frameWidth + margin) + 150;
                 const frameY = 850;
             
-                const frameId = `frame-${writer.userId}`; // Use userId in frameId
+                const frameId = `frame1-${writer.userId}`; // Use userId in frameId
             
                 const frameShape = {
                   id: `shape:${frameId}`,
-                  type: 'frame',
+                  type: 'frame1',
                   x: frameX,
                   y: frameY,
                   // isLocked: true,

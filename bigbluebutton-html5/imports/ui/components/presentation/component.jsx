@@ -83,6 +83,7 @@ class Presentation extends PureComponent {
       tldrawIsMounting: true,
       isToolbarVisible: true,
       hadPresentation: false,
+      isPerUserFrame: false,
     };
 
     this.currentPresentationToastId = null;
@@ -100,6 +101,7 @@ class Presentation extends PureComponent {
     this.setIsToolbarVisible = this.setIsToolbarVisible.bind(this);
     this.handlePanShortcut = this.handlePanShortcut.bind(this);
     this.renderPresentationMenu = this.renderPresentationMenu.bind(this);
+    this.setIsPerUserFrame = this.setIsPerUserFrame.bind(this);
 
     this.onResize = () => setTimeout(this.handleResize.bind(this), 0);
     this.renderCurrentPresentationToast = this.renderCurrentPresentationToast.bind(this);
@@ -442,6 +444,12 @@ class Presentation extends PureComponent {
     });
   }
 
+  setIsPerUserFrame(val) {
+    this.setState({
+      isPerUserFrame: val,
+    });
+  }
+
   setPresentationRef(ref) {
     this.refPresentationContainer = ref;
   }
@@ -633,6 +641,7 @@ class Presentation extends PureComponent {
         whiteboardId={currentSlide?.id}
         numberOfSlides={totalPages}
         tldrawAPI={this.state.tldrawAPI}
+        setIsPerUserFrame={this.setIsPerUserFrame}
       />
     );
   }
