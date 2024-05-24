@@ -25,8 +25,8 @@ import {
 } from "./utils";
 import { useMouseEvents, useCursor } from "./hooks";
 import { notifyShapeNumberExceeded, customEditorAssetUrls, customAssetUrls } from "./service";
-
 import NoopTool from './custom-tools/noop-tool/component';
+import { PollShapeUtil } from './custom-shapes/poll/component';
 
 // Helper functions
 const deleteLocalStorageItemsWithPrefix = (prefix) => {
@@ -142,6 +142,9 @@ const Whiteboard = React.memo(function Whiteboard(props) {
   const lastKnownWidth = React.useRef(presentationAreaWidth);
 
   const [shapesVersion, setShapesVersion] = React.useState(0);
+
+  const customShapeUtils = [PollShapeUtil]
+  const customTools = [NoopTool];
 
   const setIsMouseDown = (val) => {
     isMouseDownRef.current = val;
@@ -1175,8 +1178,6 @@ const Whiteboard = React.memo(function Whiteboard(props) {
     presentationAreaHeight,
   ]);
 
-  const customTools = [NoopTool];
-
   return (
     <div
       ref={whiteboardRef}
@@ -1189,7 +1190,8 @@ const Whiteboard = React.memo(function Whiteboard(props) {
         forceMobile={true}
         hideUi={hasWBAccessRef.current || isPresenter ? false : true}
         onMount={handleTldrawMount}
-        tools={customTools}
+				shapeUtils={customShapeUtils}
+				tools={customTools}
       />
       <Styled.TldrawV2GlobalStyle
         {...{

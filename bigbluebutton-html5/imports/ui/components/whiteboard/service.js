@@ -77,7 +77,9 @@ const sendAnnotation = (annotation, submitAnnotations) => {
   } else {
     annotationsQueue.push(annotation);
   }
-  if (!annotationsSenderIsRunning) setTimeout(() => proccessAnnotationsQueue(submitAnnotations), annotationsBufferTimeMin);
+  if (!annotationsSenderIsRunning) {
+    setTimeout(() => proccessAnnotationsQueue(submitAnnotations), annotationsBufferTimeMin);
+  }
 };
 
 const persistShape = async (shape, whiteboardId, isModerator, submitAnnotations) => {
@@ -141,18 +143,19 @@ const toggleToolsAnimations = (activeAnim, anim, time, hasWBAccess = false) => {
     const tlEls = document.querySelectorAll('.tlui-menu-zone, .tlui-toolbar__tools, .tlui-toolbar__extras, .tlui-style-panel__wrapper');
     if (tlEls.length) {
       tlEls?.forEach(el => {
-        el.classList.remove(activeAnim);
-        el.style.transition = `opacity ${time} ease-in-out`;
-        el.classList.add(anim);
+        const element = el;
+        element.classList.remove(activeAnim);
+        element.style.transition = `opacity ${time} ease-in-out`;
+        element.classList.add(anim);
       });
       handleOptionsDropdown();
     } else {
-      // If the elements are not yet in the DOM, wait for 50ms and try again
+      // If the elements are not yet in the DOM, wait for 300ms and try again
       setTimeout(checkElementsAndRun, 300);
     }
-  };
+  };  
 
-  checkElementsAndRun();
+  return checkElementsAndRun();
 };
 
 const formatAnnotations = (annotations, intl, curPageId, currentPresentationPage) => {
@@ -166,36 +169,28 @@ const formatAnnotations = (annotations, intl, curPageId, currentPresentationPage
     if (annotationInfo.questionType) {
       // poll result, convert it to text and create tldraw shape
       if (!annotationInfo.props) {
-        const { POLL_BAR_CHAR } = PollService;
         annotationInfo.answers = annotationInfo.answers.reduce(
           caseInsensitiveReducer, [],
         );
+
         let pollResult = PollService.getPollResultString(annotationInfo, intl)
           .split('<br/>').join('\n').replace(/(<([^>]+)>)/ig, '');
 
         const lines = pollResult.split('\n');
         const longestLine = lines.reduce((a, b) => (a.length > b.length ? a : b), '').length;
 
-        // add empty spaces after last ∎ in each of the lines to make them all the same length
-        pollResult = lines.map((line) => {
-          if (!line.includes(POLL_BAR_CHAR) || line.length === longestLine) return line;
-
-          const splitLine = line.split(`${POLL_BAR_CHAR} `);
-          const spaces = ' '.repeat(longestLine - line.length);
-          return `${splitLine[0]} ${spaces} ${splitLine[1]}`;
-        }).join('\n');
-
         // Text measurement estimation
-        const averageCharWidth = 14;
+        const averageCharWidth = 18;
         const lineHeight = 32;
+        const padding = 2;
 
         const annotationWidth = longestLine * averageCharWidth; // Estimate width
         const annotationHeight = lines.length * lineHeight; // Estimate height
 
         const slideWidth = currentPresentationPage?.scaledWidth;
         const slideHeight = currentPresentationPage?.scaledHeight;
-        const xPosition = slideWidth - annotationWidth;
-        const yPosition = slideHeight - annotationHeight;
+        const xPosition = slideWidth - annotationWidth - padding;
+        const yPosition = slideHeight - annotationHeight - padding;
 
         annotationInfo = {
           x: xPosition,
@@ -208,22 +203,17 @@ const formatAnnotations = (annotations, intl, curPageId, currentPresentationPage
           index: 'a1',
           id: `${annotationInfo.id}`,
           meta: {},
-          type: 'geo',
+          type: 'poll',
           props: {
-            url: '',
-            text: `${pollResult}`,
             color: 'black',
-            font: 'mono',
-            fill: 'semi',
-            dash: 'draw',
             w: annotationWidth,
             h: annotationHeight,
-            size: 'm',
-            growY: 0,
-            align: 'middle',
-            geo: 'rectangle',
-            verticalAlign: 'middle',
-            labelColor: 'black',
+            answers: annotationInfo.answers,
+            numRespondents: annotationInfo.numRespondents,
+            numResponders: annotationInfo.numResponders,
+            questionText: annotationInfo.questionText,
+            questionType: annotationInfo.questionType,
+            question: annotationInfo.question || "",
           },
         };
       } else {
@@ -238,22 +228,17 @@ const formatAnnotations = (annotations, intl, curPageId, currentPresentationPage
           index: annotationInfo.index,
           id: annotationInfo.id,
           meta: annotationInfo.meta,
-          type: 'geo',
+          type: 'poll',
           props: {
-            url: '',
-            text: annotationInfo.props.text,
             color: annotationInfo.props.color,
-            font: annotationInfo.props.font,
-            fill: annotationInfo.props.fill,
-            dash: annotationInfo.props.dash,
             h: annotationInfo.props.h,
             w: annotationInfo.props.w,
-            size: annotationInfo.props.size,
-            growY: 0,
-            align: 'middle',
-            geo: annotationInfo.props.geo,
-            verticalAlign: 'middle',
-            labelColor: annotationInfo.props.labelColor,
+            answers: annotationInfo.answers,
+            numRespondents: annotationInfo.numRespondents,
+            numResponders: annotationInfo.numResponders,
+            questionText: annotationInfo.questionText,
+            questionType: annotationInfo.questionType,
+            question: annotationInfo.question || '',
           },
         };
       }
@@ -330,9 +315,6 @@ const customAssetUrls = {
     'geo-arrow-up': `${TL_ICON_PATHS}/geo-arrow-up.svg`,
     'geo-arrow-down': `${TL_ICON_PATHS}/geo-arrow-down.svg`,
     'geo-arrow-right': `${TL_ICON_PATHS}/geo-arrow-right.svg`,
-    'geo-pentagon': `${TL_ICON_PATHS}/geo-pentagon.svg`,
-    'geo-octagon': `${TL_ICON_PATHS}/geo-octagon.svg`,
-    'geo-rhombus-2': `${TL_ICON_PATHS}/geo-rhombus-2.svg`,
     'align-left': `${TL_ICON_PATHS}/align-left.svg`,
     'align-top': `${TL_ICON_PATHS}/align-top.svg`,
     'align-right': `${TL_ICON_PATHS}/align-right.svg`,
