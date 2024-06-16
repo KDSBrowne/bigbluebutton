@@ -318,6 +318,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
   const handleTldrawMount = (editor) => {
     setTlEditor(editor);
     setTldrawAPI(editor);
+    props.setTlEditor(editor);
 
     editor?.user?.updateUserPreferences({ locale: language });
 

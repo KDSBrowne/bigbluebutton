@@ -361,7 +361,7 @@ class PresentationToolbar extends PureComponent {
   };
 
   handleButtonClick = () => {
-    console.log('start breakout - details : ', this.state);
+    console.log('start breakout - details : ', this.state, this.props.tlEditor);
     this.handleModalClose();
   };
 

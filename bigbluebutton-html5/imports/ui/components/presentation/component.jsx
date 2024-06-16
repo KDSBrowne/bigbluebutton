@@ -596,6 +596,7 @@ class Presentation extends PureComponent {
       userIsPresenter,
       hasPoll,
       currentPresentationPage,
+      tlEditor,
     } = this.props;
     const { zoom, isPanning } = this.state;
 
@@ -621,6 +622,7 @@ class Presentation extends PureComponent {
           presentationIsOpen,
           userIsPresenter,
           currentPresentationPage,
+          tlEditor,
         }}
         setIsPanning={this.setIsPanning}
         isPanning={isPanning}
@@ -748,6 +750,7 @@ class Presentation extends PureComponent {
       darkTheme,
       isViewersAnnotationsLocked,
       fitToWidth,
+      setTlEditor,
     } = this.props;
 
     const {
@@ -808,6 +811,14 @@ class Presentation extends PureComponent {
     const presentationZIndex = fullscreenContext ? presentationBounds.zIndex : undefined;
 
     const APP_CRASH_METADATA = { logCode: 'whiteboard_crash', logMessage: 'Possible whiteboard crash' };
+
+
+    console.log('=======================================')
+console.log('=======================================')
+    console.log('RENDINGINT WHITEBOARD ', setTlEditor)
+    console.log('=======================================')
+    console.log('=======================================')
+
 
     return (
       <>
@@ -889,6 +900,7 @@ class Presentation extends PureComponent {
                     darkTheme={darkTheme}
                     isToolbarVisible={isToolbarVisible}
                     isViewersAnnotationsLocked={isViewersAnnotationsLocked}
+                    setTlEditor={setTlEditor}
                   />
                 </LocatedErrorBoundary>
                 {isFullscreen && <PollingContainer />}

@@ -134,6 +134,7 @@ class App extends Component {
       isAudioModalOpen: false,
       isVideoPreviewModalOpen: false,
       presentationFitToWidth: false,
+      tlEditor: null,
     };
 
     this.timeOffsetInterval = null;
@@ -142,11 +143,19 @@ class App extends Component {
     this.handleWindowResize = throttle(this.handleWindowResize).bind(this);
     this.shouldAriaHide = this.shouldAriaHide.bind(this);
     this.setAudioModalIsOpen = this.setAudioModalIsOpen.bind(this);
+    this.setTlEditor = this.setTlEditor.bind(this);
 
     this.setVideoPreviewModalIsOpen = this.setVideoPreviewModalIsOpen.bind(this);
 
     this.throttledDeviceType = throttle(() => this.setDeviceType(),
       50, { trailing: true, leading: true }).bind(this);
+  }
+
+
+  setTlEditor(api) {
+
+    console.log('setting api in app : ', api)
+    this.setState({ tlEditor: api })
   }
 
   componentDidMount() {
@@ -590,6 +599,8 @@ class App extends Component {
                 darkTheme={darkTheme}
                 presentationIsOpen={presentationIsOpen}
                 layoutType={selectedLayout}
+                tlEditor={this.state.tlEditor}
+                setTlEditor={this.setTlEditor}
               />
             )
             : null

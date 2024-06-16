@@ -297,6 +297,13 @@ const WhiteboardContainer = (props) => {
 
   if (!currentPresentationPage) return null;
 
+
+  console.log('=======================================')
+  console.log('=======================================')
+      console.log('RENDINGINT WHITEBOARD  containerrrrrrrrrrrrrr', props.setTlEditor)
+      console.log('=======================================')
+      console.log('=======================================')
+
   return (
     <Whiteboard
       {...{
