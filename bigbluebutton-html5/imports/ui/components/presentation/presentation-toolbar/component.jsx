@@ -12,13 +12,14 @@ import {
 import {
   PresentationToolbarItemType,
 } from 'bigbluebutton-html-plugin-sdk/dist/cjs/extensible-areas/presentation-toolbar-item/enums';
-import Styled from './styles';
+import styledComponents from './styles';
 import ZoomTool from './zoom-tool/component';
 import SmartMediaShareContainer from './smart-video-share/container';
 import TooltipContainer from '/imports/ui/components/common/tooltip/container';
 import KEY_CODES from '/imports/utils/keyCodes';
 import Spinner from '/imports/ui/components/common/spinner/component';
 import Separator from '/imports/ui/components/common/separator/component';
+import ReactDOM from 'react-dom';
 
 const intlMessages = defineMessages({
   previousSlideLabel: {
@@ -109,6 +110,9 @@ class PresentationToolbar extends PureComponent {
 
     this.state = {
       wasFTWActive: false,
+      showModal: false,
+      usersPerFrame: '',
+      numberOfFrames: '',
     };
 
     this.setWasActive = this.setWasActive.bind(this);
@@ -121,6 +125,10 @@ class PresentationToolbar extends PureComponent {
     this.fullscreenToggleHandler = this.fullscreenToggleHandler.bind(this);
     this.switchSlide = this.switchSlide.bind(this);
     this.handleSwitchWhiteboardMode = this.handleSwitchWhiteboardMode.bind(this);
+    this.handleModalShow = this.handleModalShow.bind(this);
+    this.handleModalClose = this.handleModalClose.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleModalSubmit = this.handleModalSubmit.bind(this);
   }
 
   componentDidMount() {
@@ -322,6 +330,82 @@ class PresentationToolbar extends PureComponent {
     );
   }
 
+  handleModalShow() {
+    this.setState({ showModal: true });
+  }
+
+  handleModalClose() {
+    this.setState({ showModal: false });
+  }
+
+  handleInputChange(event) {
+    const { name, value } = event.target;
+    this.setState({ [name]: value });
+  }
+
+  handleModalSubmit() {
+    const { usersPerFrame, numberOfFrames } = this.state;
+    // Handle the values as needed
+    console.log('Users per frame:', usersPerFrame);
+    console.log('Number of frames:', numberOfFrames);
+    this.handleModalClose();
+  }
+
+  handleInputChange = (e) => {
+    const { name, value } = e.target;
+    this.setState({ [name]: value });
+  };
+
+  handleModalClose = () => {
+    this.setState({ showModal: false });
+  };
+
+  handleButtonClick = () => {
+    console.log('start breakout - details : ', this.state);
+    this.handleModalClose();
+  };
+
+  renderModal() {
+    const { showModal, usersPerFrame, numberOfFrames } = this.state;
+
+    return ReactDOM.createPortal(
+      <styledComponents.Modal show={showModal}>
+        <styledComponents.ModalContent>
+          <styledComponents.ModalHeader>
+            <styledComponents.ModalTitle>Breakout Settings</styledComponents.ModalTitle>
+            <styledComponents.CloseButton onClick={this.handleModalClose}>&times;</styledComponents.CloseButton>
+          </styledComponents.ModalHeader>
+          <styledComponents.ModalBody>
+            <styledComponents.Container>
+              <styledComponents.FormGroup>
+                <label htmlFor="usersPerFrame">Users per frame:</label>
+                <input
+                  type="number"
+                  id="usersPerFrame"
+                  name="usersPerFrame"
+                  value={usersPerFrame}
+                  onChange={this.handleInputChange}
+                />
+              </styledComponents.FormGroup>
+              <styledComponents.FormGroup>
+                <label htmlFor="numberOfFrames">Number of frames:</label>
+                <input
+                  type="number"
+                  id="numberOfFrames"
+                  name="numberOfFrames"
+                  value={numberOfFrames}
+                  onChange={this.handleInputChange}
+                />
+              </styledComponents.FormGroup>
+              <styledComponents.SubmitButton onClick={this.handleButtonClick}>Start</styledComponents.SubmitButton>
+            </styledComponents.Container>
+          </styledComponents.ModalBody>
+        </styledComponents.ModalContent>
+      </styledComponents.Modal>,
+      document.body // Render the modal at the root level
+    );
+  }
+
   renderSkipSlideOpts(numberOfSlides) {
     // Fill drop down menu with all the slides in presentation
     const { intl } = this.props;
@@ -376,14 +460,14 @@ class PresentationToolbar extends PureComponent {
     const isInfiniteCanvas = currentSlide?.infiniteCanvas;
 
     return (
-      <Styled.PresentationToolbarWrapper
+      <styledComponents.PresentationToolbarWrapper
         id="presentationToolbarWrapper"
       >
         {this.renderAriaDescs()}
-        <Styled.QuickPollButtonWrapper>
+        <styledComponents.QuickPollButtonWrapper>
           {this.renderToolbarPluginItems()}
           {isPollingEnabled ? (
-            <Styled.QuickPollButton
+            <styledComponents.QuickPollButton
               {...{
                 intl,
                 amIPresenter,
@@ -394,9 +478,9 @@ class PresentationToolbar extends PureComponent {
           ) : null}
 
           <SmartMediaShareContainer {...{ intl, currentSlide }} />
-        </Styled.QuickPollButtonWrapper>
-        <Styled.PresentationSlideControls>
-          <Styled.PrevSlideButton
+        </styledComponents.QuickPollButtonWrapper>
+        <styledComponents.PresentationSlideControls>
+          <styledComponents.PrevSlideButton
             role="button"
             aria-label={prevSlideAriaLabel}
             aria-describedby={
@@ -416,7 +500,7 @@ class PresentationToolbar extends PureComponent {
           <TooltipContainer
             title={intl.formatMessage(intlMessages.selectLabel)}
           >
-            <Styled.SkipSlideSelect
+            <styledComponents.SkipSlideSelect
               id="skipSlide"
               aria-label={intl.formatMessage(intlMessages.skipSlideLabel)}
               aria-describedby="skipSlideDesc"
@@ -428,9 +512,9 @@ class PresentationToolbar extends PureComponent {
               data-test="skipSlide"
             >
               {this.renderSkipSlideOpts(numberOfSlides)}
-            </Styled.SkipSlideSelect>
+            </styledComponents.SkipSlideSelect>
           </TooltipContainer>
-          <Styled.NextSlideButton
+          <styledComponents.NextSlideButton
             role="button"
             aria-label={nextSlideAriaLabel}
             aria-describedby={
@@ -446,10 +530,12 @@ class PresentationToolbar extends PureComponent {
             hideLabel
             data-test="nextSlide"
           />
-        </Styled.PresentationSlideControls>
-        <Styled.PresentationZoomControls>
+        </styledComponents.PresentationSlideControls>
+        <styledComponents.PresentationZoomControls>
+          {this.renderModal()}
+          <button onClick={this.handleModalShow}>Settings</button>
           {(allowInfiniteCanvas) && (
-          <Styled.InfiniteCanvasButton
+          <styledComponents.InfiniteCanvasButton
             data-test={isInfiniteCanvas ? 'turnInfiniteCanvasOff' : 'turnInfiniteCanvasOn'}
             role="button"
             aria-label={
@@ -472,7 +558,7 @@ class PresentationToolbar extends PureComponent {
           />
           )}
 
-          <Styled.WBAccessButton
+          <styledComponents.WBAccessButton
             data-test={multiUser ? 'turnMultiUsersWhiteboardOff' : 'turnMultiUsersWhiteboardOn'}
             role="button"
             aria-label={
@@ -494,13 +580,13 @@ class PresentationToolbar extends PureComponent {
             hideLabel
           />
           {multiUser ? (
-            <Styled.MultiUserTool
+            <styledComponents.MultiUserTool
               onClick={() => this.handleSwitchWhiteboardMode(!multiUser)}
             >
               {multiUserSize}
-            </Styled.MultiUserTool>
+            </styledComponents.MultiUserTool>
           ) : (
-            <Styled.MUTPlaceholder />
+            <styledComponents.MUTPlaceholder />
           )}
           {!isMobile ? (
             <TooltipContainer>
@@ -517,7 +603,7 @@ class PresentationToolbar extends PureComponent {
               />
             </TooltipContainer>
           ) : null}
-          <Styled.FitToWidthButton
+          <styledComponents.FitToWidthButton
             role="button"
             data-test="fitToWidthButton"
             aria-describedby={fitToWidth ? 'fitPageDesc' : 'fitWidthDesc'}
@@ -542,8 +628,8 @@ class PresentationToolbar extends PureComponent {
             hideLabel
             $fitToWidth={fitToWidth}
           />
-        </Styled.PresentationZoomControls>
-      </Styled.PresentationToolbarWrapper>
+        </styledComponents.PresentationZoomControls>
+      </styledComponents.PresentationToolbarWrapper>
     );
   }
 }

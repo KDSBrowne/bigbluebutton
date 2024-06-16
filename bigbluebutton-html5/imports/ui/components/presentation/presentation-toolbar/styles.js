@@ -19,6 +19,96 @@ import {
 } from '/imports/ui/stylesheets/styled-components/general';
 import Button from '/imports/ui/components/common/button/component';
 
+const Modal = styled.div`
+  display: ${(props) => (props.show ? 'block' : 'none')};
+  position: fixed;
+  z-index: 1000;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background-color: rgba(0, 0, 0, 0.4);
+`;
+
+const ModalContent = styled.div`
+  background-color: #ffffff;
+  margin: auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  z-index: 1001;
+`;
+
+const CloseButton = styled.span`
+  color: #aaa;
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+
+  &:hover,
+  &:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 10px;
+`;
+
+const ModalTitle = styled.h2`
+  margin: 0;
+  font-size: 1.5em;
+  color: #333;
+`;
+
+const ModalBody = styled.div`
+  padding: 10px 0;
+`;
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const FormGroup = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  label {
+    flex: 1;
+  }
+
+  input {
+    flex: 2;
+    margin-left: 10px;
+  }
+`;
+
+const SubmitButton = styled.button`
+  align-self: flex-end;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+
 const PresentationToolbarWrapper = styled.div`
   position: absolute;
   align-self: center;
@@ -323,4 +413,14 @@ export default {
   WBAccessButton,
   MUTPlaceholder,
   InfiniteCanvasButton,
+  Modal,
+  ModalContent,
+  CloseButton,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  FormGroup,
+  SubmitButton,
+  Container,
 };
+
