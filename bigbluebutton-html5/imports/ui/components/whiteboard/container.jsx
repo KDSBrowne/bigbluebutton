@@ -8,7 +8,7 @@ import React, {
 import { useMutation, useQuery } from '@apollo/client';
 import {
   AssetRecordType,
-} from '@bigbluebutton/tldraw';
+} from '@tldraw/tldraw';
 import { throttle } from 'radash';
 import {
   CURRENT_PRESENTATION_PAGE_SUBSCRIPTION,
@@ -296,13 +296,6 @@ const WhiteboardContainer = (props) => {
   });
 
   if (!currentPresentationPage) return null;
-
-
-  console.log('=======================================')
-  console.log('=======================================')
-      console.log('RENDINGINT WHITEBOARD  containerrrrrrrrrrrrrr', props.setTlEditor)
-      console.log('=======================================')
-      console.log('=======================================')
 
   return (
     <Whiteboard

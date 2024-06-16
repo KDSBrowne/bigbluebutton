@@ -597,6 +597,7 @@ class Presentation extends PureComponent {
       hasPoll,
       currentPresentationPage,
       tlEditor,
+      multiUserWriters
     } = this.props;
     const { zoom, isPanning } = this.state;
 
@@ -636,6 +637,7 @@ class Presentation extends PureComponent {
         addWhiteboardGlobalAccess={addWhiteboardGlobalAccess}
         removeWhiteboardGlobalAccess={removeWhiteboardGlobalAccess}
         multiUserSize={multiUserSize}
+        multiUserWriters={multiUserWriters}
         multiUser={multiUser}
         whiteboardId={currentSlide?.id}
         numberOfSlides={totalPages}
@@ -811,14 +813,6 @@ class Presentation extends PureComponent {
     const presentationZIndex = fullscreenContext ? presentationBounds.zIndex : undefined;
 
     const APP_CRASH_METADATA = { logCode: 'whiteboard_crash', logMessage: 'Possible whiteboard crash' };
-
-
-    console.log('=======================================')
-console.log('=======================================')
-    console.log('RENDINGINT WHITEBOARD ', setTlEditor)
-    console.log('=======================================')
-    console.log('=======================================')
-
 
     return (
       <>

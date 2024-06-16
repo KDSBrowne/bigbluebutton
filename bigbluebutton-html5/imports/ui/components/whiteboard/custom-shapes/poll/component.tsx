@@ -6,7 +6,7 @@ import {
   TLOnResizeHandler,
   getDefaultColorTheme,
   resizeBox,
-} from '@bigbluebutton/tldraw';
+} from '@tldraw/tldraw';
 import { pollShapeMigrations } from './poll-shape-migrations';
 import { pollShapeProps } from './poll-shape-props';
 import { IPollShape } from './poll-shape-types';

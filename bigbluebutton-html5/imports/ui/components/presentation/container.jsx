@@ -105,10 +105,21 @@ const PresentationContainer = (props) => {
 
   const isViewersAnnotationsLocked = meeting ? meeting.lockSettings?.hideViewersAnnotation : true;
 
+
+  console.log('whiteboardWriters :: ', whiteboardWriters)
+
+  // Transform the whiteboardWriters array into an object
+const whiteboardWritersObj = whiteboardWriters.reduce((acc, writer) => {
+  acc[writer.userId] = writer;
+  return acc;
+}, {});
+
+
   const multiUserData = {
     active: whiteboardWriters?.length > 0,
     size: whiteboardWriters?.length || 0,
     hasAccess: whiteboardWriters?.some((writer) => writer.userId === Auth.userID),
+    whiteboardWriters: whiteboardWritersObj,
   };
 
   const { data: pollData } = useDeduplicatedSubscription(POLL_SUBSCRIPTION);
@@ -199,6 +210,9 @@ const PresentationContainer = (props) => {
     presentationAreaHeight: presentation?.height,
   };
 
+
+  console.log('multiUserData :: ', multiUserData)
+
   return (
     <Presentation
       {
@@ -230,6 +244,7 @@ const PresentationContainer = (props) => {
           addWhiteboardGlobalAccess: getUsers,
           removeWhiteboardGlobalAccess,
           multiUserSize: multiUserData.size,
+          multiUserWriters: multiUserData.whiteboardWriters,
           isViewersAnnotationsLocked,
           setPresentationIsOpen: MediaService.setPresentationIsOpen,
           isDefaultPresentation: currentPresentationPage?.isDefaultPresentation,

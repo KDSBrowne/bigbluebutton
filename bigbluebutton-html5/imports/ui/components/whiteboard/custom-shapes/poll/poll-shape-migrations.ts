@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { defineMigrations } from '@bigbluebutton/tldraw';
+import { defineMigrations } from '@tldraw/tldraw';
 
 // Migrations for the custom poll shape (optional but very helpful)
 export const pollShapeMigrations = defineMigrations({

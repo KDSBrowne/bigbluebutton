@@ -345,9 +345,11 @@ class PresentationToolbar extends PureComponent {
 
   handleModalSubmit() {
     const { usersPerFrame, numberOfFrames } = this.state;
+    const { tlEditor } = this.props;
     // Handle the values as needed
     console.log('Users per frame:', usersPerFrame);
     console.log('Number of frames:', numberOfFrames);
+    console.log('editor : ', tlEditor)
     this.handleModalClose();
   }
 
@@ -361,9 +363,69 @@ class PresentationToolbar extends PureComponent {
   };
 
   handleButtonClick = () => {
-    console.log('start breakout - details : ', this.state, this.props.tlEditor);
+    const { usersPerFrame, numberOfFrames } = this.state;
+    const { tlEditor, multiUserWriters, multiUserSize } = this.props;
+  
+    // Handle the values as needed
+    console.log('Users per frame:', usersPerFrame);
+    console.log('Number of frames:', numberOfFrames);
+    console.log('editor:', tlEditor);
+    console.log('multiUserWriters:', multiUserWriters);
+    console.log('multiUserSize:', multiUserSize);
+  
+    // Create an array to hold the frame shapes
+    const shapes = [];
+  
+    // Extract user IDs from multiUserWriters
+    const userIds = Object.keys(multiUserWriters);
+  
+    // Ensure we have enough users to distribute
+    if (userIds.length < usersPerFrame * numberOfFrames) {
+      console.error('Not enough users to distribute');
+      return;
+    }
+  
+    // Distribute users to each frame
+    let userIndex = 0;
+  
+    for (let i = 0; i < numberOfFrames; i++) {
+      const assignedTo = {};
+  
+      for (let j = 0; j < usersPerFrame; j++) {
+        const userId = userIds[userIndex];
+        assignedTo[userId] = true;
+        userIndex++;
+      }
+  
+      shapes.push({
+        id: `shape:br-frame-${i}`,
+        type: 'frame',
+        x: 35 + (340 * i),
+        y: 35,
+        rotation: 0,
+        isLocked: false,
+        opacity: 1,
+        parentId: "page:1",
+        meta: {
+          assignedTo,
+        },
+        props: {
+          h: 270,
+          w: 310,
+          name: "",
+        },
+      });
+    }
+  
+    // Create the frames in the editor
+    tlEditor.createShapes(shapes);
+  
+    // Close the modal
     this.handleModalClose();
   };
+  
+  
+  
 
   renderModal() {
     const { showModal, usersPerFrame, numberOfFrames } = this.state;

@@ -12,8 +12,8 @@ import {
   InstancePresenceRecordType,
   setDefaultUiAssetUrls,
   setDefaultEditorAssetUrls,
-} from "@bigbluebutton/tldraw";
-import "@bigbluebutton/tldraw/tldraw.css";
+} from "@tldraw/tldraw";
+import "@tldraw/tldraw/tldraw.css";
 import SlideCalcUtil from "/imports/utils/slideCalcUtils";
 import { HUNDRED_PERCENT } from "/imports/utils/slideCalcUtils";
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -1066,9 +1066,11 @@ const Whiteboard = React.memo(function Whiteboard(props) {
             tlEditor?.store?.remove(shapesToRemove);
           }
           if (shapesToAdd.length) {
+            console.log('shapesToAdd ' , shapesToAdd)
             tlEditor?.store?.put(shapesToAdd);
           }
           if (shapesToUpdate.length) {
+            console.log('shapesToUpdate ' , shapesToUpdate)
             tlEditor?.updateShapes(shapesToUpdate);
           }
         });

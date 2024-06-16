@@ -1,4 +1,4 @@
-import { TLBaseShape, TLDefaultColorStyle } from '@bigbluebutton/tldraw';
+import { TLBaseShape, TLDefaultColorStyle } from '@tldraw/tldraw';
 
 export type IPollShape = TLBaseShape<
   'poll',
