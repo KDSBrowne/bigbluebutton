@@ -8,6 +8,10 @@ import { POLL_CANCEL, POLL_CREATE } from '/imports/ui/components/poll/mutations'
 import { PRESENTATION_SET_PAGE, PRESENTATION_SET_PAGE_INFINITE_CANVAS } from '../mutations';
 import PresentationToolbar from './component';
 import Session from '/imports/ui/services/storage/in-memory';
+import {
+  PRES_ANNOTATION_DELETE,
+} from '../mutations';
+
 
 const infiniteCanvasIcon = (isInfiniteCanvas) => {
   if (isInfiniteCanvas) {
@@ -102,6 +106,21 @@ const PresentationToolbarContainer = (props) => {
   const [presentationSetPage] = useMutation(PRESENTATION_SET_PAGE);
   const [presentationSetPageInfiniteCanvas] = useMutation(PRESENTATION_SET_PAGE_INFINITE_CANVAS);
 
+  
+  
+  
+  const [presentationDeleteAnnotations] = useMutation(PRES_ANNOTATION_DELETE);
+
+  const removeShapes = (shapeIds) => {
+    presentationDeleteAnnotations({
+      variables: {
+        pageId: `${currentSlideNum}`,
+        annotationsIds: shapeIds,
+      },
+    });
+  };
+  
+  
   const endCurrentPoll = () => {
     if (hasPoll) stopPoll();
   };
@@ -191,6 +210,7 @@ const PresentationToolbarContainer = (props) => {
           currentSlide,
           currentPresentationPage,
           infiniteCanvasIcon,
+          removeShapes,
         }}
       />
     );

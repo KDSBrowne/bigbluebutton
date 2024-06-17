@@ -122,6 +122,8 @@ const Whiteboard = React.memo(function Whiteboard(props) {
   const [initialZoomSet, setInitialZoomSet] = React.useState(false);
   const [initialViewBoxWidth, setInitialViewBoxWidth] = React.useState(null);
 
+  const [breakoutFrameAssigned, setBreakoutFrameAssigned] = React.useState({ enabled: false, frameId: null });
+
   if (isMounting) {
     setDefaultEditorAssetUrls(getCustomEditorAssetUrls());
     setDefaultUiAssetUrls(getCustomAssetUrls());
@@ -171,6 +173,11 @@ const Whiteboard = React.memo(function Whiteboard(props) {
       setIsWheelZoom(false);
     }, 300);
   };
+
+
+  React.useEffect(() => {
+    console.log('breakoutFrameAssigned ', breakoutFrameAssigned)
+  }, [breakoutFrameAssigned])
 
   React.useEffect(() => {
     currentPresentationPageRef.current = currentPresentationPage;
@@ -366,7 +373,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
 
         const addedCount = Object.keys(added).length;
         const shapeNumberExceeded = Object.keys(prevShapesRef.current).length + addedCount > maxNumberOfAnnotations;
-        const invalidShapeType = Object.keys(added).find((id) => !isValidShapeType(added[id]));
+        const invalidShapeType = false//Object.keys(added).find((id) => !isValidShapeType(added[id]));
 
         if (shapeNumberExceeded || invalidShapeType) {
           // notify and undo last command without persisting to not generate the onUndo/onRedo callback
@@ -385,6 +392,9 @@ const Whiteboard = React.memo(function Whiteboard(props) {
                 createdBy: currentUser?.userId,
               },
             };
+
+
+            console.log('persistShapeWrapper - adding : ', updatedRecord)
 
             persistShapeWrapper(
               updatedRecord,
@@ -406,6 +416,8 @@ const Whiteboard = React.memo(function Whiteboard(props) {
             },
           };
 
+          console.log('persistShapeWrapper -  update ' , updatedRecord)
+
           persistShapeWrapper(
             updatedRecord,
             whiteboardIdRef.current,
@@ -414,6 +426,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
         });
 
         Object.values(removed).forEach((record) => {
+          console.log('REMOVING ', [record?.id])
           removeShapes([record?.id]);
         });
       },
@@ -581,6 +594,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
 
     filteredShapes.forEach((localShape) => {
       if (!remoteShapeIds.includes(localShape.id)) {
+
         toRemove.push(localShape.id);
       }
     });
@@ -1064,10 +1078,39 @@ const Whiteboard = React.memo(function Whiteboard(props) {
         tlEditor?.store?.mergeRemoteChanges(() => {
           if (shapesToRemove.length > 0) {
             tlEditor?.store?.remove(shapesToRemove);
+
+            const currentUserId = currentUser?.userId;
+          
+            const isAssignedToCurrentUser = shapesToRemove.some(shape => {
+              const assignedTo = shape.meta?.assignedTo;
+              return assignedTo && assignedTo[currentUserId];
+            });
+          
+            if (isAssignedToCurrentUser) {
+              setBreakoutFrameAssigned({ enabled: false, frameId: null });
+            }
           }
           if (shapesToAdd.length) {
-            console.log('shapesToAdd ' , shapesToAdd)
+            console.log('shapesToAdd', shapesToAdd);
             tlEditor?.store?.put(shapesToAdd);
+
+            const currentUserId = currentUser?.userId;
+
+            let fsid = null;
+          
+            const isAssignedToCurrentUser = shapesToAdd.some(shape => {
+              const assignedTo = shape.meta?.assignedTo;
+              const isAssigned = assignedTo && assignedTo[currentUserId];
+              if (isAssigned) {
+                fsid = shape?.id;
+              }
+              return isAssigned;
+            });
+          
+            if (isAssignedToCurrentUser) {
+              setBreakoutFrameAssigned({ enabled: true, frameId: fsid });
+            }
+          
           }
           if (shapesToUpdate.length) {
             console.log('shapesToUpdate ' , shapesToUpdate)

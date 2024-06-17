@@ -1,106 +1,105 @@
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
-import { defineMessages, injectIntl } from 'react-intl';
-import deviceInfo from '/imports/utils/deviceInfo';
-import injectWbResizeEvent from '/imports/ui/components/presentation/resize-wrapper/component';
-import Button from '/imports/ui/components/common/button/component';
+import React, { PureComponent } from "react";
+import PropTypes from "prop-types";
+import { defineMessages, injectIntl } from "react-intl";
+import deviceInfo from "/imports/utils/deviceInfo";
+import injectWbResizeEvent from "/imports/ui/components/presentation/resize-wrapper/component";
+import Button from "/imports/ui/components/common/button/component";
 import {
   HUNDRED_PERCENT,
   MAX_PERCENT,
   STEP,
-} from '/imports/utils/slideCalcUtils';
-import {
-  PresentationToolbarItemType,
-} from 'bigbluebutton-html-plugin-sdk/dist/cjs/extensible-areas/presentation-toolbar-item/enums';
-import styledComponents from './styles';
-import ZoomTool from './zoom-tool/component';
-import SmartMediaShareContainer from './smart-video-share/container';
-import TooltipContainer from '/imports/ui/components/common/tooltip/container';
-import KEY_CODES from '/imports/utils/keyCodes';
-import Spinner from '/imports/ui/components/common/spinner/component';
-import Separator from '/imports/ui/components/common/separator/component';
-import ReactDOM from 'react-dom';
+} from "/imports/utils/slideCalcUtils";
+import { PresentationToolbarItemType } from "bigbluebutton-html-plugin-sdk/dist/cjs/extensible-areas/presentation-toolbar-item/enums";
+import styledComponents from "./styles";
+import ZoomTool from "./zoom-tool/component";
+import SmartMediaShareContainer from "./smart-video-share/container";
+import TooltipContainer from "/imports/ui/components/common/tooltip/container";
+import KEY_CODES from "/imports/utils/keyCodes";
+import Spinner from "/imports/ui/components/common/spinner/component";
+import Separator from "/imports/ui/components/common/separator/component";
+import ReactDOM from "react-dom";
+import { AssetRecordType } from "@tldraw/tldraw";
 
 const intlMessages = defineMessages({
   previousSlideLabel: {
-    id: 'app.presentation.presentationToolbar.prevSlideLabel',
-    description: 'Previous slide button label',
+    id: "app.presentation.presentationToolbar.prevSlideLabel",
+    description: "Previous slide button label",
   },
   previousSlideDesc: {
-    id: 'app.presentation.presentationToolbar.prevSlideDesc',
-    description: 'Aria description for when switching to previous slide',
+    id: "app.presentation.presentationToolbar.prevSlideDesc",
+    description: "Aria description for when switching to previous slide",
   },
   nextSlideLabel: {
-    id: 'app.presentation.presentationToolbar.nextSlideLabel',
-    description: 'Next slide button label',
+    id: "app.presentation.presentationToolbar.nextSlideLabel",
+    description: "Next slide button label",
   },
   nextSlideDesc: {
-    id: 'app.presentation.presentationToolbar.nextSlideDesc',
-    description: 'Aria description for when switching to next slide',
+    id: "app.presentation.presentationToolbar.nextSlideDesc",
+    description: "Aria description for when switching to next slide",
   },
   noNextSlideDesc: {
-    id: 'app.presentation.presentationToolbar.noNextSlideDesc',
-    description: '',
+    id: "app.presentation.presentationToolbar.noNextSlideDesc",
+    description: "",
   },
   noPrevSlideDesc: {
-    id: 'app.presentation.presentationToolbar.noPrevSlideDesc',
-    description: '',
+    id: "app.presentation.presentationToolbar.noPrevSlideDesc",
+    description: "",
   },
   skipSlideLabel: {
-    id: 'app.presentation.presentationToolbar.skipSlideLabel',
-    description: 'Aria label for when switching to a specific slide',
+    id: "app.presentation.presentationToolbar.skipSlideLabel",
+    description: "Aria label for when switching to a specific slide",
   },
   skipSlideDesc: {
-    id: 'app.presentation.presentationToolbar.skipSlideDesc',
-    description: 'Aria description for when switching to a specific slide',
+    id: "app.presentation.presentationToolbar.skipSlideDesc",
+    description: "Aria description for when switching to a specific slide",
   },
   goToSlide: {
-    id: 'app.presentation.presentationToolbar.goToSlide',
-    description: 'button for slide select',
+    id: "app.presentation.presentationToolbar.goToSlide",
+    description: "button for slide select",
   },
   selectLabel: {
-    id: 'app.presentation.presentationToolbar.selectLabel',
-    description: 'slide select label',
+    id: "app.presentation.presentationToolbar.selectLabel",
+    description: "slide select label",
   },
   fitToWidth: {
-    id: 'app.presentation.presentationToolbar.fitToWidth',
-    description: 'button for fit to width',
+    id: "app.presentation.presentationToolbar.fitToWidth",
+    description: "button for fit to width",
   },
   fitToWidthDesc: {
-    id: 'app.presentation.presentationToolbar.fitWidthDesc',
-    description: 'Aria description to display the whole width of the slide',
+    id: "app.presentation.presentationToolbar.fitWidthDesc",
+    description: "Aria description to display the whole width of the slide",
   },
   fitToPage: {
-    id: 'app.presentation.presentationToolbar.fitToPage',
-    description: 'button label for fit to width',
+    id: "app.presentation.presentationToolbar.fitToPage",
+    description: "button label for fit to width",
   },
   fitToPageDesc: {
-    id: 'app.presentation.presentationToolbar.fitScreenDesc',
-    description: 'Aria description to display the whole slide',
+    id: "app.presentation.presentationToolbar.fitScreenDesc",
+    description: "Aria description to display the whole slide",
   },
   presentationLabel: {
-    id: 'app.presentationUploder.title',
-    description: 'presentation area element label',
+    id: "app.presentationUploder.title",
+    description: "presentation area element label",
   },
   toolbarMultiUserOn: {
-    id: 'app.whiteboard.toolbar.multiUserOn',
-    description: 'Whiteboard toolbar turn multi-user on menu',
+    id: "app.whiteboard.toolbar.multiUserOn",
+    description: "Whiteboard toolbar turn multi-user on menu",
   },
   toolbarMultiUserOff: {
-    id: 'app.whiteboard.toolbar.multiUserOff',
-    description: 'Whiteboard toolbar turn multi-user off menu',
+    id: "app.whiteboard.toolbar.multiUserOff",
+    description: "Whiteboard toolbar turn multi-user off menu",
   },
   infiniteCanvasOn: {
-    id: 'app.whiteboard.toolbar.infiniteCanvasOn',
-    description: 'Whiteboard toolbar turn infinite canvas on',
+    id: "app.whiteboard.toolbar.infiniteCanvasOn",
+    description: "Whiteboard toolbar turn infinite canvas on",
   },
   infiniteCanvasOff: {
-    id: 'app.whiteboard.toolbar.infiniteCanvasOff',
-    description: 'Whiteboard toolbar turn infinite canvas off',
+    id: "app.whiteboard.toolbar.infiniteCanvasOff",
+    description: "Whiteboard toolbar turn infinite canvas off",
   },
   pan: {
-    id: 'app.whiteboard.toolbar.tools.hand',
-    description: 'presentation toolbar pan label',
+    id: "app.whiteboard.toolbar.tools.hand",
+    description: "presentation toolbar pan label",
   },
 });
 
@@ -111,8 +110,8 @@ class PresentationToolbar extends PureComponent {
     this.state = {
       wasFTWActive: false,
       showModal: false,
-      usersPerFrame: '',
-      numberOfFrames: '',
+      usersPerFrame: "",
+      numberOfFrames: "",
     };
 
     this.setWasActive = this.setWasActive.bind(this);
@@ -124,7 +123,8 @@ class PresentationToolbar extends PureComponent {
     this.previousSlideHandler = this.previousSlideHandler.bind(this);
     this.fullscreenToggleHandler = this.fullscreenToggleHandler.bind(this);
     this.switchSlide = this.switchSlide.bind(this);
-    this.handleSwitchWhiteboardMode = this.handleSwitchWhiteboardMode.bind(this);
+    this.handleSwitchWhiteboardMode =
+      this.handleSwitchWhiteboardMode.bind(this);
     this.handleModalShow = this.handleModalShow.bind(this);
     this.handleModalClose = this.handleModalClose.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -132,18 +132,27 @@ class PresentationToolbar extends PureComponent {
   }
 
   componentDidMount() {
-    document.addEventListener('keydown', this.switchSlide);
+    document.addEventListener("keydown", this.switchSlide);
   }
 
   componentDidUpdate(prevProps) {
     const {
-      zoom, setIsPanning, fitToWidth, fitToWidthHandler, currentSlideNum,
+      zoom,
+      setIsPanning,
+      fitToWidth,
+      fitToWidthHandler,
+      currentSlideNum,
     } = this.props;
     const { wasFTWActive } = this.state;
 
-    if (zoom <= HUNDRED_PERCENT && zoom !== prevProps.zoom && !fitToWidth) setIsPanning();
+    if (zoom <= HUNDRED_PERCENT && zoom !== prevProps.zoom && !fitToWidth)
+      setIsPanning();
 
-    if ((prevProps?.currentSlideNum !== currentSlideNum) && (!fitToWidth && wasFTWActive)) {
+    if (
+      prevProps?.currentSlideNum !== currentSlideNum &&
+      !fitToWidth &&
+      wasFTWActive
+    ) {
       setTimeout(() => {
         fitToWidthHandler();
         this.setWasActive(false);
@@ -152,7 +161,7 @@ class PresentationToolbar extends PureComponent {
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.switchSlide);
+    document.removeEventListener("keydown", this.switchSlide);
   }
 
   handleFTWSlideChange() {
@@ -200,13 +209,13 @@ class PresentationToolbar extends PureComponent {
     } = this.props;
 
     handleToggleFullScreen(fullscreenRef);
-    const newElement = isFullscreen ? '' : fullscreenElementId;
+    const newElement = isFullscreen ? "" : fullscreenElementId;
 
     layoutContextDispatch({
       type: fullscreenAction,
       value: {
         element: newElement,
-        group: '',
+        group: "",
       },
     });
   }
@@ -231,7 +240,7 @@ class PresentationToolbar extends PureComponent {
 
   switchSlide(event) {
     const { target, which } = event;
-    const isBody = target.nodeName === 'BODY';
+    const isBody = target.nodeName === "BODY";
 
     if (isBody) {
       switch (which) {
@@ -259,9 +268,7 @@ class PresentationToolbar extends PureComponent {
   renderToolbarPluginItems() {
     let pluginProvidedItems = [];
     if (this.props) {
-      const {
-        pluginProvidedPresentationToolbarItems,
-      } = this.props;
+      const { pluginProvidedPresentationToolbarItems } = this.props;
       pluginProvidedItems = pluginProvidedPresentationToolbarItems;
     }
 
@@ -274,7 +281,7 @@ class PresentationToolbar extends PureComponent {
           componentToReturn = (
             <Button
               key={ppbId}
-              style={{ marginLeft: '2px' }}
+              style={{ marginLeft: "2px" }}
               label={ppb.label}
               onClick={ppb.onClick}
               tooltipLabel={ppb.tooltip}
@@ -282,16 +289,10 @@ class PresentationToolbar extends PureComponent {
           );
           break;
         case PresentationToolbarItemType.SPINNER:
-          componentToReturn = (
-            <Spinner
-              key={ppbId}
-            />
-          );
+          componentToReturn = <Spinner key={ppbId} />;
           break;
         case PresentationToolbarItemType.SEPARATOR:
-          componentToReturn = (
-            <Separator />
-          );
+          componentToReturn = <Separator />;
           break;
         default:
           componentToReturn = null;
@@ -347,9 +348,9 @@ class PresentationToolbar extends PureComponent {
     const { usersPerFrame, numberOfFrames } = this.state;
     const { tlEditor } = this.props;
     // Handle the values as needed
-    console.log('Users per frame:', usersPerFrame);
-    console.log('Number of frames:', numberOfFrames);
-    console.log('editor : ', tlEditor)
+    console.log("Users per frame:", usersPerFrame);
+    console.log("Number of frames:", numberOfFrames);
+    console.log("editor : ", tlEditor);
     this.handleModalClose();
   }
 
@@ -364,78 +365,95 @@ class PresentationToolbar extends PureComponent {
 
   handleButtonClick = () => {
     const { usersPerFrame, numberOfFrames } = this.state;
-    const { tlEditor, multiUserWriters, multiUserSize } = this.props;
-  
+    const {
+      tlEditor,
+      multiUserWriters,
+      multiUserSize,
+      currentPresentationPage,
+    } = this.props;
+
     // Handle the values as needed
-    console.log('Users per frame:', usersPerFrame);
-    console.log('Number of frames:', numberOfFrames);
-    console.log('editor:', tlEditor);
-    console.log('multiUserWriters:', multiUserWriters);
-    console.log('multiUserSize:', multiUserSize);
-  
-    // Create an array to hold the frame shapes
+    console.log("Users per frame:", usersPerFrame);
+    console.log("Number of frames:", numberOfFrames);
+    console.log("editor:", tlEditor);
+    console.log("multiUserWriters:", multiUserWriters);
+    console.log("multiUserSize:", multiUserSize);
+    console.log("currentPresentationPage:", currentPresentationPage);
+
+    // Create an array to hold the shapes
     const shapes = [];
-  
+
     // Extract user IDs from multiUserWriters
     const userIds = Object.keys(multiUserWriters);
-  
+
     // Ensure we have enough users to distribute
     if (userIds.length < usersPerFrame * numberOfFrames) {
-      console.error('Not enough users to distribute');
+      console.error("Not enough users to distribute");
       return;
     }
-  
-    // Distribute users to each frame
+
+    // Calculate the position for the frames
+    const startX = currentPresentationPage?.scaledWidth || 0;
+    const startY = 0;
+    const frameWidth = currentPresentationPage?.scaledWidth;
+    const frameHeight = currentPresentationPage?.scaledHeight;
+
     let userIndex = 0;
-  
+
     for (let i = 0; i < numberOfFrames; i++) {
       const assignedTo = {};
-  
+
       for (let j = 0; j < usersPerFrame; j++) {
         const userId = userIds[userIndex];
         assignedTo[userId] = true;
         userIndex++;
       }
-  
-      shapes.push({
-        id: `shape:br-frame-${i}`,
-        type: 'frame',
-        x: 35 + (340 * i),
-        y: 35,
-        rotation: 0,
-        isLocked: false,
-        opacity: 1,
-        parentId: "page:1",
-        meta: {
-          assignedTo,
+
+      // Calculate x position to place frames next to each other
+      const x = startX + frameWidth * i;
+      const y = startY;
+
+      tlEditor.createShapes([
+        {
+          id: `shape:br-frame-${i}`,
+          type: "frame",
+          x: x,
+          y: y,
+          rotation: 0,
+          isLocked: false,
+          opacity: 1,
+          parentId: "page:1",
+          meta: {
+            assignedTo,
+          },
+          index: "a0",
+          props: {
+            h: frameHeight,
+            w: frameWidth,
+            name: Object.keys(assignedTo).join(", "),
+          },
         },
-        props: {
-          h: 270,
-          w: 310,
-          name: "",
-        },
-      });
+      ]);
     }
-  
-    // Create the frames in the editor
-    tlEditor.createShapes(shapes);
-  
+
     // Close the modal
     this.handleModalClose();
   };
-  
-  
-  
 
   renderModal() {
     const { showModal, usersPerFrame, numberOfFrames } = this.state;
+    const { tlEditor, removeShapes } = this.props;
 
     return ReactDOM.createPortal(
       <styledComponents.Modal show={showModal}>
         <styledComponents.ModalContent>
           <styledComponents.ModalHeader>
-            <styledComponents.ModalTitle>Breakout Settings</styledComponents.ModalTitle>
-            <styledComponents.CloseButton onClick={this.handleModalClose}>&times;</styledComponents.CloseButton>
+            <styledComponents.ModalTitle>
+              Breakout Settings
+            </styledComponents.ModalTitle>
+            <styledComponents.CloseButton onClick={this.handleModalClose}>
+              &times;
+            </styledComponents.CloseButton>
           </styledComponents.ModalHeader>
           <styledComponents.ModalBody>
             <styledComponents.Container>
@@ -459,7 +477,27 @@ class PresentationToolbar extends PureComponent {
                   onChange={this.handleInputChange}
                 />
               </styledComponents.FormGroup>
-              <styledComponents.SubmitButton onClick={this.handleButtonClick}>Start</styledComponents.SubmitButton>
+              <styledComponents.SubmitButton onClick={this.handleButtonClick}>
+                Start
+              </styledComponents.SubmitButton>
+              <styledComponents.SubmitButton
+                onClick={() => {
+                  const allRecords = tlEditor.store.allRecords();
+
+                  // Filter the objects that have type "shape:br-frame"
+                  const filteredIds = allRecords
+                    .filter(
+                      (record) =>
+                        record.type === "frame" &&
+                        record.id.startsWith("shape:br-frame")
+                    )
+                    .map((record) => record.id);
+
+                  console.log("Filtered IDs:", filteredIds);
+                }}
+              >
+                End
+              </styledComponents.SubmitButton>
             </styledComponents.Container>
           </styledComponents.ModalBody>
         </styledComponents.ModalContent>
@@ -476,7 +514,7 @@ class PresentationToolbar extends PureComponent {
       optionList.push(
         <option value={i} key={i}>
           {intl.formatMessage(intlMessages.goToSlide, { 0: i })}
-        </option>,
+        </option>
       );
     }
 
@@ -511,20 +549,20 @@ class PresentationToolbar extends PureComponent {
 
     const prevSlideAriaLabel = startOfSlides
       ? intl.formatMessage(intlMessages.previousSlideLabel)
-      : `${intl.formatMessage(intlMessages.previousSlideLabel)} (${currentSlideNum <= 1 ? '' : currentSlideNum - 1
-      })`;
+      : `${intl.formatMessage(intlMessages.previousSlideLabel)} (${
+          currentSlideNum <= 1 ? "" : currentSlideNum - 1
+        })`;
 
     const nextSlideAriaLabel = endOfSlides
       ? intl.formatMessage(intlMessages.nextSlideLabel)
-      : `${intl.formatMessage(intlMessages.nextSlideLabel)} (${currentSlideNum >= 1 ? currentSlideNum + 1 : ''
-      })`;
+      : `${intl.formatMessage(intlMessages.nextSlideLabel)} (${
+          currentSlideNum >= 1 ? currentSlideNum + 1 : ""
+        })`;
 
     const isInfiniteCanvas = currentSlide?.infiniteCanvas;
 
     return (
-      <styledComponents.PresentationToolbarWrapper
-        id="presentationToolbarWrapper"
-      >
+      <styledComponents.PresentationToolbarWrapper id="presentationToolbarWrapper">
         {this.renderAriaDescs()}
         <styledComponents.QuickPollButtonWrapper>
           {this.renderToolbarPluginItems()}
@@ -546,7 +584,7 @@ class PresentationToolbar extends PureComponent {
             role="button"
             aria-label={prevSlideAriaLabel}
             aria-describedby={
-              startOfSlides ? 'noPrevSlideDesc' : 'prevSlideDesc'
+              startOfSlides ? "noPrevSlideDesc" : "prevSlideDesc"
             }
             disabled={startOfSlides || !isMeteorConnected}
             color="light"
@@ -579,9 +617,7 @@ class PresentationToolbar extends PureComponent {
           <styledComponents.NextSlideButton
             role="button"
             aria-label={nextSlideAriaLabel}
-            aria-describedby={
-              endOfSlides ? 'noNextSlideDesc' : 'nextSlideDesc'
-            }
+            aria-describedby={endOfSlides ? "noNextSlideDesc" : "nextSlideDesc"}
             disabled={endOfSlides || !isMeteorConnected}
             color="light"
             circle
@@ -596,32 +632,42 @@ class PresentationToolbar extends PureComponent {
         <styledComponents.PresentationZoomControls>
           {this.renderModal()}
           <button onClick={this.handleModalShow}>Settings</button>
-          {(allowInfiniteCanvas) && (
-          <styledComponents.InfiniteCanvasButton
-            data-test={isInfiniteCanvas ? 'turnInfiniteCanvasOff' : 'turnInfiniteCanvasOn'}
-            role="button"
-            aria-label={
-              isInfiniteCanvas
-                ? intl.formatMessage(intlMessages.infiniteCanvasOff)
-                : intl.formatMessage(intlMessages.infiniteCanvasOn)
-            }
-            color="light"
-            disabled={!isMeteorConnected}
-            customIcon={infiniteCanvasIcon(isInfiniteCanvas)}
-            size="md"
-            circle
-            onClick={() => { setPresentationPageInfiniteCanvas(!isInfiniteCanvas); }}
-            label={
-              isInfiniteCanvas
-                ? intl.formatMessage(intlMessages.infiniteCanvasOff)
-                : intl.formatMessage(intlMessages.infiniteCanvasOn)
-            }
-            hideLabel
-          />
+          {allowInfiniteCanvas && (
+            <styledComponents.InfiniteCanvasButton
+              data-test={
+                isInfiniteCanvas
+                  ? "turnInfiniteCanvasOff"
+                  : "turnInfiniteCanvasOn"
+              }
+              role="button"
+              aria-label={
+                isInfiniteCanvas
+                  ? intl.formatMessage(intlMessages.infiniteCanvasOff)
+                  : intl.formatMessage(intlMessages.infiniteCanvasOn)
+              }
+              color="light"
+              disabled={!isMeteorConnected}
+              customIcon={infiniteCanvasIcon(isInfiniteCanvas)}
+              size="md"
+              circle
+              onClick={() => {
+                setPresentationPageInfiniteCanvas(!isInfiniteCanvas);
+              }}
+              label={
+                isInfiniteCanvas
+                  ? intl.formatMessage(intlMessages.infiniteCanvasOff)
+                  : intl.formatMessage(intlMessages.infiniteCanvasOn)
+              }
+              hideLabel
+            />
           )}
 
           <styledComponents.WBAccessButton
-            data-test={multiUser ? 'turnMultiUsersWhiteboardOff' : 'turnMultiUsersWhiteboardOn'}
+            data-test={
+              multiUser
+                ? "turnMultiUsersWhiteboardOff"
+                : "turnMultiUsersWhiteboardOn"
+            }
             role="button"
             aria-label={
               multiUser
@@ -630,7 +676,7 @@ class PresentationToolbar extends PureComponent {
             }
             color="light"
             disabled={!isMeteorConnected}
-            icon={multiUser ? 'multi_whiteboard' : 'whiteboard'}
+            icon={multiUser ? "multi_whiteboard" : "whiteboard"}
             size="md"
             circle
             onClick={() => this.handleSwitchWhiteboardMode(!multiUser)}
@@ -668,15 +714,15 @@ class PresentationToolbar extends PureComponent {
           <styledComponents.FitToWidthButton
             role="button"
             data-test="fitToWidthButton"
-            aria-describedby={fitToWidth ? 'fitPageDesc' : 'fitWidthDesc'}
+            aria-describedby={fitToWidth ? "fitPageDesc" : "fitWidthDesc"}
             aria-label={
               fitToWidth
                 ? `${intl.formatMessage(
-                  intlMessages.presentationLabel,
-                )} ${intl.formatMessage(intlMessages.fitToPage)}`
+                    intlMessages.presentationLabel
+                  )} ${intl.formatMessage(intlMessages.fitToPage)}`
                 : `${intl.formatMessage(
-                  intlMessages.presentationLabel,
-                )} ${intl.formatMessage(intlMessages.fitToWidth)}`
+                    intlMessages.presentationLabel
+                  )} ${intl.formatMessage(intlMessages.fitToWidth)}`
             }
             color="light"
             disabled={!isMeteorConnected}
@@ -684,9 +730,11 @@ class PresentationToolbar extends PureComponent {
             size="md"
             circle
             onClick={fitToWidthHandler}
-            label={fitToWidth
-              ? intl.formatMessage(intlMessages.fitToPage)
-              : intl.formatMessage(intlMessages.fitToWidth)}
+            label={
+              fitToWidth
+                ? intl.formatMessage(intlMessages.fitToPage)
+                : intl.formatMessage(intlMessages.fitToWidth)
+            }
             hideLabel
             $fitToWidth={fitToWidth}
           />
