@@ -597,7 +597,8 @@ class Presentation extends PureComponent {
       hasPoll,
       currentPresentationPage,
       tlEditor,
-      multiUserWriters
+      multiUserWriters,
+      currentUser,
     } = this.props;
     const { zoom, isPanning } = this.state;
 
@@ -624,6 +625,7 @@ class Presentation extends PureComponent {
           userIsPresenter,
           currentPresentationPage,
           tlEditor,
+          currentUser,
         }}
         setIsPanning={this.setIsPanning}
         isPanning={isPanning}

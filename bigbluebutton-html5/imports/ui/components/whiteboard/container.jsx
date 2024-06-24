@@ -259,6 +259,23 @@ const WhiteboardContainer = (props) => {
     },
   }];
 
+  for(let k = 0; k < 10; k++) {
+        assets.push ({
+          id: `asset:fr-${k}`,
+          typeName: 'asset',
+          type: 'image',
+          meta: {},
+          props: {
+            w: currentPresentationPage?.scaledWidth,
+            h: currentPresentationPage?.scaledHeight,
+            src: currentPresentationPage?.svgUrl,
+            name: '',
+            isAnimated: false,
+            mimeType: null,
+          },
+        });    
+  }
+
   const isRTL = layoutSelect((i) => i.isRTL);
   const width = layoutSelect((i) => i?.output?.presentation?.width);
   const height = layoutSelect((i) => i?.output?.presentation?.height);
@@ -277,7 +294,7 @@ const WhiteboardContainer = (props) => {
     x: 1,
     y: 1,
     rotation: 0,
-    isLocked: true,
+    isLocked: false,
     opacity: 1,
     meta: {},
     id: `shape:BG-${curPageNum}`,

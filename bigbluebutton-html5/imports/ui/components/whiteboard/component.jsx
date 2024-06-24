@@ -176,8 +176,30 @@ const Whiteboard = React.memo(function Whiteboard(props) {
 
 
   React.useEffect(() => {
-    console.log('breakoutFrameAssigned ', breakoutFrameAssigned)
-  }, [breakoutFrameAssigned])
+    if (!isPresenterRef.current && breakoutFrameAssigned?.enabled) {
+      const sd = tlEditorRef.current?.getShape(breakoutFrameAssigned?.frameId);
+      const sbounds = tlEditorRef.current?.getShapePageBounds(sd);
+
+      tlEditorRef.current?.zoomToBounds(sbounds, {
+        inset: 0,
+      })
+
+    } else if (!isPresenterRef.current && !breakoutFrameAssigned?.enabled) {
+      const bg = tlEditorRef.current?.getShape(`shape:BG-${curPageIdRef.current}`);
+      const bgbounds = tlEditorRef.current?.getShapePageBounds(bg);
+
+      console.log(bg, bgbounds)
+      tlEditorRef.current?.zoomToBounds(bgbounds, {
+        inset: 0,
+      })
+    }
+
+
+    if (isPresenterRef.current) {
+      console.log('breakoutFrameAssigned ', breakoutFrameAssigned)
+    }
+
+  }, [breakoutFrameAssigned, tlEditorRef.current])
 
   React.useEffect(() => {
     currentPresentationPageRef.current = currentPresentationPage;
@@ -373,9 +395,9 @@ const Whiteboard = React.memo(function Whiteboard(props) {
 
         const addedCount = Object.keys(added).length;
         const shapeNumberExceeded = Object.keys(prevShapesRef.current).length + addedCount > maxNumberOfAnnotations;
-        const invalidShapeType = false//Object.keys(added).find((id) => !isValidShapeType(added[id]));
+        const invalidShapeType = Object.keys(added).find((id) => !isValidShapeType(added[id]));
 
-        if (shapeNumberExceeded || invalidShapeType) {
+        if (shapeNumberExceeded) {
           // notify and undo last command without persisting to not generate the onUndo/onRedo callback
           if (shapeNumberExceeded) {
             notifyShapeNumberExceeded(intl, maxNumberOfAnnotations);
@@ -394,7 +416,13 @@ const Whiteboard = React.memo(function Whiteboard(props) {
             };
 
 
-            console.log('persistShapeWrapper - adding : ', updatedRecord)
+            console.log('persistShapeWrapper - adding : ^^^^^^^^^^^^^^^^^^^^^ ', updatedRecord)
+
+
+            if (updatedRecord.id.includes('shape:br-frame')) {
+              setBreakoutFrameAssigned({ enabled: true, frameId: null })
+            }
+
 
             persistShapeWrapper(
               updatedRecord,
@@ -416,7 +444,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
             },
           };
 
-          console.log('persistShapeWrapper -  update ' , updatedRecord)
+          // console.log('persistShapeWrapper -  update ' , updatedRecord)
 
           persistShapeWrapper(
             updatedRecord,
@@ -427,6 +455,11 @@ const Whiteboard = React.memo(function Whiteboard(props) {
 
         Object.values(removed).forEach((record) => {
           console.log('REMOVING ', [record?.id])
+
+          if (record?.id.includes('shape:br-frame')) {
+            setBreakoutFrameAssigned({ enabled: false, frameId: null });
+          }
+
           removeShapes([record?.id]);
         });
       },
@@ -451,7 +484,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
           const [prevCam, nextCam] = cameras;
           const panned = prevCam.x !== nextCam.x || prevCam.y !== nextCam.y;
 
-          if (panned && isPresenter) {
+          if (panned && isPresenter && !isInfiniteCanvas) {
             let viewedRegionW = SlideCalcUtil.calcViewedRegionWidth(
               editor?.getViewportPageBounds()?.w,
               currentPresentationPage?.scaledWidth
@@ -552,7 +585,12 @@ const Whiteboard = React.memo(function Whiteboard(props) {
 
         // Adjust camera position to ensure it stays within bounds
         const panned = next?.id?.includes("camera") && (prev.x !== next.x || prev.y !== next.y);
-        if (panned && !currentPresentationPageRef.current?.infiniteCanvas) {
+
+        if (!breakoutFrameAssigned?.enabled && !isPresenterRef.current) {
+          return next;
+        }
+
+        if ((panned && !currentPresentationPageRef.current?.infiniteCanvas)) {
           // Horizontal bounds check
           if (next.x > 0) {
             next.x = 0;
@@ -839,6 +877,9 @@ const Whiteboard = React.memo(function Whiteboard(props) {
   }, [whiteboardRef.current]);
 
   React.useEffect(() => {
+
+    if (isInfiniteCanvas) return
+
     zoomValueRef.current = zoomValue;
     let timeoutId = null;
 
@@ -913,6 +954,10 @@ const Whiteboard = React.memo(function Whiteboard(props) {
   }, [zoomValue, tlEditor, curPageIdRef.current, isWheelZoomRef.current]);
 
   React.useEffect(() => {
+    if (breakoutFrameAssigned?.enabled) {
+      return;
+    }
+
     // A slight delay to ensure the canvas has rendered
     const timeoutId = setTimeout(() => {
       if (
@@ -1051,6 +1096,9 @@ const Whiteboard = React.memo(function Whiteboard(props) {
 
   React.useEffect(() => {
     if (!isPresenter && tlEditorRef.current && initialViewBoxWidthRef.current && currentPresentationPage) {
+      if (breakoutFrameAssigned?.enabled) {
+        return;
+      }
       const currentZoomRatio = currentPresentationPage.scaledViewBoxWidth / currentPresentationPage.scaledWidth;
       const initialZoomRatio = initialViewBoxWidthRef.current / currentPresentationPage.scaledWidth;
       const effectiveZoom = initialZoomRatio / currentZoomRatio;
@@ -1077,21 +1125,26 @@ const Whiteboard = React.memo(function Whiteboard(props) {
       const tlStoreUpdateTimeoutId = setTimeout(() => {
         tlEditor?.store?.mergeRemoteChanges(() => {
           if (shapesToRemove.length > 0) {
-            tlEditor?.store?.remove(shapesToRemove);
+           
 
             const currentUserId = currentUser?.userId;
           
             const isAssignedToCurrentUser = shapesToRemove.some(shape => {
-              const assignedTo = shape.meta?.assignedTo;
+              const shapeData = tlEditor?.getShape(shape);
+              const assignedTo = shapeData.meta?.assignedTo;
               return assignedTo && assignedTo[currentUserId];
             });
+
+            // console.log('isAssignedToCurrentUser - removing : ', isAssignedToCurrentUser, shapesToRemove)
           
             if (isAssignedToCurrentUser) {
               setBreakoutFrameAssigned({ enabled: false, frameId: null });
             }
+
+            tlEditor?.store?.remove(shapesToRemove);
           }
           if (shapesToAdd.length) {
-            console.log('shapesToAdd', shapesToAdd);
+            // console.log('shapesToAdd', shapesToAdd);
             tlEditor?.store?.put(shapesToAdd);
 
             const currentUserId = currentUser?.userId;
@@ -1113,7 +1166,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
           
           }
           if (shapesToUpdate.length) {
-            console.log('shapesToUpdate ' , shapesToUpdate)
+            // console.log('shapesToUpdate ' , shapesToUpdate)
             tlEditor?.updateShapes(shapesToUpdate);
           }
         });

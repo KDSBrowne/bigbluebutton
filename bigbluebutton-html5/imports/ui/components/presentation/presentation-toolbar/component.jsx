@@ -362,6 +362,136 @@ class PresentationToolbar extends PureComponent {
   handleModalClose = () => {
     this.setState({ showModal: false });
   };
+/////////////////////
+
+
+// handleButtonClick = () => {
+//   const { usersPerFrame, numberOfFrames } = this.state;
+//   const {
+//     tlEditor,
+//     multiUserWriters,
+//     currentPresentationPage,
+//     currentUser,
+//   } = this.props;
+
+
+//   // Handle the values as needed
+//   // console.log("Users per frame:", usersPerFrame);
+//   // console.log("Number of frames:", numberOfFrames);
+//   console.log("editor:", tlEditor);
+//   // console.log("multiUserWriters:", multiUserWriters);
+//   console.log("currentPresentationPage:", currentPresentationPage);
+
+//   console.log("currentUser:", currentUser);
+
+//   // Create arrays to hold the assets and shapes
+//   const assets = [];
+//   const shapes = [];
+
+//   // Extract user IDs from multiUserWriters
+//   const userIds = Object.keys(multiUserWriters);
+
+//   // Ensure we have enough users to distribute
+//   if (userIds.length < usersPerFrame * numberOfFrames) {
+//     console.error("Not enough users to distribute");
+//     return;
+//   }
+
+//   // Calculate the position for the frames
+//   const startX = currentPresentationPage?.scaledWidth || 0;
+//   const startY = 0;
+//   const frameWidth = currentPresentationPage?.scaledWidth;
+//   const frameHeight = currentPresentationPage?.scaledHeight;
+
+//   let userIndex = 0;
+
+//   for (let i = 0; i < numberOfFrames; i++) {
+//     const assignedTo = {};
+
+//     for (let j = 0; j < usersPerFrame; j++) {
+//       const userId = userIds[userIndex];
+//       assignedTo[userId] = true;
+//       userIndex++;
+//     }
+
+//     // Calculate x position to place frames next to each other
+//     const x = startX + frameWidth * i;
+//     const y = startY;
+
+//     // Create unique asset ID
+//     const assetId = `asset:fr-${i}`;
+
+//        // Create frame shape
+//        const frameShape = {
+//         id: `shape:br-frame${i}`,
+//         type: "frame",
+//         typeName: "shape",
+//         x: x,
+//         y: y,
+//         rotation: 0,
+//         isLocked: false,
+//         opacity: 1,
+//         parentId: `page:${currentPresentationPage?.num}`,
+//         meta: {
+//           assignedTo,
+//           createdBy: currentUser.userId,
+//         },
+//         index: "a0",
+//         props: {
+//           h: frameHeight,
+//           w: frameWidth,
+//           name: Object.keys(assignedTo).join(", "),
+//         },
+//       };
+
+//       shapes.push(frameShape);
+
+
+
+//     // // Create image shape
+//     const imageShape = {
+//       id: `shape:framebgimage-${i}`,
+//       index: 'a1',
+//       isLocked: false,
+//       meta: {
+//         createdBy: "",
+//       },
+//       opacity: 1,
+//       props: {
+//         w: currentPresentationPage?.scaledWidth - 10,
+//         h: currentPresentationPage?.scaledHeight - 10,
+//         assetId: assetId, // Use a unique asset ID for each frame
+//         playing: true,
+//         url: "",
+//         crop: null,
+//       },
+//       rotation: 0,
+//       type: 'image',
+//       parentId: `shape:br-frame${i}`,
+//       typeName: 'shape',
+//       x: 5,
+//       y: 5,
+//     };
+
+//     shapes.push(imageShape);
+
+
+//   }
+
+//   // console.log('shapes being created : ', shapes);
+//   // Add all shapes to the editor
+//   tlEditor.createShapes(shapes);
+
+
+  
+
+//   this.handleModalClose();
+// };
+
+
+////////////////////////////
+
+
 
   handleButtonClick = () => {
     const { usersPerFrame, numberOfFrames } = this.state;
@@ -370,6 +500,7 @@ class PresentationToolbar extends PureComponent {
       multiUserWriters,
       multiUserSize,
       currentPresentationPage,
+      currentUser,
     } = this.props;
 
     // Handle the values as needed
@@ -379,6 +510,7 @@ class PresentationToolbar extends PureComponent {
     console.log("multiUserWriters:", multiUserWriters);
     console.log("multiUserSize:", multiUserSize);
     console.log("currentPresentationPage:", currentPresentationPage);
+    console.log("currentUser:", currentUser);
 
     // Create an array to hold the shapes
     const shapes = [];
@@ -415,24 +547,49 @@ class PresentationToolbar extends PureComponent {
 
       tlEditor.createShapes([
         {
-          id: `shape:br-frame-${i}`,
+          id: `shape:br-frame${i}`,
           type: "frame",
+          typeName: "shape",
           x: x,
           y: y,
           rotation: 0,
           isLocked: false,
           opacity: 1,
-          parentId: "page:1",
+          parentId: `page:${currentPresentationPage?.num}`,
           meta: {
             assignedTo,
+            createdBy: currentUser?.userId,
           },
-          index: "a0",
+          index: "a1",
           props: {
             h: frameHeight,
             w: frameWidth,
             name: Object.keys(assignedTo).join(", "),
           },
         },
+        {
+          id: `shape:framebgimage-${i}`,
+          index: 'a1',
+          isLocked: false,
+          meta: {
+            createdBy: currentUser?.userId,
+          },
+          opacity: 1,
+          props: {
+            w: currentPresentationPage?.scaledWidth - 10,
+            h: currentPresentationPage?.scaledHeight - 10,
+            assetId: `asset:fr-${i}`,
+            playing: true,
+            url: "",
+            crop: null,
+          },
+          rotation: 0,
+          type: 'image',
+          parentId: `shape:br-frame${i}`,
+          typeName: 'shape',
+          x: 5,
+          y: 5,
+        }
       ]);
     }
 
@@ -484,16 +641,21 @@ class PresentationToolbar extends PureComponent {
                 onClick={() => {
                   const allRecords = tlEditor.store.allRecords();
 
-                  // Filter the objects that have type "shape:br-frame"
+                // Filter the objects that have type "frame" or "image" and IDs that start with "shape:br-frame" or "shape:framebgimage"
                   const filteredIds = allRecords
-                    .filter(
-                      (record) =>
-                        record.type === "frame" &&
-                        record.id.startsWith("shape:br-frame")
-                    )
-                    .map((record) => record.id);
+                  .filter(
+                    (record) =>
+                      (record.type === "frame") &&
+                      (record.id.startsWith("shape:br-frame"))
+                  )
+                  .map((record) => record.id);
 
                   console.log("Filtered IDs:", filteredIds);
+
+
+
+                  tlEditor.deleteShapes(filteredIds)
+
                 }}
               >
                 End
@@ -560,6 +722,9 @@ class PresentationToolbar extends PureComponent {
         })`;
 
     const isInfiniteCanvas = currentSlide?.infiniteCanvas;
+
+
+    console.log('allowInfiniteCanvas : ', currentSlide, allowInfiniteCanvas)
 
     return (
       <styledComponents.PresentationToolbarWrapper id="presentationToolbarWrapper">

@@ -106,8 +106,6 @@ const PresentationContainer = (props) => {
   const isViewersAnnotationsLocked = meeting ? meeting.lockSettings?.hideViewersAnnotation : true;
 
 
-  console.log('whiteboardWriters :: ', whiteboardWriters)
-
   // Transform the whiteboardWriters array into an object
 const whiteboardWritersObj = whiteboardWriters.reduce((acc, writer) => {
   acc[writer.userId] = writer;
@@ -210,8 +208,6 @@ const whiteboardWritersObj = whiteboardWriters.reduce((acc, writer) => {
     presentationAreaHeight: presentation?.height,
   };
 
-
-  console.log('multiUserData :: ', multiUserData)
 
   return (
     <Presentation
