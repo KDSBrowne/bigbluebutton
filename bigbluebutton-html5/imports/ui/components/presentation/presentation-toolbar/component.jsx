@@ -796,7 +796,26 @@ class PresentationToolbar extends PureComponent {
         </styledComponents.PresentationSlideControls>
         <styledComponents.PresentationZoomControls>
           {this.renderModal()}
-          <button onClick={this.handleModalShow}>Settings</button>
+
+          <styledComponents.InfiniteCanvasButton
+              role="button"
+
+              color="light"
+              disabled={!isMeteorConnected}
+              customIcon={infiniteCanvasIcon(true)}
+              size="md"
+              circle
+              onClick={() => {
+                this.handleModalShow();
+              }}
+              label={
+                "Breakout Vision"
+              }
+              hideLabel
+            />
+
+
+
           {allowInfiniteCanvas && (
             <styledComponents.InfiniteCanvasButton
               data-test={
@@ -820,8 +839,8 @@ class PresentationToolbar extends PureComponent {
               }}
               label={
                 isInfiniteCanvas
-                  ? intl.formatMessage(intlMessages.infiniteCanvasOff)
-                  : intl.formatMessage(intlMessages.infiniteCanvasOn)
+                  ? 'Turn infinite whiteboard on'
+                  : 'Turn infinite whiteboard off'
               }
               hideLabel
             />

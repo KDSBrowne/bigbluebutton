@@ -56,7 +56,7 @@ const useMouseEvents = ({ whiteboardRef, tlEditorRef, isWheelZoomRef, initialZoo
         // tlEditorRef?.current?.updateInstanceState({ canMoveCamera: true });
     };
 
-    const handleMouseDown = (event) => {
+    const handleMouseDownWhiteboard = (event) => {
         // if (!isPresenter && !hasWBAccess) {
         //     const updateProps = { isReadonly: true };
 
