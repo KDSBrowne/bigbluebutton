@@ -518,8 +518,14 @@ class PresentationToolbar extends PureComponent {
     // Extract user IDs from multiUserWriters
     const userIds = Object.keys(multiUserWriters);
 
+    // Check if the current user is the presenter and filter them out if so
+const filteredUserIds = userIds.filter(userId => {
+  // Ensure to remove the presenter based on currentUser's userId
+  return currentUser.presenter && userId !== currentUser.userId;
+});
+
     // Ensure we have enough users to distribute
-    if (userIds.length < usersPerFrame * numberOfFrames) {
+    if (filteredUserIds.length < usersPerFrame * numberOfFrames) {
       console.error("Not enough users to distribute");
       return;
     }
@@ -536,7 +542,7 @@ class PresentationToolbar extends PureComponent {
       const assignedTo = {};
 
       for (let j = 0; j < usersPerFrame; j++) {
-        const userId = userIds[userIndex];
+        const userId = filteredUserIds[userIndex];
         assignedTo[userId] = true;
         userIndex++;
       }
@@ -564,13 +570,13 @@ class PresentationToolbar extends PureComponent {
           props: {
             h: frameHeight,
             w: frameWidth,
-            name: Object.keys(assignedTo).join(", "),
+            name: `Room ${i+1}`,//Object.keys(assignedTo).join(", "),
           },
         },
         {
           id: `shape:framebgimage-${i}`,
           index: 'a1',
-          isLocked: false,
+          isLocked: true,
           meta: {
             createdBy: currentUser?.userId,
           },

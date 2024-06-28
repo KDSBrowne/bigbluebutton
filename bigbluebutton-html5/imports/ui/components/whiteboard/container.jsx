@@ -294,7 +294,7 @@ const WhiteboardContainer = (props) => {
     x: 1,
     y: 1,
     rotation: 0,
-    isLocked: false,
+    isLocked: true,
     opacity: 1,
     meta: {},
     id: `shape:BG-${curPageNum}`,
