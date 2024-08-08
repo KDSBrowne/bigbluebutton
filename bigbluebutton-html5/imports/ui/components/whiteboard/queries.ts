@@ -176,4 +176,31 @@ export const getCursorsCoordinatesStream = gql`
   }
 `;
 
+export const PAGES_BY_PRESENTATION_QUERY = gql`
+  query PagesByPresentationQuery($presentationId: String!) {
+    pres_page(where: { presentationId: { _eq: $presentationId } }) {
+      content
+      height
+      heightRatio
+      isCurrentPage
+      num
+      pageId
+      presentationId
+      scaledHeight
+      scaledViewBoxHeight
+      scaledViewBoxWidth
+      scaledWidth
+      slideRevealed
+      urlsJson
+      viewBoxHeight
+      viewBoxWidth
+      width
+      widthRatio
+      xOffset
+      yOffset
+      infiniteWhiteboard
+    }
+  }
+`;
+
 export default CURRENT_PAGE_ANNOTATIONS_QUERY;

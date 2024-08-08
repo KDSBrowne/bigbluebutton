@@ -78,6 +78,14 @@ const createCamera = (pageId, zoomLevel) => ({
   z: zoomLevel,
 });
 
+const createPage = (pageId) => ({
+  meta: {},
+  id: `page:${pageId}`,
+  name: `Slide ${pageId}`,
+  index: `a1`,
+  typeName: 'page',
+});
+
 function usePrevious(value) {
   const ref = useRef();
   useEffect(() => {
@@ -138,6 +146,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
     selectedLayout,
     isInfiniteWhiteboard,
     whiteboardWriters,
+    currentPresPages,
   } = props;
 
   clearTldrawCache();
@@ -572,7 +581,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
               currentPresentationPageRef.current?.scaledHeight
             );
 
-            zoomSlide(viewedRegionW, viewedRegionH, nextCam.x, nextCam.y);
+            zoomSlide(viewedRegionW, viewedRegionH, nextCam.x, nextCam.y, currentPresentationPageRef.current);
           }
         }
       },
@@ -785,6 +794,44 @@ const Whiteboard = React.memo(function Whiteboard(props) {
       : calcedZoom;
   };
 
+  const getZoomLevel = (page, currentZoom, widthGap = 0) => {
+    const baseZoom = calculateZoomValue(page.scaledWidth, page.scaledHeight);
+    const adjustedZoom = widthGap > 0
+      ? calculateZoomWithGapValue(page.scaledWidth, page.scaledHeight, false, widthGap) * (currentZoom / HUNDRED_PERCENT)
+      : baseZoom * (currentZoom / HUNDRED_PERCENT);
+    return adjustedZoom;
+  };
+
+  const createPagesAndCameras = (pages, currentZoom, widthGap) => {
+    const sortedPages = [...pages].sort((a, b) => a.num - b.num);
+    const cameras = [];
+    const tldrawPages = sortedPages.map((page, index) => {
+      const zoomToApply = getZoomLevel(page, currentZoom, widthGap);
+      cameras.push(createCamera(index + 1, zoomToApply));
+      return createPage(index + 1);
+    });
+    return { tldrawPages, cameras };
+  };
+
+  const mergePagesAndCameras = (tldrawPages, cameras, additionalStoreData = []) => {
+    tlEditorRef.current?.store.mergeRemoteChanges(() => {
+      tlEditorRef.current?.batch(() => {
+        tlEditorRef.current?.store.put(tldrawPages);
+        tlEditorRef.current?.store.put(cameras);
+        additionalStoreData.forEach(data => tlEditorRef.current?.store.put(data));
+        tlEditorRef.current?.history.clear();
+      });
+    });
+  };
+
+  const calculateWidthGap = () => {
+    const container = document.querySelector('[data-test="presentationContainer"]');
+    const innerWrapper = document.getElementById("presentationInnerWrapper");
+    const containerWidth = container ? container.offsetWidth : 0;
+    const innerWrapperWidth = innerWrapper ? innerWrapper.offsetWidth : 0;
+    return Math.max(containerWidth - innerWrapperWidth, 0);
+  };
+
   useMouseEvents(
     { whiteboardRef, tlEditorRef, isWheelZoomRef, initialZoomRef },
     {
@@ -976,7 +1023,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
               currentPresentationPage.scaledHeight
             );
 
-            zoomSlide(viewedRegionW, viewedRegionH, nextCamera.x, nextCamera.y);
+            zoomSlide(viewedRegionW, viewedRegionH, nextCamera.x, nextCamera.y, currentPresentationPageRef.current);
           }
         }, 500);
       }
@@ -1039,7 +1086,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
       if (!initialViewBoxHeightRef.current) {
         initialViewBoxHeightRef.current = currentPresentationPageRef.current?.scaledViewBoxHeight;
       }
-      // Calculate the absolute difference
+
       const heightDifference = Math.abs(
         presentationAreaHeight - lastKnownHeight.current
       );
@@ -1047,9 +1094,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
         presentationAreaWidth - lastKnownWidth.current
       );
 
-      // Check if the difference is greater than the threshold
       if (heightDifference > THRESHOLD || widthDifference > THRESHOLD) {
-        // Update the last known dimensions
         lastKnownHeight.current = presentationAreaHeight;
         lastKnownWidth.current = presentationAreaWidth;
 
@@ -1066,7 +1111,9 @@ const Whiteboard = React.memo(function Whiteboard(props) {
             currentPresentationPage.scaledWidth,
             currentPresentationPage.scaledHeight
           );
+
           let adjustedZoom = baseZoom * (currentZoom / HUNDRED_PERCENT);
+
           if (isPresenter) {
             const container = document.querySelector(
               '[data-test="presentationContainer"]'
@@ -1081,7 +1128,6 @@ const Whiteboard = React.memo(function Whiteboard(props) {
             const widthGap = Math.max(containerWidth - innerWrapperWidth, 0);
             const camera = tlEditorRef.current.getCamera();
 
-            let adjustedZoom;
             if (widthGap > 0) {
               adjustedZoom = calculateZoomWithGapValue(
                 currentPresentationPage.scaledWidth,
@@ -1100,13 +1146,14 @@ const Whiteboard = React.memo(function Whiteboard(props) {
                 ? adjustedZoom
                 : baseZoom * (currentZoom / HUNDRED_PERCENT);
 
-            const formattedPageId = Number(curPageIdRef?.current);
             const cameras = [
-              createCamera(formattedPageId - 1, zoomToApply),
-              createCamera(formattedPageId, zoomToApply),
-              createCamera(formattedPageId + 1, zoomToApply),
+              createCamera(Number(curPageIdRef.current), zoomToApply),
             ];
-            tlEditorRef.current.store.put(cameras);
+
+            tlEditorRef.current.store.mergeRemoteChanges(() => {
+              tlEditorRef.current.store.put(cameras);
+            });
+
             setCamera(zoomToApply, camera.x, camera.y);
           } else {
             // Viewer logic
@@ -1119,13 +1166,15 @@ const Whiteboard = React.memo(function Whiteboard(props) {
             adjustedZoom = baseZoom * (effectiveZoom / HUNDRED_PERCENT);
 
             const camera = tlEditorRef.current.getCamera();
-            const formattedPageId = Number(curPageIdRef?.current);
+
             const cameras = [
-              createCamera(formattedPageId - 1, adjustedZoom),
-              createCamera(formattedPageId, adjustedZoom),
-              createCamera(formattedPageId + 1, adjustedZoom),
+              createCamera(Number(curPageIdRef.current), adjustedZoom),
             ];
-            tlEditorRef.current.store.put(cameras);
+
+            tlEditorRef.current.store.mergeRemoteChanges(() => {
+              tlEditorRef.current.store.put(cameras);
+            });
+
             setCamera(adjustedZoom, camera.x, camera.y);
           }
         }
@@ -1135,7 +1184,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
     const timeoutId = setTimeout(handleResize, CAMERA_UPDATE_DELAY);
 
     return () => clearTimeout(timeoutId);
-  }, [presentationAreaHeight, presentationAreaWidth, curPageId, presentationId]);
+  }, [presentationAreaHeight, presentationAreaWidth, presentationId]);
 
   React.useEffect(() => {
     if (!fitToWidth && isPresenter) {
@@ -1276,36 +1325,41 @@ const Whiteboard = React.memo(function Whiteboard(props) {
     }
   }, [otherCursors, whiteboardWriters]);
 
+  React.useEffect(() => {
+    const totalPages = currentPresentationPageRef.current?.totalPages;
+    const pages = currentPresPages?.pres_page;
+
+    if (pages && totalPages === pages.length) {
+      const currentZoom = zoomValueRef.current || HUNDRED_PERCENT;
+      const widthGap = calculateWidthGap();
+      const { tldrawPages, cameras } = createPagesAndCameras(pages, currentZoom, widthGap);
+
+      mergePagesAndCameras(tldrawPages, cameras);
+    }
+  }, [currentPresPages]);
+
   // set current tldraw page when presentation id updates
   React.useEffect(() => {
     if (tlEditorRef.current && curPageIdRef.current !== "0") {
-      const pages = [
-        {
-          meta: {},
-          id: `page:${curPageIdRef.current}`,
-          name: `Slide ${curPageIdRef.current}`,
-          index: `a1`,
-          typeName: "page",
-        }
-      ];
+      const currentPageId = `page:${curPageIdRef.current}`;
 
-      tlEditorRef.current.store.mergeRemoteChanges(() => {
-        tlEditorRef.current.batch(() => {
-          tlEditorRef.current.store.put(pages);
-          const tlZ = tlEditorRef.current.getCamera()?.z;
-          const formattedPageId = Number(curPageIdRef?.current);
-          const cameras = [
-            createCamera(formattedPageId - 1, tlZ),
-            createCamera(formattedPageId, tlZ),
-            createCamera(formattedPageId + 1, tlZ),
-          ];
-          tlEditorRef.current.store.put(cameras);
-          tlEditorRef.current.setCurrentPage(`page:${curPageIdRef.current}`);
-          tlEditorRef.current.store.put(assets);
-          tlEditorRef.current.store.put(bgShape);
-          tlEditorRef.current.history.clear();
-        });
-      });
+      const totalPages = currentPresentationPageRef.current?.totalPages;
+      const pages = currentPresPages?.pres_page;
+
+      if (pages && totalPages === pages.length) {
+        const currentZoom = zoomValueRef.current || HUNDRED_PERCENT;
+        const widthGap = calculateWidthGap();
+        const { tldrawPages, cameras } = createPagesAndCameras(pages, currentZoom, widthGap);
+
+        mergePagesAndCameras(tldrawPages, cameras, [assets, bgShape]);
+
+        tlEditorRef.current.setCurrentPage(currentPageId);
+
+        if (isPresenter) {
+          zoomChanger(HUNDRED_PERCENT);
+          zoomSlide(HUNDRED_PERCENT, HUNDRED_PERCENT, 0, 0);
+        }
+      }
 
       whiteboardToolbarAutoHide &&
         toggleToolsAnimations(
@@ -1314,6 +1368,7 @@ const Whiteboard = React.memo(function Whiteboard(props) {
           "0s",
           hasWBAccessRef.current || isPresenter
         );
+
       slideChanged.current = false;
       slideNext.current = null;
     }

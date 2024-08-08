@@ -42,5 +42,5 @@ select_permissions:
         - infiniteWhiteboard
       filter:
         meetingId:
-          _eq: X-Hasura-PresenterInMeeting
+          _eq: X-Hasura-MeetingId
       allow_aggregations: true

@@ -15,6 +15,7 @@ import {
   CURRENT_PAGE_ANNOTATIONS_STREAM,
   CURRENT_PAGE_ANNOTATIONS_QUERY,
   CURRENT_PAGE_WRITERS_SUBSCRIPTION,
+  PAGES_BY_PRESENTATION_QUERY
 } from './queries';
 import {
   initDefaultPages,
@@ -92,6 +93,11 @@ const WhiteboardContainer = (props) => {
 
   const presentationId = currentPresentationPage?.presentationId;
 
+  const { data: currentPresPages } = useQuery(PAGES_BY_PRESENTATION_QUERY, {
+    variables: { presentationId },
+    skip: !presentationId,
+  });
+
   const { data: whiteboardWritersData } = useDeduplicatedSubscription(
     CURRENT_PAGE_WRITERS_SUBSCRIPTION,
     {
@@ -132,8 +138,8 @@ const WhiteboardContainer = (props) => {
     });
   };
 
-  const zoomSlide = (widthRatio, heightRatio, xOffset, yOffset) => {
-    const { pageId, num } = currentPresentationPage;
+  const zoomSlide = (widthRatio, heightRatio, xOffset, yOffset, currPage = currentPresentationPage) => {
+    const { pageId, num } = currPage;
 
     presentationSetZoom({
       variables: {
@@ -353,6 +359,7 @@ const WhiteboardContainer = (props) => {
         darkTheme: SettingsService?.application?.darkTheme,
         selectedLayout: SettingsService?.application?.selectedLayout,
         isInfiniteWhiteboard,
+        currentPresPages,
       }}
       {...props}
       meetingId={Auth.meetingID}
