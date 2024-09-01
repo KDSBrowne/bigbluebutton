@@ -26,6 +26,8 @@ import Styled from "./styles";
 import {
   mapLanguage,
   isValidShapeType,
+  cursorWorkerCode,
+  shapesWorkerCode,
 } from "./utils";
 import { useMouseEvents, useCursor } from "./hooks";
 import { notifyShapeNumberExceeded, getCustomEditorAssetUrls, getCustomAssetUrls } from "./service";
@@ -152,6 +154,8 @@ const Whiteboard = React.memo(function Whiteboard(props) {
     setDefaultUiAssetUrls(getCustomAssetUrls());
   }
 
+  const workerRef = React.useRef(null);
+  const cursorWorkerRef = React.useRef(null);
   const whiteboardRef = React.useRef(null);
   const zoomValueRef = React.useRef(null);
   const prevShapesRef = React.useRef(shapes);
@@ -177,8 +181,6 @@ const Whiteboard = React.memo(function Whiteboard(props) {
   const CAMERA_UPDATE_DELAY = 650;
   const lastKnownHeight = React.useRef(presentationAreaHeight);
   const lastKnownWidth = React.useRef(presentationAreaWidth);
-
-  const [shapesVersion, setShapesVersion] = React.useState(0);
 
   const customShapeUtils = [PollShapeUtil];
   const customTools = [NoopTool];
@@ -237,10 +239,51 @@ const Whiteboard = React.memo(function Whiteboard(props) {
       }
   }, [isPresenter]);
 
-  React.useEffect(() => {
-    if (!isEqual(prevShapesRef.current, shapes)) {
-      prevShapesRef.current = shapes;
-      setShapesVersion((v) => v + 1);
+  useEffect(() => {
+    // Create a Blob from the worker code
+    const blob = new Blob([shapesWorkerCode], { type: 'application/javascript' });
+
+    // Create a URL for the Blob and use it to create the worker
+    workerRef.current = new Worker(URL.createObjectURL(blob));
+
+    workerRef.current.onmessage = (e) => {
+      const { toAdd, toUpdate, toRemove } = e.data;
+
+      if (e.data.error) {
+        console.error('Worker Error:', e.data.error);
+      }
+
+      if (toAdd.length > 0 || toUpdate.length > 0 || toRemove.length > 0) {
+        tlEditorRef.current?.store?.mergeRemoteChanges(() => {
+          if (toRemove.length > 0) tlEditorRef.current?.store?.remove(toRemove);
+          if (toAdd.length > 0) tlEditorRef.current?.store?.put(toAdd);
+          if (toUpdate.length > 0) {
+            const updatedShapes = toUpdate.map((shape) => {
+              const currentShape = tlEditorRef.current?.getShape(shape.id);
+              return currentShape ? { ...currentShape, ...shape } : null;
+            }).filter(Boolean);
+            if (updatedShapes.length > 0) tlEditorRef.current?.store?.put(updatedShapes);
+          }
+        });
+      }
+    };
+
+    return () => {
+      workerRef.current.terminate();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (workerRef.current && tlEditorRef.current) {
+      const remoteShapesArray = Array.isArray(shapes) ? shapes : Object.values(shapes);
+      const ls = tlEditorRef.current?.getCurrentPageShapes()
+      const localShapesArray = Array.isArray(ls) ? ls : Object.values(ls);
+      const messageData = {
+        remoteShapes: remoteShapesArray,
+        localShapes: localShapesArray,
+        currentUser,
+      };
+      workerRef.current.postMessage(messageData);
     }
   }, [shapes]);
 
@@ -689,63 +732,6 @@ const Whiteboard = React.memo(function Whiteboard(props) {
     isMountedRef.current = true;
   };
 
-  const { shapesToAdd, shapesToUpdate, shapesToRemove } = React.useMemo(() => {
-    const localShapes = tlEditorRef.current?.getCurrentPageShapes();
-    const filteredShapes =
-      localShapes?.filter((item) => item?.index !== "a0") || [];
-    const localLookup = new Map(
-      filteredShapes.map((shape) => [shape.id, shape])
-    );
-    const remoteShapeIds = Object.keys(prevShapesRef.current);
-    const toAdd = [];
-    const toUpdate = [];
-    const toRemove = [];
-
-    Object.values(prevShapesRef.current).forEach((remoteShape) => {
-      if (!remoteShape.id) return;
-      const localShape = localLookup.get(remoteShape.id);
-      const prevShape = prevShapesRef.current[remoteShape.id];
-
-      if (!localShape) {
-        delete remoteShape.isModerator;
-        delete remoteShape.questionType;
-        toAdd.push(remoteShape);
-      } else {
-        const remoteShapeMeta = remoteShape?.meta;
-        const isCreatedByCurrentUser = remoteShapeMeta?.createdBy === currentUser?.userId;
-        const isUpdatedByCurrentUser = remoteShapeMeta?.updatedBy === currentUser?.userId;
-
-        // System-level shapes (background image) lack createdBy and updatedBy metadata, which can cause false positives.
-        // These cases expect an early return and shouldn't be updated.
-        if (
-          remoteShapeMeta && (
-            (isCreatedByCurrentUser && isUpdatedByCurrentUser)
-            || (!isCreatedByCurrentUser && isUpdatedByCurrentUser)
-          )
-        ) {
-          return;
-        }
-
-        const diff = remoteShape;
-        delete diff.isModerator;
-        delete diff.questionType;
-        toUpdate.push(diff);
-      }
-    });
-
-    filteredShapes.forEach((localShape) => {
-      if (!remoteShapeIds.includes(localShape.id)) {
-        toRemove.push(localShape.id);
-      }
-    });
-
-    return {
-      shapesToAdd: toAdd,
-      shapesToUpdate: toUpdate,
-      shapesToRemove: toRemove,
-    };
-  }, [prevShapesRef.current, curPageId]);
-
   const setCamera = (zoom, x = 0, y = 0) => {
     if (tlEditorRef.current) {
       tlEditorRef.current.setCamera({ x, y, z: zoom }, false);
@@ -1169,36 +1155,6 @@ const Whiteboard = React.memo(function Whiteboard(props) {
     }
   }, [currentPresentationPage]);
 
-  React.useEffect(() => {
-    if (shapesToAdd.length || shapesToUpdate.length || shapesToRemove.length) {
-      const tlStoreUpdateTimeoutId = setTimeout(() => {
-        tlEditor?.store?.mergeRemoteChanges(() => {
-          if (shapesToRemove.length > 0) {
-            tlEditor?.store?.remove(shapesToRemove);
-          }
-          if (shapesToAdd.length) {
-            tlEditor?.store?.put(shapesToAdd);
-          }
-          if (shapesToUpdate.length) {
-            const updatedShapes = shapesToUpdate.map(shape => {
-              const currentShape = tlEditor?.getShape(shape.id);
-              if (currentShape) {
-                return { ...currentShape, ...shape };
-              }
-              return null;
-            }).filter(Boolean);
-
-            if (updatedShapes.length) {
-              tlEditor?.store?.put(updatedShapes);
-            }
-          }
-        });
-      }, 300);
-
-      return () => clearTimeout(tlStoreUpdateTimeoutId);
-    }
-  }, [shapesToAdd, shapesToUpdate, shapesToRemove]);
-
   // Updating presences in tldraw store based on changes in cursors
   React.useEffect(() => {
     if (tlEditorRef.current) {
@@ -1208,73 +1164,52 @@ const Whiteboard = React.memo(function Whiteboard(props) {
       } else if (useElement) {
         useElement.setAttribute("href", "#cursor");
       }
-
-      const idsToRemove = [];
-
-      // Get all presence records from the store
-      const allRecords = tlEditorRef.current.store.allRecords();
-      const presenceRecords = allRecords.filter(record => record.id.startsWith('instance_presence:'));
-
-      // Check if any presence records correspond to users not in whiteboardWriters
-      presenceRecords.forEach(record => {
-        const userId = record.userId.split('instance_presence:')[1];
-        const hasAccessToWhiteboard = whiteboardWriters.some(writer => writer.userId === userId);
-
-        if (!hasAccessToWhiteboard) {
-          idsToRemove.push(record.id);
-        }
-      });
-
-      const updatedPresences = otherCursors
-        .map(({ userId, user, xPercent, yPercent }) => {
-          const { presenter, name } = user;
-          const id = InstancePresenceRecordType.createId(userId);
-          const active = xPercent !== -1 && yPercent !== -1;
-          // if cursor is not active remove it from tldraw store
-          if (
-            !active ||
-            (hideViewersCursor &&
-              user.role === "VIEWER" &&
-              !currentUser?.presenter) ||
-            (!presenter && !isMultiUserActive)
-          ) {
-            idsToRemove.push(id);
-            return null;
-          }
-
-          const cursor = {
-            x: xPercent,
-            y: yPercent,
-            type: "default",
-            rotation: 0,
-          };
-          const color = presenter ? "#FF0000" : "#70DB70";
-          const c = {
-            ...InstancePresenceRecordType.create({
-              id,
-              currentPageId: `page:${curPageIdRef.current}`,
-              userId,
-              userName: name,
-              cursor,
-              color,
-            }),
-            lastActivityTimestamp: Date.now(),
-          };
-
-          return c;
-        })
-        .filter((cursor) => cursor && cursor.userId !== currentUser?.userId);
-
-      if (idsToRemove.length) {
-        tlEditorRef.current?.store.remove(idsToRemove);
-      }
-
-      // If there are any updated presences, put them all in the store
-      if (updatedPresences.length) {
-        tlEditorRef.current?.store.put(updatedPresences);
+      let c = {
+        ...InstancePresenceRecordType.create({
+          currentPageId: `page:${curPageIdRef.current}`,
+        }),
+        lastActivityTimestamp: Date.now(),
+      };
+      if (cursorWorkerRef.current) {
+        const messageData = {
+          otherCursors,
+          whiteboardWriters,
+          currentUser,
+          curPageId: curPageIdRef.current,
+          hideViewersCursor,
+          isMultiUserActive,
+          isPresenter,
+          presenceRecord: c,
+        };
+        cursorWorkerRef.current.postMessage(messageData);
       }
     }
   }, [otherCursors, whiteboardWriters]);
+
+  useEffect(() => {
+    const blob = new Blob([cursorWorkerCode], { type: 'application/javascript' });
+    cursorWorkerRef.current = new Worker(URL.createObjectURL(blob));
+    cursorWorkerRef.current.onmessage = (e) => {
+      const { updatedPresences, idsToRemove } = e.data;
+
+      if (e.data.error) {
+        console.error('Worker Error:', e.data.error);
+      }
+
+      if (updatedPresences.length > 0 || idsToRemove.length > 0) {
+        tlEditorRef.current?.store?.mergeRemoteChanges(() => {
+          if (idsToRemove.length > 0) tlEditorRef.current?.store?.remove(idsToRemove);
+          if (updatedPresences.length > 0) {
+            tlEditorRef.current?.store?.put(updatedPresences);
+          }
+        });
+      }
+    };
+
+    return () => {
+      cursorWorkerRef.current.terminate();
+    };
+  }, []);
 
   // set current tldraw page when presentation id updates
   React.useEffect(() => {
