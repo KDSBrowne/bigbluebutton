@@ -12,8 +12,8 @@ import {
   InstancePresenceRecordType,
   setDefaultUiAssetUrls,
   setDefaultEditorAssetUrls,
-} from '@bigbluebutton/tldraw';
-import '@bigbluebutton/tldraw/tldraw.css';
+} from 'tldraw';
+import 'tldraw/tldraw.css';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { compressToBase64, decompressFromBase64 } from 'lz-string';
 import SlideCalcUtil, { HUNDRED_PERCENT } from '/imports/utils/slideCalcUtils';
@@ -114,10 +114,10 @@ const Whiteboard = React.memo((props) => {
   const [tlEditor, setTlEditor] = React.useState(null);
   const [isMounting, setIsMounting] = React.useState(true);
 
-  if (isMounting) {
-    setDefaultEditorAssetUrls(getCustomEditorAssetUrls());
-    setDefaultUiAssetUrls(getCustomAssetUrls());
-  }
+  // if (isMounting) {
+  //   setDefaultEditorAssetUrls(getCustomEditorAssetUrls());
+  //   setDefaultUiAssetUrls(getCustomAssetUrls());
+  // }
 
   const whiteboardRef = React.useRef(null);
   const zoomValueRef = React.useRef(null);
@@ -298,7 +298,7 @@ const Whiteboard = React.memo((props) => {
   }, [tlEditorRef]);
 
   const handleKeyDown = useCallback((event) => {
-    if (event.repeat) {
+    if (event.repeat || !isPresenterRef.current) {
       event.preventDefault();
       event.stopPropagation();
       return;
@@ -608,6 +608,37 @@ const Whiteboard = React.memo((props) => {
       },
       { source: 'user' },
     );
+
+const scaledWidth = currentPresentationPageRef.current?.scaledWidth;
+const scaledHeight = currentPresentationPageRef.current?.scaledHeight;
+
+
+    
+const CAMERA_OPTIONS = {
+  isLocked: false,
+  wheelBehavior: 'zoom',
+  panSpeed: 1,
+  zoomSpeed: 1,
+  zoomSteps: [1, 2, 4, 6],
+  constraints: {
+    initialZoom: 'fit-min-100',
+    baseZoom: 'fit-min-100',
+    bounds: {
+      x: 0,
+      y: 0,
+      w: scaledWidth,
+      h: scaledHeight,
+    },
+    behavior: { x: 'contain', y: 'contain' },
+    padding: { x: 0, y: 0 },
+    origin: { x: 0, y: 0 },
+  },
+};
+
+// Set camera options with adjusted zoom
+editor.setCameraOptions(CAMERA_OPTIONS);
+// editor.setCamera(editor.getCamera(), { reset: true });
+
 
     if (editor && curPageIdRef.current) {
       const pages = [
@@ -1580,7 +1611,7 @@ const Whiteboard = React.memo((props) => {
       key={`animations=-${animations}-${whiteboardToolbarAutoHide}-${language}-${presentationId}`}
     >
       <Tldraw
-        autoFocus={false}
+        autoFocus={!isPresenterRef.current ? false : true}
         key={`tldrawv2-${presentationId}-${animations}-${isInfiniteWhiteboard}`}
         forceMobile
         hideUi={!(hasWBAccessRef.current || isPresenter)}

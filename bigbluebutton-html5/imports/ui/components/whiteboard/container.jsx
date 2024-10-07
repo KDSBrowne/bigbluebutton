@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { useMutation, useQuery } from '@apollo/client';
 import {
   AssetRecordType,
-} from '@bigbluebutton/tldraw';
+} from 'tldraw';
 import { throttle } from 'radash';
 import {
   CURRENT_PRESENTATION_PAGE_SUBSCRIPTION,
@@ -48,7 +48,6 @@ import { useMergedCursorData } from './hooks.ts';
 import useDeduplicatedSubscription from '../../core/hooks/useDeduplicatedSubscription';
 import MediaService from '/imports/ui/components/media/service';
 import getFromUserSettings from '/imports/ui/services/users-settings';
-import { debounce } from '/imports/utils/debounce';
 
 const FORCE_RESTORE_PRESENTATION_ON_NEW_EVENTS = 'bbb_force_restore_presentation_on_new_events';
 
@@ -139,7 +138,7 @@ const WhiteboardContainer = (props) => {
     });
   };
 
-  const zoomSlide = debounce((
+  const zoomSlide = (
     widthRatio, heightRatio, xOffset, yOffset, currPage = currentPresentationPage,
   ) => {
     const { pageId, num } = currPage;
@@ -155,7 +154,7 @@ const WhiteboardContainer = (props) => {
         heightRatio,
       },
     });
-  }, 500);
+  };
 
   const submitAnnotations = async (newAnnotations) => {
     const isAnnotationSent = await presentationSubmitAnnotations({
@@ -319,6 +318,8 @@ const WhiteboardContainer = (props) => {
       playing: true,
       url: '',
       crop: null,
+      flipX: false,
+      flipY: false,
     },
     parentId: `page:${curPageNum}`,
     index: 'a0',

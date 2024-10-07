@@ -1,5 +1,5 @@
 /* eslint-disable lines-between-class-members */
-import { StateNode } from '@bigbluebutton/tldraw';
+import { StateNode } from 'tldraw';
 
 export default class NoopTool extends StateNode {
   static override id = 'noop';

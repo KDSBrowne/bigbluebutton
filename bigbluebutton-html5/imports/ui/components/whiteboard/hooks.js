@@ -47,18 +47,18 @@ const useMouseEvents = ({
       setIsMouseDown(false);
     }, 1000);
 
-    tlEditorRef?.current?.updateInstanceState({ canMoveCamera: true, isReadonly: false });
+    // tlEditorRef?.current?.updateInstanceState({ canMoveCamera: true, isReadonly: false });
   };
 
   const handleMouseDownWhiteboard = (event) => {
     if (!isPresenterRef.current && !hasWBAccess) {
-      const updateProps = { isReadonly: false };
+      // const updateProps = { isReadonly: false };
 
-      if (event.button === 1) {
-        updateProps.canMoveCamera = false;
-      }
+      // // if (event.button === 1) {
+      // //   updateProps.canMoveCamera = false;
+      // // }
 
-      tlEditorRef?.current?.updateInstanceState(updateProps);
+      // tlEditorRef?.current?.updateInstanceState(updateProps);
     }
 
     setIsMouseDown(true);
@@ -148,7 +148,7 @@ const useMouseEvents = ({
       z: newCameraZoomFactor,
     };
 
-    tlEditorRef.current.setCamera(nextCamera, { duration: 175 });
+    // tlEditorRef.current.setCamera(nextCamera, { duration: 175 });
 
     if (isWheelZoomRef.currentTimeout) {
       clearTimeout(isWheelZoomRef.currentTimeout);
@@ -185,7 +185,7 @@ const useMouseEvents = ({
       whiteboardElement.addEventListener('mouseup', handleMouseUp);
       whiteboardElement.addEventListener('mouseenter', handleMouseEnter);
       whiteboardElement.addEventListener('mouseleave', handleMouseLeave);
-      whiteboardElement.addEventListener('wheel', handleMouseWheel, { passive: false, capture: true });
+      // whiteboardElement.addEventListener('wheel', handleMouseWheel, { passive: false, capture: true });
     }
 
     return () => {
@@ -194,7 +194,7 @@ const useMouseEvents = ({
         whiteboardElement.removeEventListener('mouseup', handleMouseUp);
         whiteboardElement.removeEventListener('mouseenter', handleMouseEnter);
         whiteboardElement.removeEventListener('mouseleave', handleMouseLeave);
-        whiteboardElement.removeEventListener('wheel', handleMouseWheel);
+        // whiteboardElement.removeEventListener('wheel', handleMouseWheel);
       }
 
       window.removeEventListener('mousedown', handleMouseDownWindow);
