@@ -118,6 +118,7 @@ const Whiteboard = React.memo((props) => {
     selectedLayout,
     isInfiniteWhiteboard,
     whiteboardWriters,
+    isPhone,
   } = props;
 
   clearTldrawCache();
@@ -668,6 +669,47 @@ const Whiteboard = React.memo((props) => {
 
       // eslint-disable-next-line no-param-reassign
       editor.store.onBeforeChange = (prev, next) => {
+        if (isPhone) {
+          const path = editor.getPath();
+          const activePaths = [
+            'draw.drawing',
+            'eraser.erasing',
+            'select.dragging_handle',
+            'select.resizing',
+            'select.translating',
+            'select.rotating',
+            'select.editing_shape',
+            'hand.pointing',
+            'hand.dragging',
+            'geo.pointing',
+            'line.pointing',
+            'highlight.drawing',
+          ];
+          const idlePaths = [
+            'draw.idle',
+            'eraser.idle',
+            'select.idle',
+            'hand.idle',
+            'highlight.idle',
+          ];
+
+          if (activePaths.includes(path)) {
+            toggleToolsAnimations(
+              'fade-in',
+              'fade-out',
+              animations ? '.3s' : '0s',
+              hasWBAccessRef.current || isPresenterRef.current,
+            );
+          } else if (idlePaths.includes(path)) {
+            toggleToolsAnimations(
+              'fade-out',
+              'fade-in',
+              animations ? '.3s' : '0s',
+              hasWBAccessRef.current || isPresenterRef.current,
+            );
+          }
+        }
+
         const newNext = next;
         if (next?.typeName === 'instance_page_state') {
           if (isPresenterRef.current || isModeratorRef.current) return next;
