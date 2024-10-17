@@ -697,14 +697,14 @@ const Whiteboard = React.memo((props) => {
             toggleToolsAnimations(
               'fade-in',
               'fade-out',
-              animations ? '.3s' : '0s',
+              animations ? '0s' : '0s',
               hasWBAccessRef.current || isPresenterRef.current,
             );
           } else if (idlePaths.includes(path)) {
             toggleToolsAnimations(
               'fade-out',
               'fade-in',
-              animations ? '.3s' : '0s',
+              animations ? '0s' : '0s',
               hasWBAccessRef.current || isPresenterRef.current,
             );
           }
