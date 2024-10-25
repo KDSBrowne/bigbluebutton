@@ -129,6 +129,33 @@ export const CURRENT_PAGE_ANNOTATIONS_STREAM = gql`subscription annotationsStrea
   }
 }`;
 
+export const ANNOTATIONS_HISTORY_STREAM = gql`subscription annotationsHistoryStream($updatedAt: timestamptz) {
+    pres_annotation_history_curr_stream(batch_size: 100, cursor: {initial_value: { updatedAt: $updatedAt }, ordering: ASC}) {
+      annotationId
+      annotationInfo
+      pageId
+      presentationId
+      updatedAt
+      userId
+    }
+  }
+`;
+
+
+export const CURRENT_ANNOTATIONS = gql`
+  query currentAnnotations($presentationId: uuid!) {
+    pres_annotation_curr(where: { presentationId: { _eq: $presentationId } }) {
+      annotationId
+      annotationInfo
+      pageId
+      presentationId
+      lastUpdatedAt
+      userId
+    }
+  }
+`;
+
+
 export const CURRENT_PAGE_WRITERS_SUBSCRIPTION = gql`
   subscription currentPageWritersSubscription($pageId: String!) {
     pres_page_writers(where: { pageId: { _eq: $pageId } }) {

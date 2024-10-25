@@ -10,10 +10,11 @@ import { useMutation, useQuery } from '@apollo/client';
 import {
   AssetRecordType,
 } from '@bigbluebutton/tldraw';
-import { throttle } from 'radash';
+import { throttle, isEqual } from 'radash';
 import {
   CURRENT_PRESENTATION_PAGE_SUBSCRIPTION,
   CURRENT_PAGE_ANNOTATIONS_STREAM,
+  ANNOTATIONS_HISTORY_STREAM,
   CURRENT_PAGE_ANNOTATIONS_QUERY,
   CURRENT_PAGE_WRITERS_SUBSCRIPTION,
 } from './queries';
@@ -62,8 +63,13 @@ const WhiteboardContainer = (props) => {
   const layoutContextDispatch = layoutDispatch();
 
   const [annotations, setAnnotations] = useState([]);
+  const [shapesToUpdate, setShapesToUpdate] = useState([]);
+  const [shapesToRemove, setShapesToRemove] = useState([]);
   const [shapes, setShapes] = useState({});
   const [currentPresentationPage, setCurrentPresentationPage] = useState(null);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState(new Date(0).toISOString());
+
+  const prevDataRef = useRef();
 
   const { userLocks } = useLockContext();
 
@@ -195,9 +201,10 @@ const WhiteboardContainer = (props) => {
   const cursorArray = useMergedCursorData();
 
   const { data: annotationStreamData } = useDeduplicatedSubscription(
-    CURRENT_PAGE_ANNOTATIONS_STREAM,
+    ANNOTATIONS_HISTORY_STREAM,
     {
-      variables: { lastUpdatedAt: new Date(0).toISOString() },
+      variables: { updatedAt: lastUpdatedAt },
+      skip: !lastUpdatedAt,
     },
   );
 
@@ -214,7 +221,7 @@ const WhiteboardContainer = (props) => {
     }
   }, [curPageIdRef.current]);
 
-  const processAnnotations = (data) => {
+  const processInitialAnnotations = (data) => {
     const newAnnotations = [];
     const annotationsToBeRemoved = [];
 
@@ -246,16 +253,39 @@ const WhiteboardContainer = (props) => {
 
   React.useEffect(() => {
     if (initialPageAnnotations && initialPageAnnotations.pres_annotation_curr) {
-      processAnnotations(initialPageAnnotations.pres_annotation_curr);
+      processInitialAnnotations(initialPageAnnotations.pres_annotation_curr);
     }
   }, [initialPageAnnotations]);
 
-  useEffect(() => {
-    const { pres_annotation_curr_stream: annotationStream } = annotationStreamData || {};
-    if (annotationStream) {
-      processAnnotations(annotationStream);
+  React.useEffect(() => {
+    const { pres_annotation_history_curr_stream: diffs } = annotationStreamData || {};
+
+    if (diffs && diffs.length > 0 && !isEqual(prevDataRef.current, annotationStreamData)) {
+      const formattedDiffs = diffs.map((diff) => {
+        const annotationInfo = diff.annotationInfo ? JSON.parse(diff.annotationInfo) : {};
+        return {
+          id: diff.annotationId,
+          ...annotationInfo,
+          props: { ...annotationInfo.props },
+        };
+      });
+
+      const shapesWithEmptyProps = formattedDiffs
+        .filter((diff) => Object.keys(diff.props).length === 0)
+        .map((diff) => diff.id);
+
+      if (!isEqual(shapesToRemove, shapesWithEmptyProps)) {
+        setShapesToRemove(shapesWithEmptyProps);
+      }
+
+      if (!isEqual(shapesToUpdate, formattedDiffs)) {
+        setShapesToUpdate(formattedDiffs);
+      }
+
+      prevDataRef.current = annotationStreamData;
+      setLastUpdatedAt(new Date().toISOString());
     }
-  }, [annotationStreamData]);
+  }, [annotationStreamData, shapesToUpdate, shapesToRemove]);
 
   const bgShape = [];
 
@@ -263,11 +293,11 @@ const WhiteboardContainer = (props) => {
     const updatedShapes = formatAnnotations(
       annotations.filter((annotation) => annotation.pageId === curPageIdRef.current),
       intl,
-      curPageNum,
+      curPageIdRef.current,
       currentPresentationPage,
     );
     setShapes(updatedShapes);
-  }, [annotations, intl, curPageNum, currentPresentationPage]);
+  }, [annotations, intl, curPageIdRef.current, currentPresentationPage]);
 
   const { isIphone, isPhone } = deviceInfo;
 
@@ -374,6 +404,8 @@ const WhiteboardContainer = (props) => {
         selectedLayout: Settings?.application?.selectedLayout,
         isInfiniteWhiteboard,
         curPageNum,
+        shapesToUpdate,
+        shapesToRemove,
       }}
       {...props}
       meetingId={Auth.meetingID}

@@ -108,6 +108,8 @@ const Whiteboard = React.memo((props) => {
     isInfiniteWhiteboard,
     whiteboardWriters,
     isPhone,
+    shapesToUpdate,
+    shapesToRemove,
   } = props;
 
   clearTldrawCache();
@@ -151,8 +153,6 @@ const Whiteboard = React.memo((props) => {
   const lastKnownHeight = React.useRef(presentationAreaHeight);
   const lastKnownWidth = React.useRef(presentationAreaWidth);
 
-  // eslint-disable-next-line no-unused-vars
-  const [shapesVersion, setShapesVersion] = React.useState(0);
   const customTools = [NoopTool];
 
   const presenterChanged = usePrevious(isPresenter) !== isPresenter;
@@ -212,13 +212,6 @@ const Whiteboard = React.memo((props) => {
   React.useEffect(() => {
     fitToWidthRef.current = fitToWidth;
   }, [fitToWidth]);
-
-  React.useEffect(() => {
-    if (!isEqual(prevShapesRef.current, shapes)) {
-      prevShapesRef.current = shapes;
-      setShapesVersion((v) => v + 1);
-    }
-  }, [shapes]);
 
   const handleCopy = useCallback(() => {
     const selectedShapes = tlEditorRef.current?.getSelectedShapes();
@@ -742,34 +735,13 @@ const Whiteboard = React.memo((props) => {
         });
       });
 
-      const remoteShapes = shapes;
-      const localShapes = editor.store.allRecords();
-      const filteredShapes = localShapes.filter((item) => item?.typeName === 'shape') || [];
-
-      const localShapesObj = {};
-      filteredShapes.forEach((shape) => {
-        localShapesObj[shape.id] = shape;
-      });
-
-      const shapesToAdd = [];
-      Object.keys(remoteShapes).forEach((id) => {
-        if (
-          !localShapesObj[id]
-          || JSON.stringify(remoteShapes[id])
-            !== JSON.stringify(localShapesObj[id])
-        ) {
-          shapesToAdd.push(remoteShapes[id]);
-        }
-      });
-
       editor.store.mergeRemoteChanges(() => {
-        if (shapesToAdd && shapesToAdd.length) {
-          shapesToAdd.forEach((shape) => {
-            const newShape = shape;
-            delete newShape.isModerator;
-            delete newShape.questionType;
+        if (shapes && Object.keys(shapes).length) {
+          const shapeArray = Object.values(shapes).map((shape) => {
+            const newShape = sanitizeShape({ ...shape });
+            return newShape;
           });
-          editor.store.put(shapesToAdd);
+          editor.store.put(shapeArray);
         }
       });
 
@@ -905,63 +877,61 @@ const Whiteboard = React.memo((props) => {
     isMountedRef.current = true;
   };
 
-  const shapesToRemove = React.useMemo(() => {
-    if (isMouseDownRef.current) return [];
-    const remoteShapeIds = Object.keys(prevShapesRef.current);
-    const localShapes = tlEditorRef.current?.getCurrentPageShapes();
-    const filteredShapes = localShapes?.filter((item) => item?.index !== 'a0') || [];
-    return filteredShapes
-      .filter((localShape) => !remoteShapeIds.includes(localShape.id))
-      .map((localShape) => localShape.id);
-  }, [prevShapesRef.current, curPageId]);
+  const sanitizeShape = (shape) => {
+    const { isModerator, questionType, ...rest } = shape;
+    return rest;
+  };
 
-  const { shapesToAdd, shapesToUpdate } = React.useMemo(() => {
-    const toAdd = [];
-    const toUpdate = [];
-
-    Object.values(prevShapesRef.current).forEach((remoteShape) => {
-      if (!remoteShape.id) return;
-      const localShapes = tlEditorRef.current?.getCurrentPageShapes();
-      const filteredShapes = localShapes?.filter((item) => item?.index !== 'a0') || [];
-      const localLookup = new Map(
-        filteredShapes.map((shape) => [shape.id, shape]),
-      );
-      const localShape = localLookup.get(remoteShape.id);
-
-      if (!localShape) {
-        const newRemoteShape = remoteShape;
-        delete newRemoteShape.isModerator;
-        delete newRemoteShape.questionType;
-        toAdd.push(newRemoteShape);
-      } else {
-        const remoteShapeMeta = remoteShape?.meta;
-        const isCreatedByCurrentUser = remoteShapeMeta?.createdBy === currentUser?.userId;
-        const isUpdatedByCurrentUser = remoteShapeMeta?.updatedBy === currentUser?.userId;
-
-        // System-level shapes (background image) lack createdBy
-        // and updatedBy metadata, which can cause false positives.
-        // These cases expect an early return and shouldn't be updated.
-        if (
-          remoteShapeMeta && (
-            (isCreatedByCurrentUser && isUpdatedByCurrentUser)
-            || (!isCreatedByCurrentUser && isUpdatedByCurrentUser)
-          )
-        ) {
-          return;
-        }
-
-        const diff = remoteShape;
-        delete diff.isModerator;
-        delete diff.questionType;
-        toUpdate.push(diff);
+  React.useEffect(() => {
+    tlEditor?.store?.mergeRemoteChanges(() => {
+      if (shapes.length > 0) {
+        tlEditorRef.current?.store?.put(shapes);
       }
-    });
+    })
+  }, [shapes]);
 
-    return {
-      shapesToAdd: toAdd,
-      shapesToUpdate: toUpdate,
-    };
-  }, [prevShapesRef.current, curPageId]);
+  React.useEffect(() => {
+    tlEditor?.store?.mergeRemoteChanges(() => {
+      if (shapesToRemove.length > 0) {
+        if (shapesToRemove.length > 0) {
+          tlEditorRef.current?.store?.remove(shapesToRemove);
+        }
+      }
+    })
+  }, [shapesToRemove]);
+
+  React.useEffect(() => {
+    if (tlEditorRef.current && shapesToUpdate && shapesToUpdate.length > 0) {
+      tlEditor?.store?.mergeRemoteChanges(() => {
+        tlEditorRef.current.batch(() => {
+          shapesToUpdate.forEach((diff) => {
+            const sanitizedDiff = sanitizeShape(diff);
+            const existingShape = tlEditorRef.current.getShape(sanitizedDiff.id);
+            const mergedProps = {
+              ...existingShape?.props,
+              ...sanitizedDiff.props
+            };
+
+            if (Object.keys(mergedProps).length === 0) {
+              return;
+            }
+
+            const shapeData = {
+              ...existingShape,
+              ...sanitizedDiff,
+              props: mergedProps,
+            };
+
+            if (existingShape) {
+              tlEditorRef.current.store.put([shapeData]);
+            } else if (sanitizedDiff.type) {
+              tlEditorRef.current.store.put([shapeData]);
+            }
+          });
+        });
+      })
+    }
+  }, [shapesToUpdate]);
 
   const calculateZoomWithGapValue = (
     localWidth,
@@ -1350,37 +1320,6 @@ const Whiteboard = React.memo((props) => {
     }
   }, [currentPresentationPage, isPresenter]);
 
-  React.useEffect(() => {
-    if (shapesToAdd.length || shapesToUpdate.length || shapesToRemove.length) {
-      const tlStoreUpdateTimeoutId = setTimeout(() => {
-        tlEditor?.store?.mergeRemoteChanges(() => {
-          if (shapesToRemove.length > 0) {
-            tlEditor?.store?.remove(shapesToRemove);
-          }
-          if (shapesToAdd.length) {
-            tlEditor?.store?.put(shapesToAdd);
-          }
-          if (shapesToUpdate.length) {
-            const updatedShapes = shapesToUpdate.map((shape) => {
-              const currentShape = tlEditor?.getShape(shape.id);
-              if (currentShape) {
-                return { ...currentShape, ...shape };
-              }
-              return null;
-            }).filter(Boolean);
-
-            if (updatedShapes.length) {
-              tlEditor?.store?.put(updatedShapes);
-            }
-          }
-        });
-      }, 300);
-
-      return () => clearTimeout(tlStoreUpdateTimeoutId);
-    }
-    return undefined;
-  }, [shapesToAdd, shapesToUpdate, shapesToRemove]);
-
   // Updating presences in tldraw store based on changes in cursors
   React.useEffect(() => {
     if (tlEditorRef.current) {
@@ -1532,9 +1471,16 @@ const Whiteboard = React.memo((props) => {
 
       tlEditorRef.current.store.mergeRemoteChanges(() => {
         tlEditorRef.current.batch(() => {
-          cleanupStore(currentPageId);
+          // cleanupStore(currentPageId);
           updateStore(pages, cameras);
           tlEditorRef.current.setCurrentPage(currentPageId);
+          if (shapes && Object.keys(shapes).length) {
+            const shapeArray = Object.values(shapes).map((shape) => {
+              const newShape = sanitizeShape({ ...shape });
+              return newShape;
+            });
+            tlEditorRef.current.store.put(shapeArray);
+          }
           finalizeStore();
         });
       });
