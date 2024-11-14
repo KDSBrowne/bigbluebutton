@@ -202,33 +202,32 @@ const WhiteboardContainer = (props) => {
     variables: { updatedAt: new Date(0).toISOString() },
     skip: !curPageId,
     onSubscriptionData: ({ subscriptionData }) => {
-      const annotationStream = subscriptionData.data?.pres_annotation_history_curr_stream || [];
+      const annotationStream =
+        subscriptionData.data?.pres_annotation_history_curr_stream || [];
 
-      const shapeMap = new Map();
-
-      annotationStream.forEach((annotation) => {
-        const { annotationId, annotationInfo } = annotation;
-        shapeMap.set(annotationId, annotation);
-      });
-
+      const seenIds = new Set();
       const validShapes = [];
-      const annotationsToBeRemoved = new Set();
+      const annotationsToBeRemoved = [];
 
-      //Process only the latest occurrence of each shape
-      shapeMap.forEach(({ annotationId, annotationInfo }) => {
+      // Process the annotationStream in reverse order
+      for (let i = annotationStream.length - 1; i >= 0; i--) {
+        const { annotationId, annotationInfo } = annotationStream[i];
+
+        if (seenIds.has(annotationId)) {
+          continue;
+        }
+
+        seenIds.add(annotationId);
+
         if (!annotationInfo) {
-          annotationsToBeRemoved.add(annotationId);
+          annotationsToBeRemoved.push(annotationId);
         } else {
           validShapes.push({ ...annotationInfo, id: annotationId });
         }
-      });
+      }
 
       setShapes(() => {
-        const finalShapes = validShapes.filter(
-          (shape) => !annotationsToBeRemoved.has(shape.id)
-        );
-
-        if (finalShapes.length > 0) {
+        if (validShapes.length > 0) {
           const restoreOnUpdate = getFromUserSettings(
             FORCE_RESTORE_PRESENTATION_ON_NEW_EVENTS,
             window.meetingClientSettings.public.presentation.restoreOnUpdate,
@@ -239,10 +238,10 @@ const WhiteboardContainer = (props) => {
           }
         }
 
-        return finalShapes;
+        return validShapes;
       });
 
-      setRemovedShapes(Array.from(annotationsToBeRemoved));
+      setRemovedShapes(annotationsToBeRemoved);
     },
   });
 
