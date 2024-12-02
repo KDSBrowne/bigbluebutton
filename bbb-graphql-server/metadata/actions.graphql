@@ -432,6 +432,13 @@ type Mutation {
 }
 
 type Mutation {
+  presentationSetPageWhiteboardVision(
+    whiteboardVision: Boolean!
+    pageId: String!
+  ): Boolean
+}
+
+type Mutation {
   presentationSetRenderedInToast(
     presentationId: String!
   ): Boolean

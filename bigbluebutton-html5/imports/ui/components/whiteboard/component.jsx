@@ -118,6 +118,7 @@ const Whiteboard = React.memo((props) => {
     whiteboardWriters,
     isPhone,
     setEditor,
+    isInWhiteboardVision,
   } = props;
 
   clearTldrawCache();
@@ -205,6 +206,7 @@ const Whiteboard = React.memo((props) => {
 
   React.useEffect(() => {
     currentPresentationPageRef.current = currentPresentationPage;
+    console.log('currentPresentationPage update ... ', currentPresentationPage)
   }, [currentPresentationPage]);
 
   React.useEffect(() => {
@@ -243,13 +245,23 @@ const Whiteboard = React.memo((props) => {
 
   React.useEffect(() => {
     if (shapes && Object.keys(shapes).length > 0) {
+      // Filter shapes based on whiteboardVision and currentUser
+      const filteredShapes = currentPresentationPage?.whiteboardVision
+        ? Object.values(shapes).filter(shape => shape.meta?.createdBy === currentUser?.userId)
+        : Object.values(shapes);
+
+      // Sanitize the shapes after filtering
+      const sanitizedShapes = filteredShapes.map(shape => sanitizeShape(shape));
+
+      console.log('SANITIZED SHAPES ::: ', sanitizedShapes, currentUser?.userId, isInWhiteboardVision)
+  
+      // Update the previous shapes reference and apply the changes
       prevShapesRef.current = shapes;
-      const remoteShapesArray = Object.values(shapes).map((shape) => sanitizeShape(shape));
       tlEditorRef.current?.store.mergeRemoteChanges(() => {
-        tlEditorRef.current?.store.put(remoteShapesArray);
+        tlEditorRef.current?.store.put(sanitizedShapes);
       });
     }
-  }, [shapes]);
+  }, [shapes, isInWhiteboardVision]);
 
   React.useEffect(() => {
     if (removedShapes && removedShapes.length > 0) {
@@ -697,6 +709,7 @@ const Whiteboard = React.memo((props) => {
               meta: {
                 ...record.meta,
                 createdBy: currentUser?.userId,
+                whiteboardVision: currentPresentationPageRef?.whiteboardVision,
               },
             };
 
@@ -713,6 +726,7 @@ const Whiteboard = React.memo((props) => {
             meta: {
               createdBy,
               updatedBy: currentUser?.userId,
+              whiteboardVision: currentPresentationPageRef?.whiteboardVision,
             },
           };
 
@@ -1594,7 +1608,7 @@ const Whiteboard = React.memo((props) => {
     <div
       ref={whiteboardRef}
       id="whiteboard-element"
-      key={`animations=-${animations}-${whiteboardToolbarAutoHide}-${language}-${presentationId}-${fitToWidth}`}
+      key={`animations=-${animations}-${whiteboardToolbarAutoHide}-${language}-${presentationId}-${fitToWidth}-${isInWhiteboardVision}`}
     >
       <Tldraw
         autoFocus={false}

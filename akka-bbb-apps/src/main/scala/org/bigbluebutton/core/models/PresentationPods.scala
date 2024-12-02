@@ -31,7 +31,8 @@ case class PresentationPage(
     width:       Double              = 1440D,
     height:      Double              = 1080D,
     converted:   Boolean             = false,
-    infiniteWhiteboard: Boolean          = false,
+    infiniteWhiteboard: Boolean      = false,
+    whiteboardVision: Boolean        = false,
 )
 
 object PresentationInPod {

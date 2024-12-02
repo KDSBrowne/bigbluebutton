@@ -40,6 +40,7 @@ select_permissions:
         - xOffset
         - yOffset
         - infiniteWhiteboard
+        - whiteboardVision
       filter:
         meetingId:
           _eq: X-Hasura-PresenterInMeeting

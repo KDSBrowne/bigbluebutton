@@ -109,6 +109,15 @@ export const PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD = gql`
   }
 `;
 
+export const PRESENTATION_SET_PAGE_WHITEBOARD_VISION = gql`
+  mutation PresentationSetPageWhiteboardVision($pageId: String!, $whiteboardVision: Boolean!) {
+    presentationSetPageWhiteboardVision(
+      pageId: $pageId,
+      whiteboardVision: $whiteboardVision
+    )
+  }
+`;
+
 export default {
   PRESENTATION_SET_ZOOM,
   PRESENTATION_SET_WRITERS,
@@ -121,4 +130,5 @@ export default {
   PRES_ANNOTATION_SUBMIT,
   PRESENTATION_PUBLISH_CURSOR,
   PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD,
+  PRESENTATION_SET_PAGE_WHITEBOARD_VISION,
 };

@@ -95,6 +95,7 @@ const WhiteboardContainer = (props) => {
   const curPageNum = currentPresentationPage?.num;
   const curPageId = currentPresentationPage?.pageId;
   const isInfiniteWhiteboard = currentPresentationPage?.infiniteWhiteboard;
+  const isInWhiteboardVision = currentPresentationPage?.whiteboardVision;
   const curPageIdRef = useRef();
 
   React.useEffect(() => {
@@ -275,7 +276,7 @@ const WhiteboardContainer = (props) => {
     if (curPageIdRef.current) {
       refetchInitialPageAnnotations();
     }
-  }, [curPageIdRef.current, presentationId]);
+  }, [curPageIdRef.current, presentationId, isInWhiteboardVision]);
 
   const processAnnotations = (data) => {
     let annotationsToBeRemoved = [];
@@ -441,6 +442,7 @@ const WhiteboardContainer = (props) => {
         toggleToolsAnimations,
         isIphone,
         isPhone,
+        isInWhiteboardVision,
         currentPresentationPage,
         numberOfPages: currentPresentationPage?.totalPages,
         presentationId,

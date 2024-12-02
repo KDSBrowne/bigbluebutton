@@ -5,7 +5,11 @@ import FullscreenService from '/imports/ui/components/common/fullscreen-button/s
 import { useIsInfiniteWhiteboardEnabled, useIsPollingEnabled } from '/imports/ui/services/features';
 import { PluginsContext } from '/imports/ui/components/components-data/plugin-context/context';
 import { POLL_CANCEL, POLL_CREATE } from '/imports/ui/components/poll/mutations';
-import { PRESENTATION_SET_ZOOM, PRESENTATION_SET_PAGE, PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD } from '../mutations';
+import {
+  PRESENTATION_SET_ZOOM, PRESENTATION_SET_PAGE,
+  PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD,
+  PRESENTATION_SET_PAGE_WHITEBOARD_VISION
+} from '../mutations';
 import PresentationToolbar from './component';
 import Session from '/imports/ui/services/storage/in-memory';
 import { useMeetingIsBreakout } from '/imports/ui/components/app/service';
@@ -105,6 +109,7 @@ const PresentationToolbarContainer = (props) => {
   const [presentationSetZoom] = useMutation(PRESENTATION_SET_ZOOM);
   const [presentationSetPage] = useMutation(PRESENTATION_SET_PAGE);
   const [presentationSetPageInfiniteWhiteboard] = useMutation(PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD);
+  const [presentationSetPageWhiteboardVision] = useMutation(PRESENTATION_SET_PAGE_WHITEBOARD_VISION);
 
   const resetSlide = () => {
     const { pageId, num } = currentPresentationPage;
@@ -140,6 +145,16 @@ const PresentationToolbarContainer = (props) => {
       variables: {
         pageId,
         infiniteWhiteboard,
+      },
+    });
+  };
+
+  const setPresentationPageWhiteboardVision = (whiteboardVision) => {
+    const pageId = `${presentationId}/${currentSlideNum}`;
+    presentationSetPageWhiteboardVision({
+      variables: {
+        pageId,
+        whiteboardVision,
       },
     });
   };
@@ -214,6 +229,7 @@ const PresentationToolbarContainer = (props) => {
           nextSlide,
           skipToSlide,
           setPresentationPageInfiniteWhiteboard,
+          setPresentationPageWhiteboardVision,
           currentSlide,
           currentPresentationPage,
           infiniteWhiteboardIcon,

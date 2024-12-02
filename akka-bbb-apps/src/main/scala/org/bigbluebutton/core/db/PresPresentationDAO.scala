@@ -176,6 +176,7 @@ object PresPresentationDAO {
               maxImageHeight = 1080,
               uploadCompleted = page._2.converted,
               infiniteWhiteboard = page._2.infiniteWhiteboard,
+              whiteboardVision = page._2.whiteboardVision,
             )
           )
         }

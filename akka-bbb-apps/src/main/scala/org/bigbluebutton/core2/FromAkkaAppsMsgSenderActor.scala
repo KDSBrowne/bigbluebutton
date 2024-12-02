@@ -92,6 +92,8 @@ class FromAkkaAppsMsgSenderActor(msgSender: MessageSender)
         msgSender.send(fromAkkaAppsPresRedisChannel, json)
       case SetPageInfiniteWhiteboardEvtMsg.NAME =>
         msgSender.send(fromAkkaAppsPresRedisChannel, json)
+      case SetPageWhiteboardVisionEvtMsg.NAME =>
+        msgSender.send(fromAkkaAppsPresRedisChannel, json)
       case ResizeAndMovePageEvtMsg.NAME =>
         msgSender.send(fromAkkaAppsPresRedisChannel, json)
       case RemovePresentationEvtMsg.NAME =>

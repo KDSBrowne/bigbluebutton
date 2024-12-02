@@ -720,6 +720,7 @@ export interface Whiteboard {
   annotations: Annotations
   allowInfiniteWhiteboard: boolean
   allowInfiniteWhiteboardInBreakouts: boolean
+  allowWhiteboardVision: boolean
   styles: Styles
   toolbar: Toolbar
 }

@@ -373,6 +373,7 @@ class PresentationToolbar extends PureComponent {
       multiUserSize,
       multiUser,
       setPresentationPageInfiniteWhiteboard,
+      setPresentationPageWhiteboardVision,
       allowInfiniteWhiteboard,
       allowInfiniteWhiteboardInBreakouts,
       infiniteWhiteboardIcon,
@@ -399,6 +400,7 @@ class PresentationToolbar extends PureComponent {
       })`;
 
     const isInfiniteWhiteboard = currentSlide?.infiniteWhiteboard;
+    const isWhiteboardVision = currentSlide?.whiteboardVision;
 
     const showIWB = (allowInfiniteWhiteboard && !meetingIsBreakout)
       || (meetingIsBreakout && allowInfiniteWhiteboardInBreakouts);
@@ -490,6 +492,32 @@ class PresentationToolbar extends PureComponent {
           />
         </Styled.PresentationSlideControls>
         <Styled.PresentationZoomControls>
+          {
+            <Styled.InfiniteWhiteboardButton
+              data-test={isWhiteboardVision ? 'turnInfiniteWhiteboardOff' : 'turnInfiniteWhiteboardOn'}
+              role="button"
+              aria-label={
+                isWhiteboardVision
+                  ? 'intl.formatMessage(intlMessages.infiniteWhiteboardOff)'
+                  : 'intl.formatMessage(intlMessages.infiniteWhiteboardOn)'
+              }
+              color="light"
+              disabled={!isMeteorConnected}
+              customIcon={infiniteWhiteboardIcon(isWhiteboardVision)}
+              size="md"
+              circle
+              onClick={() => {
+                setPresentationPageWhiteboardVision(!isWhiteboardVision);
+              }}
+              label={
+                isWhiteboardVision
+                  ? 'intl.formatMessage(intlMessages.infiniteWhiteboardOff)'
+                  : 'intl.formatMessage(intlMessages.infiniteWhiteboardOn)'
+              }
+              hideLabel
+            />
+          }
+
           {(showIWB) && (
           <Styled.InfiniteWhiteboardButton
             data-test={isInfiniteWhiteboard ? 'turnInfiniteWhiteboardOff' : 'turnInfiniteWhiteboardOn'}

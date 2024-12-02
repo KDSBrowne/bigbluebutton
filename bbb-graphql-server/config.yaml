@@ -1,6 +1,6 @@
 version: 3
 endpoint: http://127.0.0.1:8085
-admin_secret: bigbluebutton
+admin_secret: OOGwlVXGfvt48plbYKn2UsonM9EEfds5EOxo6mpk
 metadata_directory: metadata
 actions:
   kind: synchronous
