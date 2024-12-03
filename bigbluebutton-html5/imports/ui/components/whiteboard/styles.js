@@ -39,6 +39,10 @@ const TldrawV2GlobalStyle = createGlobalStyle`
     bottom: 0px;
   }
 
+  .tlui-debug-panel {
+    display: none;
+  }
+
 `;
 
 const EditableWBWrapper = styled.div`
