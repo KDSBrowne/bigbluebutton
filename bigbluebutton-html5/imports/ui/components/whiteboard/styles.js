@@ -39,189 +39,6 @@ const TldrawV2GlobalStyle = createGlobalStyle`
     bottom: 0px;
   }
 
-  .tlui-navigation-zone,
-  .tlui-help-menu,
-  .tlui-debug-panel {
-    display: none !important;
-  }
-
-  .tl-container:focus-within {
-    outline: none !important;
-  }
-
-  .tlui-style-panel__wrapper {
-    right: 0px;
-    top: -0.35rem;
-    position: relative;
-  }
-
-  .tl-overlays__item {
-    height: auto !important;
-    width: auto !important;
-  }
-
-  .tlui-popover__content {
-    left: -50px !important;
-  }
-
-  ${({ isPresenter, isMultiUserActive }) => !isPresenter && !isMultiUserActive && `
-    .tl-cursor use {
-      transform: scale(0.05)!important;
-    }
-
-    .tl-collaborator__cursor {
-      position: absolute !important;
-      left: -7px !important;
-      top: -6px !important;
-    }
-  `}
-
-  .tlui-toolbar__extras {
-    position: fixed !important;
-    top: 2px !important;
-    
-  }
-
-  .tlui-toolbar__extras__controls {
-    border-radius: var(--radius-4);
-    border: none;
-    background-color: ${colorOffWhite};
-    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.16),
-      0px 2px 3px rgba(0, 0, 0, 0.24),
-      0px 2px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  ${({ isRTL }) => (!isRTL) && `
-    .tlui-toolbar__extras {
-      right: 0;
-      left: 50px !important;
-    }
-  `}
-
-  ${({ isRTL }) => (isRTL) && `
-    .tlui-toolbar__extras {
-      right: 50px !important;
-      left: 0;
-    }
-
-    .tlui-toolbar__extras__controls {
-      margin-right: 8px;
-      margin-left: 0;
-    }
-  `}
-
-  ${({ bgSelected }) => (bgSelected) && `
-      [data-testid="menu-item.toggle-lock"],
-      [data-testid="menu-item.toggle-locked"],
-      [data-testid="menu-item.paste"],
-      [data-testid="menu-item.copy"] {
-        display: none !important;
-      }
-  `}
-
-  [data-testid="menu-item.bring-to-front"],
-  [data-testid="menu-item.bring-forward"],
-  [data-testid="menu-item.send-backward"],
-  [data-testid="menu-item.send-to-back"],
-  [data-testid="menu-item.modify"],
-  [data-testid="menu-item.conversions"],
-  .tlui-helper-buttons,
-  [data-testid="main.page-menu"],
-  [data-testid="main.menu"],
-  [data-testid="tools.more.laser"],
-  [data-testid="tools.asset"],
-  [data-testid="page-menu.button"],
-  [data-testid="menu-item.zoom-to-100"],
-  .tlui-menu-zone {
-    display: none !important;
-  }
-
-  .tl-collaborator__cursor {
-    height: auto !important;
-    width: auto !important;
-  }
-
-  .tlui-layout__mobile .tlui-button__tool {
-    height: 30px !important;
-    width: 20px !important;
-  }
-
-  .tlui-toolbar__inner {
-    flex-direction: column-reverse !important;
-  }
-
-  .tlui-toolbar__tools {
-    flex-direction: column !important;
-  }
-
-  .tlui-toolbar {
-    align-items: end !important;
-  }
-
-  .tlui-layout__bottom {
-    grid-row: auto / auto !important;
-    position: absolute !important;
-    right: 10px !important;
-  }
-
-  [data-side="bottom"][data-align="end"][data-state="open"][role="dialog"] {
-    right: 3.5rem !important;
-    bottom: 9.5rem !important;
-  }
-
-  [id*="shape:poll-result"] {
-    background-color: white !important;
-  }
-
-  ${({ presentationHeight }) => {
-    const minRange = { height: 345, top: 14 };
-    const maxRange = { height: 1200, top: 384 };
-
-    const interpolateTop = (height) => {
-      if (height <= minRange.height) return `${minRange.top}px`;
-      if (height >= maxRange.height) return `${maxRange.top}px`;
-
-      const slope = (maxRange.top - minRange.top) / (maxRange.height - minRange.height);
-      const interpolatedTop = minRange.top + slope * (height - minRange.height);
-      return `${interpolatedTop}px`;
-    };
-
-    const topValue = interpolateTop(presentationHeight);
-
-    let additionalStyles = '';
-    if (presentationHeight <= 375) {
-      additionalStyles += `
-        .tlui-layout__mobile .tlui-button__tool > .tlui-icon {
-          height: 10px !important;
-          width: 10px !important;
-        }
-
-        .tlui-toolbar__tools {
-          flex-direction: row !important;
-        }
-
-        .tlui-toolbar__inner {
-          flex-direction: row-reverse !important;
-        }
-
-        .tlui-layout__bottom {
-          grid-row: auto / auto !important;
-          position: relative !important;
-          top: 2px !important;
-        }
-
-        .tlui-toolbar__tools.tlui-toolbar__tools__mobile.fade-in {
-          height: 30px !important;
-        }
-
-        [data-side="top"][role="dialog"]:has(.tlui-style-panel) {
-          left: 10rem !important;
-        }
-      `;
-    }
-
-    return `.tlui-layout__bottom { top: ${topValue} !important; }${additionalStyles}`;
-  }}
 `;
 
 const EditableWBWrapper = styled.div`
@@ -230,7 +47,46 @@ const EditableWBWrapper = styled.div`
   }
 `;
 
+const PanelContainer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 200px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-right: 2px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  overflow-y: auto; /* Enable vertical scrolling */
+  box-sizing: border-box;
+  z-index: 1000;
+
+  /* Fade In/Out Effect */
+  opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
+  pointer-events: ${({ isVisible }) => (isVisible ? 'auto' : 'none')};
+  visibility: ${({ isVisible }) => (isVisible ? 'visible' : 'hidden')};
+  transition: opacity 0.3s ease, visibility 0.3s ease; /* Smooth visibility change */
+`;
+
+
+const PanelBox = styled.div`
+  height: 100px;
+  flex-shrink: 0;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+`;
+
+
+
 export default {
   TldrawV2GlobalStyle,
   EditableWBWrapper,
+  PanelContainer,
+  PanelBox,
 };

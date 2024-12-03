@@ -1,6 +1,6 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { isEqual } from 'radash';
 import {
   Tldraw,
@@ -124,8 +124,30 @@ const Whiteboard = React.memo((props) => {
   clearTldrawCache();
 
   const [tlEditor, setTlEditor] = React.useState(null);
+  const [panelEditors, setPanelEditors] = React.useState({});
   const [isMounting, setIsMounting] = React.useState(true);
   const [isTabVisible, setIsTabVisible] = React.useState(document.visibilityState === 'visible');
+  const [boxes, setBoxes] = useState([]);
+  const [isPanelVisible, setIsPanelVisible] = useState(isInWhiteboardVision);
+  const [selectedUserId, setSelectedUserId] = React.useState(null);
+
+  const togglePanel = () => {
+    setIsPanelVisible((prev) => !prev);
+  };
+
+  const addBox = () => {
+    setBoxes((prev) => [...prev, prev.length + 1]);
+  };
+
+  const handleUserClick = (userId) => {
+    setSelectedUserId(userId); // Update the selected user ID
+  };
+
+  React.useEffect(() => {
+    if (whiteboardWriters.length > 0 && isInWhiteboardVision) {
+      setBoxes(whiteboardWriters);
+    }
+  }, [whiteboardWriters, isInWhiteboardVision]);
 
   React.useEffect(() => {
     const handleVisibilityChange = () => {
@@ -243,32 +265,82 @@ const Whiteboard = React.memo((props) => {
     fitToWidthRef.current = fitToWidth;
   }, [fitToWidth]);
 
+  // React.useEffect(() => {
+  //   if (shapes && Object.keys(shapes).length > 0) {
+  //     // Filter shapes based on whiteboardVision and currentUser
+  //     const filteredShapes = currentPresentationPage?.whiteboardVision
+  //       ? Object.values(shapes).filter(shape => shape.meta?.createdBy === currentUser?.userId)
+  //       : Object.values(shapes);
+
+  //     // Sanitize the shapes after filtering
+  //     const sanitizedShapes = filteredShapes.map(shape => sanitizeShape(shape));
+
+  //     console.log('SANITIZED SHAPES ::: ', sanitizedShapes, currentUser?.userId, isInWhiteboardVision)
+  
+  //     // Update the previous shapes reference and apply the changes
+  //     prevShapesRef.current = shapes;
+  //     tlEditorRef.current?.store.mergeRemoteChanges(() => {
+  //       tlEditorRef.current?.store.put(sanitizedShapes);
+  //     });
+  //   }
+  // }, [shapes, isInWhiteboardVision]);
+
+  // React.useEffect(() => {
+  //   if (removedShapes && removedShapes.length > 0) {
+  //     tlEditorRef.current?.store.remove([...removedShapes]);
+  //   }
+  // }, [removedShapes]);
+
+
+
   React.useEffect(() => {
     if (shapes && Object.keys(shapes).length > 0) {
-      // Filter shapes based on whiteboardVision and currentUser
-      const filteredShapes = currentPresentationPage?.whiteboardVision
-        ? Object.values(shapes).filter(shape => shape.meta?.createdBy === currentUser?.userId)
-        : Object.values(shapes);
-
-      // Sanitize the shapes after filtering
-      const sanitizedShapes = filteredShapes.map(shape => sanitizeShape(shape));
-
-      console.log('SANITIZED SHAPES ::: ', sanitizedShapes, currentUser?.userId, isInWhiteboardVision)
+      if (isInWhiteboardVision) {
+        // Update panelEditors when in Whiteboard Vision mode
+        Object.entries(panelEditors).forEach(([userId, editor]) => {
+          const userShapes = Object.values(shapes).filter(
+            (shape) => shape.meta?.createdBy === userId
+          );
   
-      // Update the previous shapes reference and apply the changes
-      prevShapesRef.current = shapes;
-      tlEditorRef.current?.store.mergeRemoteChanges(() => {
-        tlEditorRef.current?.store.put(sanitizedShapes);
-      });
+          const sanitizedShapes = userShapes.map((shape) => sanitizeShape(shape));
+          console.log('UPDATING PANEL SHAPES :::: ', sanitizedShapes)
+          editor?.store.mergeRemoteChanges(() => {
+            editor?.store.put(sanitizedShapes);
+          });
+        });
+      } else {
+          const sanitizedShapes = Object.values(shapes)
+            .filter((shape) => !shape.meta?.whiteboardVision) // Exclude shapes with whiteboardVision: true
+            .map((shape) => sanitizeShape(shape));
+          console.log('UPDATING SHAPES :::: ', sanitizedShapes)
+          tlEditorRef.current?.store.mergeRemoteChanges(() => {
+            tlEditorRef.current?.store.put(sanitizedShapes);
+          });
+      }
     }
-  }, [shapes, isInWhiteboardVision]);
-
+  }, [shapes, panelEditors, isInWhiteboardVision]);
+  
+  
   React.useEffect(() => {
     if (removedShapes && removedShapes.length > 0) {
-      tlEditorRef.current?.store.remove([...removedShapes]);
+      if (isInWhiteboardVision) {
+        Object.values(panelEditors).forEach((editor) => {
+          editor?.store.remove([...removedShapes]);
+        });
+      } else {
+        tlEditorRef.current?.store.remove([...removedShapes]);
+      }
     }
-  }, [removedShapes]);
+  }, [removedShapes, panelEditors]);
 
+  React.useEffect(() => {
+    return () => {
+      setPanelEditors({});
+    };
+  }, []);
+  
+
+  
   const handleCopy = useCallback(() => {
     const selectedShapes = tlEditorRef.current?.getSelectedShapes();
     if (!selectedShapes || selectedShapes.length === 0) {
@@ -709,7 +781,7 @@ const Whiteboard = React.memo((props) => {
               meta: {
                 ...record.meta,
                 createdBy: currentUser?.userId,
-                whiteboardVision: currentPresentationPageRef?.whiteboardVision,
+                whiteboardVision: currentPresentationPageRef.current?.whiteboardVision,
               },
             };
 
@@ -726,9 +798,11 @@ const Whiteboard = React.memo((props) => {
             meta: {
               createdBy,
               updatedBy: currentUser?.userId,
-              whiteboardVision: currentPresentationPageRef?.whiteboardVision,
+              whiteboardVision: currentPresentationPageRef.current?.whiteboardVision,
             },
           };
+
+          console.log('UPDATED RECORD HERE ++++>>> ', updatedRecord, currentPresentationPageRef)
 
           const diff = getDifferences(prevShapesRef.current[record?.id], updatedRecord);
 
@@ -1604,12 +1678,216 @@ const Whiteboard = React.memo((props) => {
     return null;
   }
 
+
+
   return (
     <div
       ref={whiteboardRef}
       id="whiteboard-element"
-      key={`animations=-${animations}-${whiteboardToolbarAutoHide}-${language}-${presentationId}-${fitToWidth}-${isInWhiteboardVision}`}
+      key={`animations=-${animations}-${whiteboardToolbarAutoHide}-${language}-${presentationId}-${fitToWidth}`}
     >
+      {isInWhiteboardVision && isPresenter && (
+          [
+            <button
+            onClick={togglePanel}
+            style={{
+              position: 'absolute',
+              bottom: '0px',
+              left: isPanelVisible ? '200px' : '0px', // Adjust position dynamically
+              zIndex: 1100,
+              padding: '8px 16px',
+              height: '2rem',
+              width: '2rem', // Ensure button width allows space for content
+              cursor: 'pointer',
+              border: 'none',
+              borderRadius: '4px',
+              backgroundColor: '#007BFF', // Blue background
+              color: '#fff', // White text
+              fontSize: '14px',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+              transition: 'all 0.3s ease', // Smooth animation
+              display: 'flex', // Enable flexbox for centering
+              justifyContent: 'center', // Center horizontally
+              alignItems: 'center', // Center vertically
+            }}
+          >
+            {isPanelVisible ? '<<' : '>>'}
+          </button>
+          
+          ,
+
+          <Styled.PanelContainer isVisible={isPanelVisible} style={{ position: 'absolute' }}>
+        {boxes.map((box, index) => (
+          
+          <>
+<div
+  onClick={() => handleUserClick(box.userId)} // Set the active board on click
+  style={{
+    backgroundColor: selectedUserId === box.userId ? '#007BFF' : '#f0f0f0', // Blue for selected, light gray otherwise
+    color: selectedUserId === box.userId ? '#fff' : '#000', // White text for selected, black otherwise
+    fontWeight: 'bold',
+    borderBottom: '1px solid #ccc',
+    fontSize: '14px',
+    textAlign: 'center',
+    cursor: 'pointer', // Change cursor to indicate it's clickable
+    padding: '8px',
+    transition: 'background-color 0.3s ease', // Smooth transition for background color
+  }}
+>
+  {box.userId}
+</div>
+
+          <Styled.PanelBox key={index}>
+              <Tldraw
+                autoFocus={false}
+                key={`tldrawv2-${presentationId}-${animations}-index=${index}`}
+                // forceMobile
+                hideUi={true}
+                onMount={(editor) => {
+                  setPanelEditors((prev) => ({
+                    ...prev,
+                    [box.userId]: editor, // Store editor by userId
+                  }));
+                  const pages = [
+                    {
+                      meta: {},
+                      id: `page:${curPageIdRef.current}`,
+                      name: `Slide ${curPageIdRef.current}`,
+                      index: 'a1',
+                      typeName: 'page',
+                    },
+                  ];
+            
+                  const hasShapes = shapes && Object.keys(shapes).length > 0;
+                  const remoteShapesArray = hasShapes 
+                    ? Object.values(shapes).map((shape) => sanitizeShape(shape))
+                    : [];
+            
+                  editor.store.mergeRemoteChanges(() => {
+                    editor.batch(() => {
+                      editor.store.put(pages);
+                      editor.store.put(assets);
+                      editor.setCurrentPage(`page:${curPageIdRef.current}`);
+                      editor.store.put(bgShape);
+                      if (hasShapes) {
+                        editor.store.put(remoteShapesArray);
+                      }
+                      editor.history.clear();
+                    });
+                  });
+                  editor.setCurrentTool('noop');
+                  editor.zoomToFit({ duration: 175 });
+
+
+                  // editor.store.listen(
+                  //   (entry) => {
+                  //     const { changes } = entry;
+                  //     const { added, updated, removed } = changes;
+              
+                  //     const addedCount = Object.keys(added).length;
+                  //     const localShapes = editor.getCurrentPageShapes();
+                  //     const filteredShapes = localShapes?.filter((item) => item?.index !== 'a0') || [];
+                  //     const shapeNumberExceeded = filteredShapes
+                  //       .length + addedCount - 1 > maxNumberOfAnnotations;
+                  //     const invalidShapeType = Object.keys(added).find((id) => !isValidShapeType(added[id]));
+              
+                  //     if (addedCount > 0 && (shapeNumberExceeded || invalidShapeType)) {
+                  //       // notify and undo last command without persisting
+                  //       // to not generate the onUndo/onRedo callback
+                  //       if (shapeNumberExceeded) {
+                  //         notifyShapeNumberExceeded(intl, maxNumberOfAnnotations);
+                  //       } else {
+                  //         notifyNotAllowedChange(intl);
+                  //       }
+                  //       // use remote to not trigger unwanted updates
+                  //       editor.store.mergeRemoteChanges(() => {
+                  //         editor.history.undo({ persist: false });
+                  //         const tool = editor.getCurrentToolId();
+                  //         editor.setCurrentTool('noop');
+                  //         editor.setCurrentTool(tool);
+                  //       });
+                  //     } else {
+                  //       // Add new shapes to the batch
+                  //       Object.values(added).forEach((record) => {
+                  //         const updatedRecord = {
+                  //           ...record,
+                  //           meta: {
+                  //             ...record.meta,
+                  //             createdBy: currentUser?.userId,
+                  //             whiteboardVision: currentPresentationPageRef?.whiteboardVision,
+                  //           },
+                  //         };
+              
+                  //         shapeBatchRef.current[updatedRecord.id] = updatedRecord;
+                  //       });
+                  //     }
+              
+                  //     // Update existing shapes and add them to the batch
+                  //     Object.values(updated).forEach(([, record]) => {
+                  //       const formattedLookup = createLookup(editor.getCurrentPageShapes());
+                  //       const createdBy = formattedLookup[record?.id]?.meta?.createdBy || currentUser?.userId;
+                  //       const updatedRecord = {
+                  //         ...record,
+                  //         meta: {
+                  //           createdBy,
+                  //           updatedBy: currentUser?.userId,
+                  //           whiteboardVision: currentPresentationPageRef?.whiteboardVision,
+                  //         },
+                  //       };
+              
+                  //       const diff = getDifferences(prevShapesRef.current[record?.id], updatedRecord);
+              
+                  //       if (diff) {
+                  //         diff.id = record.id;
+              
+                  //         shapeBatchRef.current[updatedRecord.id] = diff;
+                  //       } else {
+                  //         shapeBatchRef.current[updatedRecord.id] = updatedRecord;
+                  //       }
+                  //     });
+              
+                  //     // Handle removed shapes immediately (not batched)
+                  //     const idsToRemove = Object.keys(removed);
+                  //     if (idsToRemove.length > 0) {
+                  //       removeShapes(idsToRemove);
+                  //     }
+                  //   },
+                  //   { source: 'user', scope: 'document' },
+                  // );
+              
+                  // editor.store.listen(
+                  //   (entry) => {
+                  //     const path = editor.getPath();
+
+                  //     // Check for idle states and persist the batch if there are shapes
+                  //     if (path === 'select.idle' || path === 'draw.idle' || path === 'select.editing_shape' || path === 'highlight.idle') {
+                  //       if (Object.keys(shapeBatchRef.current).length > 0) {
+                  //         const shapesToPersist = Object.values(shapeBatchRef.current);
+                  //         shapesToPersist.forEach((shape) => {
+                  //           persistShapeWrapper(
+                  //             shape,
+                  //             whiteboardIdRef.current,
+                  //             isModeratorRef.current,
+                  //           );
+                  //         });
+
+                  //         shapeBatchRef.current = {};
+                  //       }
+                  //     }
+                  //   },
+                  //   { source: 'user' },
+                  // );
+                }}
+                // onMount={handleTldrawMount}
+                tools={customTools}
+              />
+          </Styled.PanelBox>
+          </>
+        ))}
+      </Styled.PanelContainer>]
+
+      )}
+
       <Tldraw
         autoFocus={false}
         key={`tldrawv2-${presentationId}-${animations}`}
