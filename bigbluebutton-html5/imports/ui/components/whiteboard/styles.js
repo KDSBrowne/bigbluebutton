@@ -8,7 +8,7 @@ const TldrawV2GlobalStyle = createGlobalStyle`
     }
   `}
 
-  ${({ isMultiUserActive }) => !isMultiUserActive && `
+  ${({ isMultiUserActive, isInWhiteboardVision }) => (!isMultiUserActive || isInWhiteboardVision) && `
     .tl-nametag {
       display: none;
     }

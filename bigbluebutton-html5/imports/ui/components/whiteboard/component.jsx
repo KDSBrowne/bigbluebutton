@@ -1406,83 +1406,167 @@ const Whiteboard = React.memo((props) => {
   }, [currentPresentationPage, isPresenter]);
 
   // Updating presences in tldraw store based on changes in cursors
+  // React.useEffect(() => {
+  //   if (tlEditorRef.current) {
+  //     const useElement = document.querySelector('.tl-cursor use');
+  //     if (useElement && !isMultiUserActive && !isPresenter) {
+  //       useElement.setAttribute('href', '#redPointer');
+  //     } else if (useElement) {
+  //       useElement.setAttribute('href', '#cursor');
+  //     }
+
+  //     const idsToRemove = [];
+
+  //     // Get all presence records from the store
+  //     const allRecords = tlEditorRef.current.store.allRecords();
+  //     const presenceRecords = allRecords.filter((record) => record.id.startsWith('instance_presence:'));
+
+  //     // Check if any presence records correspond to users not in whiteboardWriters
+  //     presenceRecords.forEach((record) => {
+  //       const userId = record.userId.split('instance_presence:')[1];
+  //       const hasAccessToWhiteboard = whiteboardWriters.some((writer) => writer.userId === userId);
+
+  //       if (!hasAccessToWhiteboard) {
+  //         idsToRemove.push(record.id);
+  //       }
+  //     });
+
+  //     const updatedPresences = otherCursors
+  //       .map(({
+  //         userId, user, xPercent, yPercent,
+  //       }) => {
+  //         const { presenter, name } = user;
+  //         const id = InstancePresenceRecordType.createId(userId);
+  //         const active = xPercent !== -1 && yPercent !== -1;
+  //         // if cursor is not active remove it from tldraw store
+  //         if (
+  //           !active
+  //           || (hideViewersCursor
+  //             && user.role === 'VIEWER'
+  //             && !currentUser?.presenter)
+  //           || (!presenter && !isMultiUserActive)
+  //         ) {
+  //           idsToRemove.push(id);
+  //           return null;
+  //         }
+
+  //         const cursor = {
+  //           x: xPercent,
+  //           y: yPercent,
+  //           type: 'default',
+  //           rotation: 0,
+  //         };
+  //         const color = presenter ? '#FF0000' : '#70DB70';
+  //         const c = {
+  //           ...InstancePresenceRecordType.create({
+  //             id,
+  //             currentPageId: `page:${curPageIdRef.current}`,
+  //             userId,
+  //             userName: name,
+  //             cursor,
+  //             color,
+  //           }),
+  //           lastActivityTimestamp: Date.now(),
+  //         };
+
+  //         return c;
+  //       })
+  //       .filter((cursor) => cursor && cursor.userId !== currentUser?.userId);
+
+  //     if (idsToRemove.length) {
+  //       tlEditorRef.current?.store.remove(idsToRemove);
+  //     }
+
+  //     // If there are any updated presences, put them all in the store
+  //     if (updatedPresences.length) {
+  //       tlEditorRef.current?.store.put(updatedPresences);
+  //     }
+  //   }
+  // }, [otherCursors, whiteboardWriters]);
+
   React.useEffect(() => {
-    if (tlEditorRef.current) {
-      const useElement = document.querySelector('.tl-cursor use');
-      if (useElement && !isMultiUserActive && !isPresenter) {
-        useElement.setAttribute('href', '#redPointer');
-      } else if (useElement) {
-        useElement.setAttribute('href', '#cursor');
+    const updateCursorsForEditor = (editor, userId, userCursors) => {
+      console.log(`Updating cursors for editor of userId: ${userId}`);
+      if (!editor) {
+        console.warn(`Editor not found for userId: ${userId}`);
+        return;
       }
-
+  
       const idsToRemove = [];
-
-      // Get all presence records from the store
-      const allRecords = tlEditorRef.current.store.allRecords();
+  
+      // Get all presence records from the store for the specific editor
+      const allRecords = editor.store.allRecords();
       const presenceRecords = allRecords.filter((record) => record.id.startsWith('instance_presence:'));
-
-      // Check if any presence records correspond to users not in whiteboardWriters
+  
+      console.log(`Existing presence records for userId: ${userId}`, presenceRecords);
+  
+      // Check if any presence records correspond to users not in the current cursors
       presenceRecords.forEach((record) => {
-        const userId = record.userId.split('instance_presence:')[1];
-        const hasAccessToWhiteboard = whiteboardWriters.some((writer) => writer.userId === userId);
-
-        if (!hasAccessToWhiteboard) {
+        const recordUserId = record.userId.split('instance_presence:')[1];
+        const isCursorStillActive = userCursors.some((cursor) => cursor.userId === recordUserId);
+  
+        if (!isCursorStillActive) {
+          console.warn(`Cursor for userId: ${recordUserId} is no longer active.`);
           idsToRemove.push(record.id);
         }
       });
-
-      const updatedPresences = otherCursors
-        .map(({
-          userId, user, xPercent, yPercent,
-        }) => {
-          const { presenter, name } = user;
-          const id = InstancePresenceRecordType.createId(userId);
-          const active = xPercent !== -1 && yPercent !== -1;
-          // if cursor is not active remove it from tldraw store
-          if (
-            !active
-            || (hideViewersCursor
-              && user.role === 'VIEWER'
-              && !currentUser?.presenter)
-            || (!presenter && !isMultiUserActive)
-          ) {
-            idsToRemove.push(id);
+  
+      // Prepare updated presences for the editor
+      const updatedPresences = userCursors
+        .map(({ userId, user, xPercent, yPercent }) => {
+          if (xPercent === -1 || yPercent === -1) {
+            console.warn(`Skipping cursor with invalid position for userId: ${userId}`);
             return null;
           }
-
+  
           const cursor = {
             x: xPercent,
             y: yPercent,
             type: 'default',
             rotation: 0,
           };
-          const color = presenter ? '#FF0000' : '#70DB70';
-          const c = {
+  
+          const color = user.presenter ? '#FF0000' : '#70DB70';
+          console.log(`Updating cursor for userId: ${userId}`, { cursor, color });
+          return {
             ...InstancePresenceRecordType.create({
-              id,
+              id: InstancePresenceRecordType.createId(userId),
               currentPageId: `page:${curPageIdRef.current}`,
               userId,
-              userName: name,
+              userName: user.name,
               cursor,
               color,
             }),
             lastActivityTimestamp: Date.now(),
           };
-
-          return c;
         })
-        .filter((cursor) => cursor && cursor.userId !== currentUser?.userId);
-
+        .filter(Boolean);
+  
+      // Remove outdated presence records
       if (idsToRemove.length) {
-        tlEditorRef.current?.store.remove(idsToRemove);
+        console.log(`Removing outdated presences: `, idsToRemove);
+        editor.store.remove(idsToRemove);
       }
-
-      // If there are any updated presences, put them all in the store
+  
+      // Add updated presence records
       if (updatedPresences.length) {
-        tlEditorRef.current?.store.put(updatedPresences);
+        console.log(`Adding/updating presences: `, updatedPresences);
+        editor.store.put(updatedPresences);
       }
+    };
+  
+    if (isInWhiteboardVision) {
+      console.log('Updating cursors for panel editors');
+      Object.entries(panelEditors).forEach(([userId, editor]) => {
+        const userCursors = otherCursors.filter((cursor) => cursor.userId === userId);
+        console.log(`Filtered cursors for userId ${userId}:`, userCursors);
+        updateCursorsForEditor(editor, userId, userCursors);
+      });
+    } else if (tlEditorRef.current) {
+      console.log('Updating cursors for main whiteboard editor');
+      updateCursorsForEditor(tlEditorRef.current, null, otherCursors);
     }
-  }, [otherCursors, whiteboardWriters]);
+  }, [isInWhiteboardVision, otherCursors, panelEditors]);
 
   const createPage = (currentPageId) => [
     {
@@ -1777,108 +1861,7 @@ const Whiteboard = React.memo((props) => {
                   });
                   editor.setCurrentTool('noop');
                   editor.zoomToFit({ duration: 175 });
-
-
-                  // editor.store.listen(
-                  //   (entry) => {
-                  //     const { changes } = entry;
-                  //     const { added, updated, removed } = changes;
-              
-                  //     const addedCount = Object.keys(added).length;
-                  //     const localShapes = editor.getCurrentPageShapes();
-                  //     const filteredShapes = localShapes?.filter((item) => item?.index !== 'a0') || [];
-                  //     const shapeNumberExceeded = filteredShapes
-                  //       .length + addedCount - 1 > maxNumberOfAnnotations;
-                  //     const invalidShapeType = Object.keys(added).find((id) => !isValidShapeType(added[id]));
-              
-                  //     if (addedCount > 0 && (shapeNumberExceeded || invalidShapeType)) {
-                  //       // notify and undo last command without persisting
-                  //       // to not generate the onUndo/onRedo callback
-                  //       if (shapeNumberExceeded) {
-                  //         notifyShapeNumberExceeded(intl, maxNumberOfAnnotations);
-                  //       } else {
-                  //         notifyNotAllowedChange(intl);
-                  //       }
-                  //       // use remote to not trigger unwanted updates
-                  //       editor.store.mergeRemoteChanges(() => {
-                  //         editor.history.undo({ persist: false });
-                  //         const tool = editor.getCurrentToolId();
-                  //         editor.setCurrentTool('noop');
-                  //         editor.setCurrentTool(tool);
-                  //       });
-                  //     } else {
-                  //       // Add new shapes to the batch
-                  //       Object.values(added).forEach((record) => {
-                  //         const updatedRecord = {
-                  //           ...record,
-                  //           meta: {
-                  //             ...record.meta,
-                  //             createdBy: currentUser?.userId,
-                  //             whiteboardVision: currentPresentationPageRef?.whiteboardVision,
-                  //           },
-                  //         };
-              
-                  //         shapeBatchRef.current[updatedRecord.id] = updatedRecord;
-                  //       });
-                  //     }
-              
-                  //     // Update existing shapes and add them to the batch
-                  //     Object.values(updated).forEach(([, record]) => {
-                  //       const formattedLookup = createLookup(editor.getCurrentPageShapes());
-                  //       const createdBy = formattedLookup[record?.id]?.meta?.createdBy || currentUser?.userId;
-                  //       const updatedRecord = {
-                  //         ...record,
-                  //         meta: {
-                  //           createdBy,
-                  //           updatedBy: currentUser?.userId,
-                  //           whiteboardVision: currentPresentationPageRef?.whiteboardVision,
-                  //         },
-                  //       };
-              
-                  //       const diff = getDifferences(prevShapesRef.current[record?.id], updatedRecord);
-              
-                  //       if (diff) {
-                  //         diff.id = record.id;
-              
-                  //         shapeBatchRef.current[updatedRecord.id] = diff;
-                  //       } else {
-                  //         shapeBatchRef.current[updatedRecord.id] = updatedRecord;
-                  //       }
-                  //     });
-              
-                  //     // Handle removed shapes immediately (not batched)
-                  //     const idsToRemove = Object.keys(removed);
-                  //     if (idsToRemove.length > 0) {
-                  //       removeShapes(idsToRemove);
-                  //     }
-                  //   },
-                  //   { source: 'user', scope: 'document' },
-                  // );
-              
-                  // editor.store.listen(
-                  //   (entry) => {
-                  //     const path = editor.getPath();
-
-                  //     // Check for idle states and persist the batch if there are shapes
-                  //     if (path === 'select.idle' || path === 'draw.idle' || path === 'select.editing_shape' || path === 'highlight.idle') {
-                  //       if (Object.keys(shapeBatchRef.current).length > 0) {
-                  //         const shapesToPersist = Object.values(shapeBatchRef.current);
-                  //         shapesToPersist.forEach((shape) => {
-                  //           persistShapeWrapper(
-                  //             shape,
-                  //             whiteboardIdRef.current,
-                  //             isModeratorRef.current,
-                  //           );
-                  //         });
-
-                  //         shapeBatchRef.current = {};
-                  //       }
-                  //     }
-                  //   },
-                  //   { source: 'user' },
-                  // );
                 }}
-                // onMount={handleTldrawMount}
                 tools={customTools}
               />
           </Styled.PanelBox>
@@ -1905,6 +1888,7 @@ const Whiteboard = React.memo((props) => {
           isMultiUserActive,
           isToolbarVisible,
           presentationHeight,
+          isInWhiteboardVision
         }}
       />
     </div>
