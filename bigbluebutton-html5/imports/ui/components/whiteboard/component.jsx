@@ -1722,6 +1722,8 @@ editor.store.listen(
   //   }
   // }, [otherCursors, whiteboardWriters]);
 
+
+  
   React.useEffect(() => {
     const updateCursorsForEditor = (editor, userId, userCursors) => {
       if (!editor) {
@@ -1745,14 +1747,8 @@ editor.store.listen(
         }
       });
   
-      // Add presenter’s cursor if it exists in `otherCursors`
-      const presenterCursor = otherCursors.find((cursor) => cursor.user?.presenter) || null;
-  
-      // Merge presenter cursor with user cursors if it exists
-      const mergedCursors = presenterCursor ? [...userCursors, presenterCursor] : [...userCursors];
-  
       // Prepare updated presences for the editor
-      const updatedPresences = mergedCursors
+      const updatedPresences = userCursors
         .map(({ userId, user, xPercent, yPercent }) => {
           if (xPercent === -1 || yPercent === -1) {
             return null; // Skip invalid cursor positions
@@ -1791,24 +1787,40 @@ editor.store.listen(
     };
   
     if (isInWhiteboardVision) {
-      // Update cursors for all panel editors
+      // Whiteboard vision logic for panel editors
       Object.entries(panelEditors).forEach(([userId, editor]) => {
         const userCursors = otherCursors.filter((cursor) => cursor.userId === userId);
-        updateCursorsForEditor(editor, userId, userCursors);
+  
+        // Include the presenter's cursor only in the selected user's panel
+        const mergedCursors =
+          userId === selectedUserIdRef.current || (userId === currentUser?.userId && selectedUserIdRef.current === currentUser?.userId)
+            ? [...userCursors, otherCursors.find((cursor) => cursor.user?.presenter)].filter(Boolean)
+            : userCursors;
+  
+        updateCursorsForEditor(editor, userId, mergedCursors);
       });
   
-      // Update the main whiteboard (`tlEditorRef`) with the selected user's cursor and the presenter cursor
-      if (selectedUserIdRef.current && tlEditorRef.current) {
-        const selectedUserCursors = otherCursors.filter((cursor) => cursor.userId === selectedUserIdRef.current);
-        updateCursorsForEditor(tlEditorRef.current, selectedUserIdRef.current, selectedUserCursors);
+      // Update the main whiteboard (`tlEditorRef`) to always show the presenter's cursor
+      if (tlEditorRef.current) {
+        const mergedCursors = [
+          ...otherCursors.filter((cursor) => cursor.userId === selectedUserIdRef.current),
+          otherCursors.find((cursor) => cursor.user?.presenter), // Include the presenter's cursor
+        ].filter(Boolean);
+  
+        updateCursorsForEditor(tlEditorRef.current, selectedUserIdRef.current, mergedCursors);
       }
     } else if (tlEditorRef.current) {
-      console.log('otherCursors             =====> ', otherCursors);
-      // Update cursors for the main whiteboard when not in WhiteboardVision
-      updateCursorsForEditor(tlEditorRef.current, null, otherCursors);
-    }
-  }, [isInWhiteboardVision, otherCursors, panelEditors]);
+      // Non-presenter main whiteboard logic
+      const presenterCursor = otherCursors.find((cursor) => cursor.user?.presenter);
   
+      const mergedCursors = [
+        ...otherCursors.filter((cursor) => cursor.userId !== currentUser?.userId), // Exclude the current user's own cursor
+        presenterCursor, // Add the presenter cursor explicitly
+      ].filter(Boolean);
+  
+      updateCursorsForEditor(tlEditorRef.current, null, mergedCursors);
+    }
+  }, [isInWhiteboardVision, otherCursors, panelEditors, selectedUserIdRef.current]);
   
   
 
