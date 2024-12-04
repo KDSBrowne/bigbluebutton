@@ -519,10 +519,162 @@ const Whiteboard = React.memo((props) => {
 
 
 
+  React.useEffect(() => {
+    const clearShapes = (editor, filterFn) => {
+      const allRecords = editor.store.allRecords();
+      const shapeRecords = allRecords.filter((record) => record.typeName === 'shape');
+  
+      const shapesToClear = shapeRecords.filter((record) => {
+        const isBackgroundShape = record.id.startsWith('shape:BG-');
+        return !isBackgroundShape && filterFn(record);
+      });
+  
+      const shapeIds = shapesToClear.map((record) => record.id);
+  
+      if (shapeIds.length > 0) {
+        editor?.store.mergeRemoteChanges(() => {
+          editor?.store.remove(shapeIds);
+        });
+      }
+    };
+  
+    if (isInWhiteboardVision) {
+      if (isPresenter) {
+        // **Presenter's logic**
+        if (tlEditorRef.current) {
+          const activeUserId = selectedUserId || null;
+  
+          clearShapes(tlEditorRef.current, (shape) => {
+            if (!selectedUserId) {
+              // Keep only the presenter's own shapes when no user is selected and not intended for any user
+              const shouldKeep =
+                shape.meta?.createdBy === currentUser?.userId && !shape.meta?.presenterForUser;
+              return !shouldKeep; // Remove if not shouldKeep
+            }
+  
+            // Keep only shapes relevant to the selected user
+            const isActiveUserShape =
+              shape.meta?.createdBy === activeUserId && !shape.meta?.presenterForUser;
+            const isPresenterForActiveUser = shape.meta?.presenterForUser === activeUserId;
+            const shouldKeep = isActiveUserShape || isPresenterForActiveUser;
+            return !shouldKeep; // Remove if not shouldKeep
+          });
+        }
+  
+        // For panel editors, clear shapes not relevant to the associated user
+        Object.entries(panelEditors).forEach(([userId, editor]) => {
+          if (editor) {
+            clearShapes(editor, (shape) => {
+              const isUserShape =
+                shape.meta?.createdBy === userId && !shape.meta?.presenterForUser;
+              const isPresenterForUser = shape.meta?.presenterForUser === userId;
+              const shouldKeep = isUserShape || isPresenterForUser;
+              return !shouldKeep; // Remove if not shouldKeep
+            });
+          }
+        });
+      } else {
+        // **Viewers' logic**
+        if (tlEditorRef.current) {
+          const currentUserId = currentUser?.userId;
+  
+          clearShapes(tlEditorRef.current, (shape) => {
+            const isUserShape =
+              shape.meta?.createdBy === currentUserId && !shape.meta?.presenterForUser;
+            const isPresenterForUser = shape.meta?.presenterForUser === currentUserId;
+            const shouldKeep = isUserShape || isPresenterForUser;
+            return !shouldKeep; // Remove if not shouldKeep
+          });
+        }
+      }
+    } else {
+      // **When not in Whiteboard Vision mode**
+      if (tlEditorRef.current) {
+        // Clear only Whiteboard Vision shapes in the main editor
+        clearShapes(tlEditorRef.current, (shape) => shape.meta?.whiteboardVision);
+      }
+  
+      // Clear all shapes in panel editors when leaving Whiteboard Vision mode
+      Object.values(panelEditors).forEach((editor) => {
+        if (editor) {
+          clearShapes(editor, () => true); // Remove all shapes
+        }
+      });
+    }
+  }, [isInWhiteboardVision, panelEditors, selectedUserId, currentUser, isPresenter]);
+  
 
 
-
-
+  React.useEffect(() => {
+    if (removedShapes && removedShapes.length > 0 && isInWhiteboardVision && tlEditorRef.current) {
+      if (isPresenter) {
+        // **Presenter's Logic**
+  
+        // Remove shapes from panel editors
+        Object.entries(panelEditors).forEach(([userId, editor]) => {
+          const shapesToRemove = removedShapes.filter((shapeId) => {
+            const shape = editor.store.get(shapeId);
+            return (
+              shape &&
+              (
+                (shape.meta?.createdBy === userId && !shape.meta?.presenterForUser) || // Shapes created by the user
+                shape.meta?.presenterForUser === userId // Shapes the presenter created for the user
+              )
+            );
+          });
+  
+          if (shapesToRemove.length > 0) {
+            editor?.store.remove(shapesToRemove);
+          }
+        });
+  
+        // Remove shapes from the presenter's main whiteboard
+        const activeUserId = selectedUserIdRef.current || null;
+  
+        const shapesToRemove = removedShapes.filter((shapeId) => {
+          const shape = tlEditorRef.current.store.get(shapeId);
+          if (!shape) return false;
+  
+          if (!selectedUserIdRef.current) {
+            // Remove only the presenter's own shapes when no user is selected and not intended for any user
+            return (
+              shape.meta?.createdBy === currentUser?.userId &&
+              !shape.meta?.presenterForUser
+            );
+          }
+  
+          // Remove selected user's shapes and those the presenter created for them
+          return (
+            (shape.meta?.createdBy === activeUserId && !shape.meta?.presenterForUser) ||
+            shape.meta?.presenterForUser === activeUserId
+          );
+        });
+  
+        if (shapesToRemove.length > 0) {
+          tlEditorRef.current?.store.remove(shapesToRemove);
+        }
+      } else {
+        // **Viewers' Logic**
+        const currentUserId = currentUser?.userId;
+  
+        const shapesToRemove = removedShapes.filter((shapeId) => {
+          const shape = tlEditorRef.current?.store.get(shapeId);
+          return (
+            shape &&
+            (
+              (shape.meta?.createdBy === currentUserId && !shape.meta?.presenterForUser) || // Shapes created by the viewer
+              shape.meta?.presenterForUser === currentUserId // Shapes the presenter created for the viewer
+            )
+          );
+        });
+  
+        if (shapesToRemove.length > 0) {
+          tlEditorRef.current?.store.remove(shapesToRemove);
+        }
+      }
+    }
+  }, [removedShapes, isInWhiteboardVision, isPresenter, currentUser, selectedUserId, panelEditors]);
+  
 
   /////////////////////////////////
   
