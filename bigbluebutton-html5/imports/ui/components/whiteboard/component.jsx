@@ -2557,7 +2557,7 @@ const Whiteboard = React.memo((props) => {
         }
         onMouseOut={(e) =>
           (e.target.style.backgroundColor =
-            selectedUserId === box.userId ? "#ffffff" : "#0056b3")
+            selectedUserId === box.userId ? "#ffffff" : "#007BFF")
         }
         onMouseDown={(e) => {
           e.target.style.transform = "scale(0.95)"; // Shrinks button slightly on click
@@ -2593,7 +2593,7 @@ const Whiteboard = React.memo((props) => {
         }
         onMouseOut={(e) =>
           (e.target.style.backgroundColor =
-            selectedUserId === box.userId ? "#ffffff" : "#0056b3")
+            selectedUserId === box.userId ? "#ffffff" : "#007BFF")
         }
         onMouseDown={(e) => {
           e.target.style.transform = "scale(0.95)"; // Shrinks button slightly on click
