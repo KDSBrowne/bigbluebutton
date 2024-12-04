@@ -294,6 +294,8 @@ class ReceivedJsonMsgHandlerActor(
         routeGenericMsg[SetPageInfiniteWhiteboardPubMsg](envelope, jsonNode)
       case SetPageWhiteboardVisionPubMsg.NAME =>
         routeGenericMsg[SetPageWhiteboardVisionPubMsg](envelope, jsonNode)
+      case SetPageSelectedUserPubMsg.NAME =>
+        routeGenericMsg[SetPageSelectedUserPubMsg](envelope, jsonNode)
       case ResizeAndMovePagePubMsg.NAME =>
         routeGenericMsg[ResizeAndMovePagePubMsg](envelope, jsonNode)
       case SlideResizedPubMsg.NAME =>

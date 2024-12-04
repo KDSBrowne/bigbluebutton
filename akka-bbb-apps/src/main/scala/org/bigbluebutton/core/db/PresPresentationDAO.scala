@@ -177,6 +177,7 @@ object PresPresentationDAO {
               uploadCompleted = page._2.converted,
               infiniteWhiteboard = page._2.infiniteWhiteboard,
               whiteboardVision = page._2.whiteboardVision,
+              selectedUser = page._2.selectedUser,
             )
           )
         }

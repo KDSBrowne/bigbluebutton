@@ -33,6 +33,7 @@ case class PresentationPage(
     converted:   Boolean             = false,
     infiniteWhiteboard: Boolean      = false,
     whiteboardVision: Boolean        = false,
+    selectedUser: String             = "",
 )
 
 object PresentationInPod {

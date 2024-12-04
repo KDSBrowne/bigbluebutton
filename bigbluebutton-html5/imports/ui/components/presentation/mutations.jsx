@@ -118,6 +118,15 @@ export const PRESENTATION_SET_PAGE_WHITEBOARD_VISION = gql`
   }
 `;
 
+export const PRESENTATION_SET_PAGE_SELECTED_USER = gql`
+  mutation PresentationSetPageSelectedUser($pageId: String!, $selectedUser: String!) {
+    presentationSetPageSelectedUser(
+      pageId: $pageId,
+      selectedUser: $selectedUser
+    )
+  }
+`;
+
 export default {
   PRESENTATION_SET_ZOOM,
   PRESENTATION_SET_WRITERS,
@@ -131,4 +140,5 @@ export default {
   PRESENTATION_PUBLISH_CURSOR,
   PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD,
   PRESENTATION_SET_PAGE_WHITEBOARD_VISION,
+  PRESENTATION_SET_PAGE_SELECTED_USER,
 };

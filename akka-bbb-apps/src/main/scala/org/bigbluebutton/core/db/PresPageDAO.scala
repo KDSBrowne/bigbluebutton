@@ -28,6 +28,7 @@ case class PresPageDbModel(
     uploadCompleted: Boolean,
     infiniteWhiteboard:  Boolean,
     whiteboardVision: Boolean,
+    selectedUser:    String,
 )
 
 class PresPageDbTableDef(tag: Tag) extends Table[PresPageDbModel](tag, None, "pres_page") {
@@ -51,9 +52,10 @@ class PresPageDbTableDef(tag: Tag) extends Table[PresPageDbModel](tag, None, "pr
   val uploadCompleted = column[Boolean]("uploadCompleted")
   val infiniteWhiteboard = column[Boolean]("infiniteWhiteboard")
   val whiteboardVision = column[Boolean]("whiteboardVision")
+  val selectedUser = column[String]("selectedUser")
 
   def * = (
-    pageId, presentationId, num, urlsJson, content, slideRevealed, current, xOffset, yOffset, widthRatio, heightRatio, width, height, viewBoxWidth, viewBoxHeight, maxImageWidth, maxImageHeight, uploadCompleted, infiniteWhiteboard, whiteboardVision
+    pageId, presentationId, num, urlsJson, content, slideRevealed, current, xOffset, yOffset, widthRatio, heightRatio, width, height, viewBoxWidth, viewBoxHeight, maxImageWidth, maxImageHeight, uploadCompleted, infiniteWhiteboard, whiteboardVision, selectedUser
   ) <> (PresPageDbModel.tupled, PresPageDbModel.unapply)
 }
 
@@ -90,6 +92,7 @@ object PresPageDAO {
           uploadCompleted = page.converted,
           infiniteWhiteboard = page.infiniteWhiteboard,
           whiteboardVision = page.whiteboardVision,
+          selectedUser = page.selectedUser,
         )
       )
     )
@@ -144,6 +147,18 @@ object PresPageDAO {
     ).onComplete {
       case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated whiteboardVision on PresPage table")
       case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating whiteboardVision on PresPage: $e")
+    }
+  }
+
+  def updateSelectedUser(pageId: String, selectedUser: String) = {
+    DatabaseConnection.db.run(
+      TableQuery[PresPageDbTableDef]
+        .filter(_.pageId === pageId)
+        .map(p => p.selectedUser)
+        .update(selectedUser)
+    ).onComplete {
+      case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated selected user on PresPage table")
+      case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating selected user on PresPage: $e")
     }
   }
 }

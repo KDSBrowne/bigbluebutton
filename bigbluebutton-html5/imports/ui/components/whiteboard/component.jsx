@@ -143,6 +143,7 @@ const Whiteboard = React.memo((props) => {
     isPhone,
     setEditor,
     isInWhiteboardVision,
+    setPresentationPageSelectedUser,
   } = props;
 
   clearTldrawCache();
@@ -153,13 +154,13 @@ const Whiteboard = React.memo((props) => {
   const [isTabVisible, setIsTabVisible] = React.useState(document.visibilityState === 'visible');
   const [boxes, setBoxes] = useState([]);
   const [isPanelVisible, setIsPanelVisible] = useState(isInWhiteboardVision);
-  const [selectedUserId, setSelectedUserId] = React.useState(currentUser?.userId || null);
+  const [selectedUserId, setSelectedUserId] = React.useState(currentPresentationPage?.selectedUser || "");
 
   const selectedUserIdRef = React.useRef(null);
 
-React.useEffect(() => {
-  selectedUserIdRef.current = selectedUserId;
-}, [selectedUserId]);
+  React.useEffect(() => {
+    selectedUserIdRef.current = selectedUserId;
+  }, [selectedUserId]);
 
   const togglePanel = () => {
     setIsPanelVisible((prev) => !prev);
@@ -170,6 +171,7 @@ React.useEffect(() => {
   };
 
   const handleUserClick = (userId) => {
+    setPresentationPageSelectedUser(userId);
     setSelectedUserId(userId); // Update the selected user ID
   };
 
@@ -261,6 +263,7 @@ React.useEffect(() => {
   React.useEffect(() => {
     currentPresentationPageRef.current = currentPresentationPage;
     console.log('currentPresentationPage update ... ', currentPresentationPage)
+    setSelectedUserId(currentPresentationPage?.selectedUser)
   }, [currentPresentationPage]);
 
   React.useEffect(() => {
@@ -343,49 +346,57 @@ React.useEffect(() => {
   //   }
   // }, [shapes, panelEditors, isInWhiteboardVision]);
 
+
+  
   React.useEffect(() => {
     if (shapes && Object.keys(shapes).length > 0) {
       if (isInWhiteboardVision) {
-        // Update panelEditors when in Whiteboard Vision mode
+        // Update panelEditors for each viewer
         Object.entries(panelEditors).forEach(([userId, editor]) => {
           const userShapes = Object.values(shapes).filter(
             (shape) =>
-              shape.meta?.createdBy === userId && shape.meta?.whiteboardVision === true
+              shape.meta?.createdBy === userId || // Shapes created by the user
+              (shape.meta?.presenterForUser === userId && isPresenter) // Shapes presented to the user
           );
   
           const sanitizedShapes = userShapes.map((shape) => sanitizeShape(shape));
-          console.log(`UPDATING PANEL SHAPES for user ${userId}:`, sanitizedShapes);
+          console.log(`[WhiteboardVision] Updating panel shapes for user ${userId}:`, sanitizedShapes);
           editor?.store.mergeRemoteChanges(() => {
             editor?.store.put(sanitizedShapes);
           });
         });
   
-        // Update the main editor for selected user or current user
+        // Update the presenter's main whiteboard
         if (tlEditorRef.current) {
-          const activeUserId = selectedUserId || currentUser?.userId;
+          const activeUserId = selectedUserIdRef.current || currentUser?.userId;
   
-          const userShapes = Object.values(shapes).filter(
-            (shape) =>
-              shape.meta?.createdBy === activeUserId && shape.meta?.whiteboardVision === true
-          );
+          const presenterShapes = Object.values(shapes).filter((shape) => {
+            if (!selectedUserIdRef.current) {
+              // Show only the presenter's shapes when no user is selected
+              return shape.meta?.createdBy === currentUser?.userId;
+            }
   
-          const sanitizedShapes = userShapes.map((shape) => sanitizeShape(shape));
-          console.log(
-            `UPDATING MAIN WHITEBOARD SHAPES for activeUserId ${activeUserId}:`,
-            sanitizedShapes
-          );
+            // Show selected user's shapes and those the presenter created for them
+            return (
+              shape.meta?.createdBy === activeUserId ||
+              shape.meta?.presenterForUser === activeUserId
+            );
+          });
+  
+          const sanitizedShapes = presenterShapes.map((shape) => sanitizeShape(shape));
+          console.log(`[WhiteboardVision] Updating presenter's main whiteboard shapes:`, sanitizedShapes);
           tlEditorRef.current.store.mergeRemoteChanges(() => {
             tlEditorRef.current.store.put(sanitizedShapes);
           });
         }
       } else {
-        // Update the main editor with all shapes excluding whiteboardVision shapes
+        // When not in Whiteboard Vision, show all shapes except whiteboardVision-specific shapes
         if (tlEditorRef.current) {
           const sanitizedShapes = Object.values(shapes)
-            .filter((shape) => !shape.meta?.whiteboardVision) // Exclude shapes with whiteboardVision: true
+            .filter((shape) => !shape.meta?.whiteboardVision)
             .map((shape) => sanitizeShape(shape));
   
-          console.log('UPDATING SHAPES in main editor:', sanitizedShapes);
+          console.log('[Whiteboard] Updating shapes for general view:', sanitizedShapes);
           tlEditorRef.current.store.mergeRemoteChanges(() => {
             tlEditorRef.current.store.put(sanitizedShapes);
           });
@@ -393,6 +404,8 @@ React.useEffect(() => {
       }
     }
   }, [shapes, panelEditors, isInWhiteboardVision, selectedUserId]);
+  
+  
   
   
   // React.useEffect(() => {
@@ -522,43 +535,63 @@ React.useEffect(() => {
   //   }
   // }, [removedShapes, panelEditors]);
 
+
+  
   React.useEffect(() => {
     if (removedShapes && removedShapes.length > 0) {
       if (isInWhiteboardVision) {
         // Remove shapes from panel editors
         Object.entries(panelEditors).forEach(([userId, editor]) => {
-          editor?.store.remove([...removedShapes]);
-        });
-  
-        // Remove shapes from the presenter's main whiteboard
-        if (tlEditorRef.current) {
-          const activeUserId = selectedUserId || currentUser?.userId;
-  
-          // Filter removed shapes to those belonging to the activeUserId
           const shapesToRemove = removedShapes.filter(
             (shape) =>
-              shape.meta?.createdBy === activeUserId && shape.meta?.whiteboardVision === true
+              shape.meta?.createdBy === userId || // Shapes created by the user
+              (shape.meta?.presenterForUser === userId && isPresenter) // Shapes presented to the user
           );
   
           if (shapesToRemove.length > 0) {
             const shapeIds = shapesToRemove.map((shape) => shape.id);
-            console.log(
-              `Removing shapes from main whiteboard for activeUserId ${activeUserId}:`,
-              shapeIds
+            console.log(`[WhiteboardVision] Removing shapes for user ${userId}:`, shapeIds);
+            editor?.store.remove(shapeIds);
+          }
+        });
+  
+        // Remove shapes from the presenter's main whiteboard
+        if (tlEditorRef.current) {
+          const activeUserId = selectedUserIdRef.current || currentUser?.userId;
+  
+          const shapesToRemove = removedShapes.filter((shape) => {
+            if (!selectedUserIdRef.current) {
+              // Remove only the presenter's shapes when no user is selected
+              return shape.meta?.createdBy === currentUser?.userId;
+            }
+  
+            // Remove selected user's shapes and those the presenter created for them
+            return (
+              shape.meta?.createdBy === activeUserId ||
+              shape.meta?.presenterForUser === activeUserId
             );
+          });
+  
+          if (shapesToRemove.length > 0) {
+            const shapeIds = shapesToRemove.map((shape) => shape.id);
+            console.log(`[WhiteboardVision] Removing shapes from main whiteboard:`, shapeIds);
             tlEditorRef.current.store.mergeRemoteChanges(() => {
               tlEditorRef.current.store.remove(shapeIds);
             });
           }
         }
       } else {
-        // Remove shapes from the main editor when not in Whiteboard Vision mode
-        tlEditorRef.current?.store.mergeRemoteChanges(() => {
-          tlEditorRef.current.store.remove([...removedShapes]);
-        });
+        // When not in Whiteboard Vision, remove all shapes
+        if (tlEditorRef.current) {
+          console.log('[Whiteboard] Removing general shapes:', removedShapes);
+          tlEditorRef.current.store.mergeRemoteChanges(() => {
+            tlEditorRef.current.store.remove(removedShapes.map((shape) => shape.id));
+          });
+        }
       }
     }
   }, [removedShapes, isInWhiteboardVision, selectedUserId, currentUser, panelEditors]);
+  
   
   
   
@@ -981,9 +1014,9 @@ React.useEffect(() => {
         const { changes } = entry;
         const { added, updated, removed } = changes;
     
-        const activeUserId = selectedUserIdRef.current || currentUser?.userId; // Use the selected user or default to the current user
-    
+        const activeUserId = selectedUserIdRef.current || null; // Use the selected user or nothing
         const addedCount = Object.keys(added).length;
+    
         const localShapes = editor.getCurrentPageShapes();
         const filteredShapes = localShapes?.filter((item) => item?.index !== 'a0') || [];
         const shapeNumberExceeded = filteredShapes.length + addedCount - 1 > maxNumberOfAnnotations;
@@ -996,6 +1029,7 @@ React.useEffect(() => {
           } else {
             notifyNotAllowedChange(intl);
           }
+    
           editor.store.mergeRemoteChanges(() => {
             editor.history.undo({ persist: false });
             const tool = editor.getCurrentToolId();
@@ -1009,8 +1043,9 @@ React.useEffect(() => {
               ...record,
               meta: {
                 ...record.meta,
-                createdBy: activeUserId, // Use the selected user's ID
+                createdBy: currentUser?.userId, // Always the user creating the shape
                 whiteboardVision: currentPresentationPageRef.current?.whiteboardVision,
+                presenterForUser: isPresenterRef.current ? activeUserId : null, // Only set if the presenter creates for a user
               },
             };
     
@@ -1021,13 +1056,16 @@ React.useEffect(() => {
         // Update existing shapes and add them to the batch
         Object.values(updated).forEach(([, record]) => {
           const formattedLookup = createLookup(editor.getCurrentPageShapes());
-          const createdBy = formattedLookup[record?.id]?.meta?.createdBy || activeUserId;
+          const createdBy = formattedLookup[record?.id]?.meta?.createdBy || currentUser?.userId;
+    
           const updatedRecord = {
             ...record,
             meta: {
-              createdBy,
-              updatedBy: currentUser?.userId,
+              ...record.meta,
+              createdBy, // Keep the original creator
+              updatedBy: currentUser?.userId, // Track who updated it
               whiteboardVision: currentPresentationPageRef.current?.whiteboardVision,
+              presenterForUser: record.meta?.presenterForUser || (isPresenterRef.current ? activeUserId : null),
             },
           };
     
@@ -1050,76 +1088,84 @@ React.useEffect(() => {
       { source: 'user', scope: 'document' }
     );
     
+    
 
-editor.store.listen(
-  (entry) => {
-    const { changes } = entry;
-    const { updated } = changes;
-    const { 'pointer:pointer': pointers } = updated;
-
-    const path = editor.getPath();
-
-    if ((isPresenterRef.current || hasWBAccessRef.current) && pointers) {
-      const [, nextPointer] = pointers;
-      updateCursorPosition(nextPointer?.x, nextPointer?.y);
-    }
-
-    const camKey = `camera:page:${curPageIdRef.current}`;
-    const { [camKey]: cameras } = updated;
-
-    if (cameras) {
-      const [prevCam, nextCam] = cameras;
-      const panned = prevCam.x !== nextCam.x || prevCam.y !== nextCam.y;
-
-      const zoomed = prevCam.z !== nextCam.z;
-
-      if ((panned || (zoomed && fitToWidthRef.current)) && isPresenterRef.current) {
-        const viewedRegionW = SlideCalcUtil.calcViewedRegionWidth(
-          editor?.getViewportPageBounds()?.w,
-          currentPresentationPageRef.current?.scaledWidth,
-        );
-        const viewedRegionH = SlideCalcUtil.calcViewedRegionHeight(
-          editor?.getViewportPageBounds()?.h,
-          currentPresentationPageRef.current?.scaledHeight,
-        );
-
-        if (isMountedRef.current) {
-          zoomSlide(
-            viewedRegionW, viewedRegionH, nextCam.x, nextCam.y,
-            currentPresentationPageRef.current,
-          );
+    editor.store.listen(
+      (entry) => {
+        const { changes } = entry;
+        const { updated } = changes;
+        const { 'pointer:pointer': pointers } = updated;
+    
+        const path = editor.getPath();
+    
+        // Handle pointer updates
+        if ((isPresenterRef.current || hasWBAccessRef.current) && pointers) {
+          const [, nextPointer] = pointers;
+          updateCursorPosition(nextPointer?.x, nextPointer?.y);
         }
-      }
-    }
-
-    // Check for idle states and persist the batch if there are shapes
-    if (path === 'select.idle' || path === 'draw.idle' || path === 'select.editing_shape' || path === 'highlight.idle') {
-      if (Object.keys(shapeBatchRef.current).length > 0) {
-        const activeUserId = selectedUserIdRef.current || currentUser?.userId; // Use the selected user ID
-
-        const shapesToPersist = Object.values(shapeBatchRef.current).map((shape) => ({
-          ...shape,
-          meta: {
-            ...shape.meta,
-            createdBy: activeUserId, // Ensure shapes are attributed to the selected user
-            whiteboardVision: currentPresentationPageRef.current?.whiteboardVision,
-          },
-        }));
-
-        shapesToPersist.forEach((shape) => {
-          persistShapeWrapper(
-            shape,
-            whiteboardIdRef.current, // Associate shapes with the correct whiteboard
-            isModeratorRef.current
-          );
-        });
-
-        shapeBatchRef.current = {};
-      }
-    }
-  },
-  { source: 'user' },
-);
+    
+        // Handle camera updates
+        const camKey = `camera:page:${curPageIdRef.current}`;
+        const { [camKey]: cameras } = updated;
+    
+        if (cameras) {
+          const [prevCam, nextCam] = cameras;
+          const panned = prevCam.x !== nextCam.x || prevCam.y !== nextCam.y;
+          const zoomed = prevCam.z !== nextCam.z;
+    
+          if ((panned || (zoomed && fitToWidthRef.current)) && isPresenterRef.current) {
+            const viewedRegionW = SlideCalcUtil.calcViewedRegionWidth(
+              editor?.getViewportPageBounds()?.w,
+              currentPresentationPageRef.current?.scaledWidth
+            );
+            const viewedRegionH = SlideCalcUtil.calcViewedRegionHeight(
+              editor?.getViewportPageBounds()?.h,
+              currentPresentationPageRef.current?.scaledHeight
+            );
+    
+            if (isMountedRef.current) {
+              zoomSlide(
+                viewedRegionW, 
+                viewedRegionH, 
+                nextCam.x, 
+                nextCam.y,
+                currentPresentationPageRef.current
+              );
+            }
+          }
+        }
+    
+        // Persist batched shapes when idle
+        if (path === 'select.idle' || path === 'draw.idle' || path === 'select.editing_shape' || path === 'highlight.idle') {
+          if (Object.keys(shapeBatchRef.current).length > 0) {
+            // Get the active user, only if a user is selected (presenter can still create shapes without a selected user)
+            const activeUserId = selectedUserIdRef.current || null;
+    
+            const shapesToPersist = Object.values(shapeBatchRef.current).map((shape) => ({
+              ...shape,
+              meta: {
+                ...shape.meta,
+                createdBy: currentUser?.userId, // Always set to the actual creator
+                presenterForUser: isPresenter && activeUserId ? activeUserId : null, // Link presenter shapes to the selected user
+                whiteboardVision: currentPresentationPageRef.current?.whiteboardVision,
+              },
+            }));
+    
+            shapesToPersist.forEach((shape) => {
+              persistShapeWrapper(
+                shape,
+                whiteboardIdRef.current, // Associate shapes with the correct whiteboard
+                isModeratorRef.current
+              );
+            });
+    
+            shapeBatchRef.current = {}; // Clear the batch after persisting
+          }
+        }
+      },
+      { source: 'user' }
+    );
+    
 
 
     if (editor && curPageIdRef.current) {
@@ -1722,24 +1768,103 @@ editor.store.listen(
   //   }
   // }, [otherCursors, whiteboardWriters]);
 
-
+    // Updating presences in tldraw store based on changes in cursors
+    React.useEffect(() => {
+      if (tlEditorRef.current && !isInWhiteboardVision) {
+        const useElement = document.querySelector('.tl-cursor use');
+        if (useElement && !isMultiUserActive && !isPresenter) {
+          useElement.setAttribute('href', '#redPointer');
+        } else if (useElement) {
+          useElement.setAttribute('href', '#cursor');
+        }
   
+        const idsToRemove = [];
+  
+        // Get all presence records from the store
+        const allRecords = tlEditorRef.current.store.allRecords();
+        const presenceRecords = allRecords.filter((record) => record.id.startsWith('instance_presence:'));
+  
+        // Check if any presence records correspond to users not in whiteboardWriters
+        presenceRecords.forEach((record) => {
+          const userId = record.userId.split('instance_presence:')[1];
+          const hasAccessToWhiteboard = whiteboardWriters.some((writer) => writer.userId === userId);
+  
+          if (!hasAccessToWhiteboard) {
+            idsToRemove.push(record.id);
+          }
+        });
+  
+        const updatedPresences = otherCursors
+          .map(({
+            userId, user, xPercent, yPercent,
+          }) => {
+            const { presenter, name } = user;
+            const id = InstancePresenceRecordType.createId(userId);
+            const active = xPercent !== -1 && yPercent !== -1;
+            // if cursor is not active remove it from tldraw store
+            if (
+              !active
+              || (hideViewersCursor
+                && user.role === 'VIEWER'
+                && !currentUser?.presenter)
+              || (!presenter && !isMultiUserActive)
+            ) {
+              idsToRemove.push(id);
+              return null;
+            }
+  
+            const cursor = {
+              x: xPercent,
+              y: yPercent,
+              type: 'default',
+              rotation: 0,
+            };
+            const color = presenter ? '#FF0000' : '#70DB70';
+            const c = {
+              ...InstancePresenceRecordType.create({
+                id,
+                currentPageId: `page:${curPageIdRef.current}`,
+                userId,
+                userName: name,
+                cursor,
+                color,
+              }),
+              lastActivityTimestamp: Date.now(),
+            };
+  
+            return c;
+          })
+          .filter((cursor) => cursor && cursor.userId !== currentUser?.userId);
+  
+        if (idsToRemove.length) {
+          tlEditorRef.current?.store.remove(idsToRemove);
+        }
+  
+        // If there are any updated presences, put them all in the store
+        if (updatedPresences.length) {
+          tlEditorRef.current?.store.put(updatedPresences);
+        }
+      }
+    }, [otherCursors, whiteboardWriters]);
+
+
+
   React.useEffect(() => {
     const updateCursorsForEditor = (editor, userId, userCursors) => {
       if (!editor) {
-        console.warn(`Editor not found for userId: ${userId}`);
+        console.warn(`[updateCursorsForEditor]: Editor not found for userId: ${userId}`);
         return;
       }
   
       const idsToRemove = [];
-  
-      // Get all presence records from the store for the specific editor
       const allRecords = editor.store.allRecords();
-      const presenceRecords = allRecords.filter((record) => record.id.startsWith('instance_presence:'));
+      const presenceRecords = allRecords.filter((record) =>
+        record.id.startsWith('instance_presence:')
+      );
   
-      // Remove outdated presence records
+      // Remove outdated cursors
       presenceRecords.forEach((record) => {
-        const recordUserId = record.userId.split('instance_presence:')[1];
+        const recordUserId = record.id.split('instance_presence:')[1];
         const isCursorStillActive = userCursors.some((cursor) => cursor.userId === recordUserId);
   
         if (!isCursorStillActive) {
@@ -1747,11 +1872,12 @@ editor.store.listen(
         }
       });
   
-      // Prepare updated presences for the editor
+      // Prepare updated presences
       const updatedPresences = userCursors
         .map(({ userId, user, xPercent, yPercent }) => {
           if (xPercent === -1 || yPercent === -1) {
-            return null; // Skip invalid cursor positions
+            // console.debug(`[updateCursorsForEditor]: Skipping inactive cursor for userId: ${userId}`);
+            return null; // Skip invalid cursors
           }
   
           const cursor = {
@@ -1761,66 +1887,103 @@ editor.store.listen(
             rotation: 0,
           };
   
-          const color = user.presenter ? '#FF0000' : '#70DB70';
+          const color = user?.presenter ? '#FF0000' : '#70DB70'; // Red for presenter, green for others
   
-          return {
+          const presenceRecord = {
             ...InstancePresenceRecordType.create({
               id: InstancePresenceRecordType.createId(userId),
               currentPageId: `page:${curPageIdRef.current}`,
               userId,
-              userName: user.name,
+              userName: user?.name,
               cursor,
               color,
             }),
             lastActivityTimestamp: Date.now(),
           };
+  
+          // console.debug(`[updateCursorsForEditor]: Prepared presence for userId: ${userId}`, presenceRecord);
+          return presenceRecord;
         })
         .filter(Boolean);
   
       if (idsToRemove.length) {
+        // console.info(`[updateCursorsForEditor]: Removing outdated cursors for userId: ${userId}`, idsToRemove);
         editor.store.remove(idsToRemove);
       }
   
       if (updatedPresences.length) {
+        // console.info(`[updateCursorsForEditor]: Adding/updating cursors for userId: ${userId}`, updatedPresences);
         editor.store.put(updatedPresences);
       }
     };
   
     if (isInWhiteboardVision) {
-      // Whiteboard vision logic for panel editors
+      // console.info(`[Effect]: Whiteboard Vision Enabled`);
+  
+      // **Panel Updates**
       Object.entries(panelEditors).forEach(([userId, editor]) => {
         const userCursors = otherCursors.filter((cursor) => cursor.userId === userId);
+        const shouldIncludePresenterCursor = userId === currentPresentationPage?.selectedUser;
   
-        // Include the presenter's cursor only in the selected user's panel
-        const mergedCursors =
-          userId === selectedUserIdRef.current || (userId === currentUser?.userId && selectedUserIdRef.current === currentUser?.userId)
-            ? [...userCursors, otherCursors.find((cursor) => cursor.user?.presenter)].filter(Boolean)
-            : userCursors;
+        const mergedCursors = shouldIncludePresenterCursor
+          ? [...userCursors, otherCursors.find((cursor) => cursor.user?.presenter)].filter(Boolean)
+          : userCursors;
   
+        // console.info(`[Panel]: Merged cursors for panel userId: ${userId}`, mergedCursors);
         updateCursorsForEditor(editor, userId, mergedCursors);
       });
   
-      // Update the main whiteboard (`tlEditorRef`) to always show the presenter's cursor
-      if (tlEditorRef.current) {
-        const mergedCursors = [
-          ...otherCursors.filter((cursor) => cursor.userId === selectedUserIdRef.current),
-          otherCursors.find((cursor) => cursor.user?.presenter), // Include the presenter's cursor
-        ].filter(Boolean);
+      // **Presenter Main Whiteboard**
+      if (isPresenter && tlEditorRef.current) { // Changed condition here
+        // console.info(`[Presenter]: Updating main whiteboard cursors`);
   
-        updateCursorsForEditor(tlEditorRef.current, selectedUserIdRef.current, mergedCursors);
+        const selectedUserCursor = otherCursors.find(
+          (cursor) => cursor.userId === currentPresentationPage?.selectedUser
+        );
+  
+        // console.info(`[Presenter]: Selected user cursor:`, selectedUserCursor);
+  
+        // Include the selected user's cursor if valid
+        const mergedCursors = selectedUserCursor && selectedUserCursor.xPercent !== -1
+          ? [selectedUserCursor]
+          : [];
+  
+        // console.info(`[Presenter]: Merged cursors for main whiteboard`, mergedCursors);
+        updateCursorsForEditor(tlEditorRef.current, null, mergedCursors);
       }
-    } else if (tlEditorRef.current) {
-      // Non-presenter main whiteboard logic
-      const presenterCursor = otherCursors.find((cursor) => cursor.user?.presenter);
   
-      const mergedCursors = [
-        ...otherCursors.filter((cursor) => cursor.userId !== currentUser?.userId), // Exclude the current user's own cursor
-        presenterCursor, // Add the presenter cursor explicitly
-      ].filter(Boolean);
+      // **Viewer Main Whiteboard**
+      if (!isPresenter && tlEditorRef.current) { // Changed condition here
+        // console.info(`[Viewer]: Updating main whiteboard cursors`);
   
-      updateCursorsForEditor(tlEditorRef.current, null, mergedCursors);
+        // Viewers should only see the presenter cursor if they are the selected user
+        const isSelectedUser = currentUser?.userId === currentPresentationPage?.selectedUser;
+        const presenterCursor = isSelectedUser
+          ? otherCursors.find((cursor) => cursor.user?.presenter)
+          : null;
+  
+        // console.info(`[Viewer]: Presenter cursor for viewer:`, presenterCursor);
+  
+        const mergedCursors = presenterCursor && presenterCursor.xPercent !== -1 ? [presenterCursor] : [];
+  
+        // console.info(`[Viewer]: Merged cursors for main whiteboard`, mergedCursors);
+        updateCursorsForEditor(tlEditorRef.current, null, mergedCursors);
+      }
     }
-  }, [isInWhiteboardVision, otherCursors, panelEditors, selectedUserIdRef.current]);
+  }, [isInWhiteboardVision, otherCursors, panelEditors, currentPresentationPage?.selectedUser, isPresenter]);
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
 
@@ -2132,7 +2295,7 @@ editor.store.listen(
 
       <Tldraw
         autoFocus={false}
-        key={`tldrawv2-${presentationId}-${animations}`}
+        key={`tldrawv2-${presentationId}-${animations}-`}
         forceMobile
         hideUi={!(hasWBAccessRef.current || isPresenter)}
         onMount={handleTldrawMount}

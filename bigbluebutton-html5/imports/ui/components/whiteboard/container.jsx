@@ -43,6 +43,7 @@ import {
   PRES_ANNOTATION_SUBMIT,
   PRESENTATION_SET_PAGE,
   PRESENTATION_PUBLISH_CURSOR,
+  PRESENTATION_SET_PAGE_SELECTED_USER
 } from '../presentation/mutations';
 import { useMergedCursorData } from './hooks.ts';
 import useDeduplicatedSubscription from '../../core/hooks/useDeduplicatedSubscription';
@@ -117,6 +118,7 @@ const WhiteboardContainer = (props) => {
 
   const [presentationSetZoom] = useMutation(PRESENTATION_SET_ZOOM);
   const [presentationSetPage] = useMutation(PRESENTATION_SET_PAGE);
+  const [presentationSetPageSelectedUser] = useMutation(PRESENTATION_SET_PAGE_SELECTED_USER);
   const [presentationDeleteAnnotations] = useMutation(PRES_ANNOTATION_DELETE);
   const [presentationSubmitAnnotations] = useMutation(PRES_ANNOTATION_SUBMIT);
   const [presentationPublishCursor] = useMutation(PRESENTATION_PUBLISH_CURSOR);
@@ -126,6 +128,16 @@ const WhiteboardContainer = (props) => {
       variables: {
         presentationId,
         pageId,
+      },
+    });
+  };
+
+  const setPresentationPageSelectedUser = (selectedUser) => {
+    const pageId = `${presentationId}/${curPageNum}`;
+    presentationSetPageSelectedUser({
+      variables: {
+        pageId,
+        selectedUser,
       },
     });
   };
@@ -450,6 +462,7 @@ const WhiteboardContainer = (props) => {
         whiteboardWriters,
         zoomChanger,
         skipToSlide,
+        setPresentationPageSelectedUser,
         locale: Settings?.application?.locale,
         darkTheme: Settings?.application?.darkTheme,
         selectedLayout: Settings?.application?.selectedLayout,

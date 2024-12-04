@@ -439,6 +439,13 @@ type Mutation {
 }
 
 type Mutation {
+  presentationSetPageSelectedUser(
+    selectedUser: String!
+    pageId: String!
+  ): Boolean
+}
+
+type Mutation {
   presentationSetRenderedInToast(
     presentationId: String!
   ): Boolean

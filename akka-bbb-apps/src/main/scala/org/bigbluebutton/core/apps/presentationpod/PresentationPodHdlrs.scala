@@ -13,6 +13,7 @@ class PresentationPodHdlrs(implicit val context: ActorContext)
   with SetCurrentPagePubMsgHdlr
   with SetPageInfiniteWhiteboardPubMsgHdlr
   with SetPageWhiteboardVisionPubMsgHdlr
+  with SetPageSelectedUserPubMsgHdlr
   with SetPresenterInDefaultPodInternalMsgHdlr
   with RemovePresentationPubMsgHdlr
   with SetPresentationDownloadablePubMsgHdlr
