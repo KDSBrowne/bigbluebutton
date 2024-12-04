@@ -97,6 +97,7 @@ const WhiteboardContainer = (props) => {
   const curPageId = currentPresentationPage?.pageId;
   const isInfiniteWhiteboard = currentPresentationPage?.infiniteWhiteboard;
   const isInWhiteboardVision = currentPresentationPage?.whiteboardVision;
+  const selectedUser = currentPresentationPage?.selectedUser;
   const curPageIdRef = useRef();
 
   React.useEffect(() => {
@@ -226,16 +227,9 @@ const WhiteboardContainer = (props) => {
   );
 
   const lastUpdatedAt = useMemo(() => {
-    if (!initialPageAnnotations?.pres_annotation_curr?.length) {
-      return currentMeeting?.createdTime
-        ? new Date(currentMeeting.createdTime).toISOString()
-        : null;
-    }
-    return initialPageAnnotations.pres_annotation_curr.reduce((latest, annotation) => {
-      const updatedAt = new Date(annotation.lastUpdatedAt);
-      return updatedAt > latest ? updatedAt : latest;
-    }, new Date(0)).toISOString();
-  }, [initialPageAnnotations]);
+    return new Date(0).toISOString(); // Start of time
+  }, []);
+  
 
   const { data: annotationStreamData } = useSubscription(ANNOTATION_HISTORY_STREAM, {
     variables: { updatedAt: lastUpdatedAt },
@@ -288,7 +282,7 @@ const WhiteboardContainer = (props) => {
     if (curPageIdRef.current) {
       refetchInitialPageAnnotations();
     }
-  }, [curPageIdRef.current, presentationId, isInWhiteboardVision]);
+  }, [curPageIdRef.current, presentationId, isInWhiteboardVision, selectedUser]);
 
   const processAnnotations = (data) => {
     let annotationsToBeRemoved = [];
