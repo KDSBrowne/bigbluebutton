@@ -301,15 +301,28 @@ const Whiteboard = React.memo((props) => {
   }, [fitToWidth]);
 
   
+  // React.useEffect(() => {
+  //   if (shapes && Object.keys(shapes).length > 0 && !isInWhiteboardVision) {
+  //     prevShapesRef.current = shapes;
+  //     const remoteShapesArray = Object.values(shapes).map((shape) => sanitizeShape(shape));
+  //     tlEditorRef.current?.store.mergeRemoteChanges(() => {
+  //       tlEditorRef.current?.store.put(remoteShapesArray);
+  //     });
+  //   }
+  // }, [shapes]);
+
   React.useEffect(() => {
     if (shapes && Object.keys(shapes).length > 0 && !isInWhiteboardVision) {
       prevShapesRef.current = shapes;
-      const remoteShapesArray = Object.values(shapes).map((shape) => sanitizeShape(shape));
+      const remoteShapesArray = Object.values(shapes)
+        .filter((shape) => !shape.meta?.whiteboardVision) // Exclude shapes from Whiteboard Vision
+        .map((shape) => sanitizeShape(shape));
       tlEditorRef.current?.store.mergeRemoteChanges(() => {
         tlEditorRef.current?.store.put(remoteShapesArray);
       });
     }
-  }, [shapes]);
+  }, [shapes, isInWhiteboardVision]);
+  
 
   React.useEffect(() => {
     if (removedShapes && removedShapes.length > 0 && !isInWhiteboardVision) {
@@ -321,11 +334,17 @@ const Whiteboard = React.memo((props) => {
   ////////////////////////////////
   React.useEffect(() => {
     if (shapes && Object.keys(shapes).length > 0 && isInWhiteboardVision && tlEditorRef.current) {
+      // Filter out shapes that were not created in Whiteboard Vision mode
+      const visionShapes = Object.values(shapes).filter(
+        (shape) => shape.meta?.whiteboardVision === true
+      );
+  
       if (isPresenter) {
-        // **Presenter's code remains the same**
+        // **Presenter's Logic**
+  
         // Update panel editors for each user
         Object.entries(panelEditors).forEach(([userId, editor]) => {
-          const userShapes = Object.values(shapes).filter(
+          const userShapes = visionShapes.filter(
             (shape) =>
               (shape.meta?.createdBy === userId && !shape.meta?.presenterForUser) || // Shapes created by the user
               shape.meta?.presenterForUser === userId // Shapes the presenter created for the user
@@ -341,7 +360,7 @@ const Whiteboard = React.memo((props) => {
         // Update the presenter's main whiteboard
         const activeUserId = selectedUserIdRef.current || null;
   
-        const presenterShapes = Object.values(shapes).filter((shape) => {
+        const presenterShapes = visionShapes.filter((shape) => {
           if (!selectedUserIdRef.current) {
             // Show only the presenter's own shapes when no user is selected and not intended for any user
             return (
@@ -363,10 +382,10 @@ const Whiteboard = React.memo((props) => {
           tlEditorRef.current.store.put(sanitizedShapes);
         });
       } else {
-        // **Code for viewers**
+        // **Viewers' Logic**
         const currentUserId = currentUser?.userId;
   
-        const viewerShapes = Object.values(shapes).filter(
+        const viewerShapes = visionShapes.filter(
           (shape) =>
             (shape.meta?.createdBy === currentUserId && !shape.meta?.presenterForUser) || // Shapes created by the viewer
             shape.meta?.presenterForUser === currentUserId // Shapes the presenter created for the viewer
@@ -380,6 +399,7 @@ const Whiteboard = React.memo((props) => {
       }
     }
   }, [shapes, panelEditors, isInWhiteboardVision, selectedUserId, isPresenter, currentUser]);
+  
   
   
   
@@ -540,22 +560,28 @@ const Whiteboard = React.memo((props) => {
   
     if (isInWhiteboardVision) {
       if (isPresenter) {
-        // **Presenter's logic**
+        // **Presenter's Logic**
         if (tlEditorRef.current) {
           const activeUserId = selectedUserId || null;
   
           clearShapes(tlEditorRef.current, (shape) => {
             if (!selectedUserId) {
-              // Keep only the presenter's own shapes when no user is selected and not intended for any user
+              // Keep only the presenter's own shapes created during Vision mode and not intended for any user
               const shouldKeep =
-                shape.meta?.createdBy === currentUser?.userId && !shape.meta?.presenterForUser;
+                shape.meta?.createdBy === currentUser?.userId &&
+                !shape.meta?.presenterForUser &&
+                shape.meta?.whiteboardVision === true;
               return !shouldKeep; // Remove if not shouldKeep
             }
   
-            // Keep only shapes relevant to the selected user
+            // Keep only shapes relevant to the selected user, created during Vision mode
             const isActiveUserShape =
-              shape.meta?.createdBy === activeUserId && !shape.meta?.presenterForUser;
-            const isPresenterForActiveUser = shape.meta?.presenterForUser === activeUserId;
+              shape.meta?.createdBy === activeUserId &&
+              !shape.meta?.presenterForUser &&
+              shape.meta?.whiteboardVision === true;
+            const isPresenterForActiveUser =
+              shape.meta?.presenterForUser === activeUserId &&
+              shape.meta?.whiteboardVision === true;
             const shouldKeep = isActiveUserShape || isPresenterForActiveUser;
             return !shouldKeep; // Remove if not shouldKeep
           });
@@ -566,22 +592,30 @@ const Whiteboard = React.memo((props) => {
           if (editor) {
             clearShapes(editor, (shape) => {
               const isUserShape =
-                shape.meta?.createdBy === userId && !shape.meta?.presenterForUser;
-              const isPresenterForUser = shape.meta?.presenterForUser === userId;
+                shape.meta?.createdBy === userId &&
+                !shape.meta?.presenterForUser &&
+                shape.meta?.whiteboardVision === true;
+              const isPresenterForUser =
+                shape.meta?.presenterForUser === userId &&
+                shape.meta?.whiteboardVision === true;
               const shouldKeep = isUserShape || isPresenterForUser;
               return !shouldKeep; // Remove if not shouldKeep
             });
           }
         });
       } else {
-        // **Viewers' logic**
+        // **Viewers' Logic**
         if (tlEditorRef.current) {
           const currentUserId = currentUser?.userId;
   
           clearShapes(tlEditorRef.current, (shape) => {
             const isUserShape =
-              shape.meta?.createdBy === currentUserId && !shape.meta?.presenterForUser;
-            const isPresenterForUser = shape.meta?.presenterForUser === currentUserId;
+              shape.meta?.createdBy === currentUserId &&
+              !shape.meta?.presenterForUser &&
+              shape.meta?.whiteboardVision === true;
+            const isPresenterForUser =
+              shape.meta?.presenterForUser === currentUserId &&
+              shape.meta?.whiteboardVision === true;
             const shouldKeep = isUserShape || isPresenterForUser;
             return !shouldKeep; // Remove if not shouldKeep
           });
@@ -590,8 +624,8 @@ const Whiteboard = React.memo((props) => {
     } else {
       // **When not in Whiteboard Vision mode**
       if (tlEditorRef.current) {
-        // Clear only Whiteboard Vision shapes in the main editor
-        clearShapes(tlEditorRef.current, (shape) => shape.meta?.whiteboardVision);
+        // Remove shapes created during Whiteboard Vision mode
+        clearShapes(tlEditorRef.current, (shape) => shape.meta?.whiteboardVision === true);
       }
   
       // Clear all shapes in panel editors when leaving Whiteboard Vision mode
@@ -602,6 +636,7 @@ const Whiteboard = React.memo((props) => {
       });
     }
   }, [isInWhiteboardVision, panelEditors, selectedUserId, currentUser, isPresenter]);
+  
   
 
 
