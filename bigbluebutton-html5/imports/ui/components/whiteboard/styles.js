@@ -31,7 +31,7 @@ const TldrawV2GlobalStyle = createGlobalStyle`
   }
 
   #whiteboard-element > * {
-    position: relative; 
+    position: absolute; 
     height: 100%;
   }
 
@@ -103,46 +103,160 @@ const EditableWBWrapper = styled.div`
   }
 `;
 
-const PanelContainer = styled.div`
-  position: absolute;
+const PanelWrapper = styled.div`
+  position: fixed; /* Overlay the whiteboard */
   top: 0;
   left: 0;
   height: 100%;
   width: 200px;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-right: 2px solid #ccc;
+  background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 10px;
-  overflow-y: auto; /* Enable vertical scrolling */
-  box-sizing: border-box;
-  z-index: 1000;
+  z-index: 1100; /* Ensure it is above the whiteboard */
+  border-right: 1px solid #ccc; /* Border to define the edge */
 
   /* Slide In/Out Effect */
   transform: ${({ isVisible }) => (isVisible ? "translateX(0)" : "translateX(-100%)")};
   opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
-  pointer-events: ${({ isVisible }) => (isVisible ? "auto" : "none")};
   visibility: ${({ isVisible }) => (isVisible ? "visible" : "hidden")};
   transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
 `;
 
 
 
-const PanelBox = styled.div`
-  height: 100px;
-  flex-shrink: 0;
-  border: 1px solid #ddd;
-  background-color: #fff;
+const PanelContainer = styled.div`
+  flex-grow: 1;
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden; /* Disable horizontal scrolling */
   display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 16px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+
+  /* Custom Scrollbar Styling */
+  scrollbar-width: thin; /* Slim scrollbar for Firefox */
+  scrollbar-color: #bbb #f0f0f0; /* Gray thumb on light track */
+
+  /* WebKit Browsers (Chrome, Edge, Safari) */
+  &::-webkit-scrollbar {
+    width: 6px; /* Slim scrollbar width */
+  }
+  &::-webkit-scrollbar-track {
+    background: #f0f0f0; /* Light gray background */
+    border-radius: 10px; /* Rounded track corners */
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #bbb; /* Gray thumb */
+    border-radius: 10px; /* Rounded thumb */
+    border: 2px solid #f0f0f0; /* Match track padding */
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #999; /* Darker gray on hover */
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none; /* Hide up/down buttons */
+    height: 0; /* Ensure no space for buttons */
+  }
 `;
 
 
 
+
+
+
+const PanelBox = styled.div`
+  position: relative;
+  height: 100px;
+  flex-shrink: 0;
+  border: 2px solid
+    ${({ isPushed, isSelected, isFocused }) =>
+      isPushed
+        ? "#28A745" // Green for shared (highest precedence)
+        : isSelected
+        ? "#007BFF" // Blue for selected (second precedence)
+        : isFocused
+        ? "#6C757D" // Dark gray for focused (third precedence)
+        : "transparent"}; // No border by default
+  background-color: ${({ isPushed, isSelected, isFocused }) =>
+    isPushed
+      ? "#E6F7E6" // Light green for shared (highest precedence)
+      : isSelected
+      ? "#E6F0FF" // Light blue for selected (second precedence)
+      : isFocused
+      ? "#F0F0F0" // Light gray for focused (third precedence)
+      : "#fff"}; // Default white background
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: border 0.3s ease, background-color 0.3s ease;
+
+  &:hover {
+    background-color: ${({ isPushed, isSelected, isFocused }) =>
+      isPushed
+        ? "#D4E9D4" // Darker green on hover
+        : isSelected
+        ? "#D4E2FF" // Darker blue on hover
+        : isFocused
+        ? "#E0E0E0" // Darker gray on hover
+        : "#f7f7f7"}; // Light gray on hover
+  }
+`;
+
+
+
+
+const Header = styled.div`
+  height: 2rem; /* Fixed height */
+  width: 100%; /* Full width of the wrapper */
+  background: ${({ isShared }) =>
+    isShared ? "rgba(40, 167, 69, 1)" : "rgba(0, 123, 255, 1)"}; /* Green for shared, blue otherwise */
+  color: #ffffff; /* White text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  position: sticky; /* Keep it fixed within the wrapper */
+  top: 0;
+  z-index: 2; /* Ensure it's above the scrollable content */
+  border-bottom: 1px solid ${({ isShared }) => (isShared ? "#28A745" : "#007BFF")}; /* Subtle bottom border */
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+`;
+
+
+
+const SubText = styled.div`
+  font-size: 12px;
+  color: #d9e2ef;
+  margin-top: 4px;
+`;
+
+
+const Footer = styled.div`
+  position: sticky; /* Sticks to the bottom of the panel */
+  bottom: 0;
+  width: 100%;
+  background-color: #f8f9fa; /* Light gray background */
+  padding: 6px; /* Smaller padding */
+  display: flex;
+  justify-content: space-between; /* Space between buttons */
+  align-items: center; /* Center buttons vertically */
+  border-top: 1px solid #ddd; /* Subtle top border */
+  z-index: 2; /* Ensure it appears above content */
+  gap: 10px; /* Add some space between buttons */
+`;
+
+
+
+
+
 export default {
+  Footer,
+  PanelWrapper,
+  SubText,
+  Header,
   TldrawV2GlobalStyle,
   EditableWBWrapper,
   PanelContainer,

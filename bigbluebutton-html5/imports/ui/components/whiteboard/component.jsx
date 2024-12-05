@@ -166,6 +166,7 @@ const Whiteboard = React.memo((props) => {
   const [selectedUserId, setSelectedUserId] = React.useState(
     currentPresentationPage?.selectedUser || ""
   );
+  const [tempSelectedUserId, setTempSelectedUserId] = React.useState("");
 
   const selectedUserIdRef = React.useRef(null);
 
@@ -2701,278 +2702,237 @@ const Whiteboard = React.memo((props) => {
   }
 
   return (
-    <div
-      ref={whiteboardRef}
-      id="whiteboard-element"
-      key={`animations=-${animations}-${whiteboardToolbarAutoHide}-${language}-${presentationId}-${fitToWidth}`}
-    >
-      {isInWhiteboardVision &&
-        isPresenter && [
-          <button
-            onClick={togglePanel}
-            style={{
-              position: "absolute",
-              left: isPanelVisible ? "200px" : "0px", // Adjust position dynamically
-              zIndex: 1100,
-              padding: "8px 16px",
-              height: "2rem",
-              width: isPanelVisible ? "2rem" : "11rem", // Ensure button width allows space for content
-              cursor: "pointer",
-              border: "none",
-              borderRadius: "4px",
-              backgroundColor: "rgba(0, 123, 255, 0.8)", // Semi-transparent blue
-              color: "#fff", // Solid white text
-              fontSize: "14px",
-              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-              transition: "all 0.3s ease", // Smooth animation
-              display: "flex", // Enable flexbox for centering
-              justifyContent: "center", // Center horizontally
-              alignItems: "center", // Center vertically
-            }}
-            onMouseOver={(e) =>
-              (e.target.style.backgroundColor = "rgba(0, 123, 255, 1)")
-            } // Fully solid on hover
-            onMouseOut={(e) =>
-              (e.target.style.backgroundColor = "rgba(0, 123, 255, 0.8)")
-            } // Semi-transparent when not hovered
-          >
-            {isPanelVisible
-              ? "<<"
-              : selectedUserId
-              ? `${selectedUserId}`
-              : ">>"}
-          </button>,
+<div
+  ref={whiteboardRef}
+  id="whiteboard-element"
+  key={`animations=-${animations}-${whiteboardToolbarAutoHide}-${language}-${presentationId}-${fitToWidth}`}
+>
+  {/* Button to Toggle Panel */}
+  {isInWhiteboardVision && isPresenter && (
+    <button
+  onClick={togglePanel}
+  style={{
+    position: "absolute",
+    left: isPanelVisible ? "200px" : "0px",
+    zIndex: 1101,
+    padding: "8px 16px",
+    height: "2rem",
+    width: isPanelVisible ? "2rem" : "11rem",
+    cursor: "pointer",
+    border: "1px solid #ccc", // Add a subtle border
+    borderRadius: "4px",
+    backgroundColor: userSharedWithAll?.length > 0 ? "#28A745" : "rgba(0, 123, 255, 0.8)", // Green for visible, blue otherwise
+    color: "#fff",
+    fontSize: "14px",
+    boxShadow: "none", // Remove shadow
+    transition: "all 0.3s ease",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  }}
+  onMouseOver={(e) =>
+    (e.target.style.backgroundColor = userSharedWithAll?.length > 0 ? "#218838" : "rgba(0, 123, 255, 1)")
+  }
+  onMouseOut={(e) =>
+    (e.target.style.backgroundColor = userSharedWithAll?.length > 0 ? "#28A745" : "rgba(0, 123, 255, 0.8)")
+  }
+>
+  {isPanelVisible ? "<<" : selectedUserId ? `${selectedUserId}` : ">>"}
+</button>
 
-          <Styled.PanelContainer
-            isVisible={isPanelVisible}
-            style={{ position: "absolute" }}
-          >
-            {boxes.map((box, index) => (
-              <>
-                <div
-                  style={{
-                    position: "relative",
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    backgroundColor:
-                      userSharedWithAll === box.userId
-                        ? "#28a745" // Green for pushed
-                        : selectedUserId === box.userId
-                        ? "#007BFF" // Blue for selected
-                        : "#f9f9f9", // Light gray otherwise
-                    color:
-                      userSharedWithAll === box.userId ||
-                      selectedUserId === box.userId
-                        ? "#fff" // White text for pushed or selected
-                        : "#000", // Black text otherwise
-                    fontWeight: "bold",
-                    border:
-                      userSharedWithAll === box.userId ||
-                      selectedUserId === box.userId
-                        ? "1px solid #007BFF"
-                        : "1px solid #ccc",
-                    borderRadius: "4px",
-                    padding: "4px 6px",
-                    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-                    transition: "all 0.3s ease",
-                    margin: "4px 0",
-                    width: "100%",
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "10px",
-                      fontWeight: "bold",
-                      marginRight: "8px",
-                    }}
-                  >
-                    {box.userId}
-                  </div>
+  )}
 
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      gap: "4px",
-                    }}
-                  >
-                    {/* Focus Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUserClick(box.userId);
-                      }}
-                      style={{
-                        backgroundColor:
-                          selectedUserId === box.userId ? "#ffffff" : "#007BFF",
-                        color:
-                          selectedUserId === box.userId ? "#0056b3" : "#fff",
-                        border:
-                          selectedUserId === box.userId
-                            ? "1px solid #0056b3"
-                            : "none",
-                        borderRadius: "3px",
-                        padding: "2px 6px",
-                        fontSize: "10px",
-                        fontWeight: "600",
-                        cursor: "pointer",
-                        boxShadow: "0 1px 2px rgba(0, 0, 0, 0.2)",
-                        transition:
-                          "transform 0.1s ease, background-color 0.3s ease",
-                      }}
-                      onMouseOver={(e) =>
-                        (e.target.style.backgroundColor =
-                          selectedUserId === box.userId ? "#f0f0f0" : "#004494")
-                      }
-                      onMouseOut={(e) =>
-                        (e.target.style.backgroundColor =
-                          selectedUserId === box.userId ? "#ffffff" : "#007BFF")
-                      }
-                      onMouseDown={(e) => {
-                        e.target.style.transform = "scale(0.95)";
-                        e.target.style.boxShadow = "0 0 0 rgba(0, 0, 0, 0)";
-                      }}
-                      onMouseUp={(e) => {
-                        e.target.style.transform = "scale(1)";
-                        e.target.style.boxShadow =
-                          "0 1px 2px rgba(0, 0, 0, 0.2)";
-                      }}
-                    >
-                      Focus
-                    </button>
+  {/* Panel Wrapper */}
+  {isInWhiteboardVision && isPresenter && (
+    <Styled.PanelWrapper isVisible={isPanelVisible}>
+  {/* Fixed Header */}
+  <Styled.Header isShared={userSharedWithAll?.length > 0}>
+    {selectedUserIdRef.current ? (
+      <div>{`${selectedUserIdRef.current}`}</div>
+    ) : (
+      <div>No User Selected</div>
+    )}
+  </Styled.Header>
 
-                    {/* Share Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUserPushClick(box.userId);
-                      }}
-                      style={{
-                        backgroundColor:
-                          userSharedWithAll === box.userId
-                            ? "#ffffff"
-                            : "#28a745",
-                        color:
-                          userSharedWithAll === box.userId ? "#155724" : "#fff",
-                        border:
-                          userSharedWithAll === box.userId
-                            ? "1px solid #155724"
-                            : "none",
-                        borderRadius: "3px",
-                        padding: "2px 6px",
-                        fontSize: "10px",
-                        fontWeight: "600",
-                        cursor: "pointer",
-                        boxShadow: "0 1px 2px rgba(0, 0, 0, 0.2)",
-                        transition:
-                          "transform 0.1s ease, background-color 0.3s ease",
-                      }}
-                      onMouseOver={(e) =>
-                        (e.target.style.backgroundColor =
-                          userSharedWithAll === box.userId
-                            ? "#e2e6ea"
-                            : "#1e7e34")
-                      }
-                      onMouseOut={(e) =>
-                        (e.target.style.backgroundColor =
-                          userSharedWithAll === box.userId
-                            ? "#ffffff"
-                            : "#28a745")
-                      }
-                      onMouseDown={(e) => {
-                        e.target.style.transform = "scale(0.95)";
-                        e.target.style.boxShadow = "0 0 0 rgba(0, 0, 0, 0)";
-                      }}
-                      onMouseUp={(e) => {
-                        e.target.style.transform = "scale(1)";
-                        e.target.style.boxShadow =
-                          "0 1px 2px rgba(0, 0, 0, 0.2)";
-                      }}
-                    >
-                      Share
-                    </button>
-                  </div>
-                </div>
-
-                <Styled.PanelBox key={index}>
-                  <Tldraw
-                    autoFocus={false}
-                    key={`tldrawv2-${presentationId}-${animations}-index=${index}`}
-                    // forceMobile
-                    hideUi={true}
-                    onMount={(editor) => {
-                      setPanelEditors((prev) => ({
-                        ...prev,
-                        [box.userId]: editor, // Store editor by userId
-                      }));
-
-                      clearAllShapes(editor, selectedUserId);
-
-                      const pages = [
-                        {
-                          meta: {},
-                          id: `page:${curPageIdRef.current}`,
-                          name: `Slide ${curPageIdRef.current}`,
-                          index: "a1",
-                          typeName: "page",
-                        },
-                      ];
-
-                      const hasShapes =
-                        shapes && Object.keys(shapes).length > 0;
-                      const remoteShapesArray = hasShapes
-                        ? Object.values(shapes).map((shape) =>
-                            sanitizeShape(shape)
-                          )
-                        : [];
-
-                      editor.store.mergeRemoteChanges(() => {
-                        editor.batch(() => {
-                          editor.store.put(pages);
-                          editor.store.put(assets);
-                          editor.setCurrentPage(`page:${curPageIdRef.current}`);
-                          editor.store.put(bgShape);
-                          if (hasShapes) {
-                            editor.store.put(remoteShapesArray);
-                          }
-                          editor.history.clear();
-                        });
-                      });
-                      editor.setCurrentTool("noop");
-                      editor.zoomToFit({ duration: 175 });
-                    }}
-                    tools={customTools}
-                  />
-                </Styled.PanelBox>
-              </>
-            ))}
-          </Styled.PanelContainer>,
-        ]}
-
-      <Tldraw
-        autoFocus={false}
-        key={`tldrawv2-${presentationId}-${animations}-`}
-        forceMobile
-        hideUi={!(hasWBAccessRef.current || isPresenter)}
-        onMount={handleTldrawMount}
-        tools={customTools}
-      />
-      <Styled.TldrawV2GlobalStyle
-        {...{
-          hasWBAccess: hasWBAccessRef.current,
-          bgSelected: bgSelectedRef.current,
-          isPresenter,
-          isRTL,
-          isMultiUserActive,
-          isToolbarVisible,
-          presentationHeight,
-          isInWhiteboardVision,
+  {/* Scrollable Panel Content */}
+  <Styled.PanelContainer>
+    {boxes.map((box, index) => (
+      <Styled.PanelBox
+        key={index}
+        isSelected={selectedUserId === box.userId}
+        isFocused={tempSelectedUserId === box.userId}
+        isPushed={userSharedWithAll === box.userId} // Determines if this panel is pushed
+        onClick={(e) => {
+          e.stopPropagation();
+          setTempSelectedUserId(box.userId);
         }}
-      />
-    </div>
+      >
+
+          {/* Click-intercepting overlay */}
+  <div
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 9999, // Ensure it’s on top of the Tldraw component
+      cursor: "pointer", // Show pointer to indicate interactivity
+    }}
+    onClick={(e) => {
+      e.stopPropagation();
+      setTempSelectedUserId(box.userId);
+    }}
+  ></div>
+        <Tldraw
+          autoFocus={false}
+          key={`tldrawv2-${presentationId}-${animations}-index=${index}`}
+          hideUi={true}
+          onMount={(editor) => {
+            setPanelEditors((prev) => ({
+              ...prev,
+              [box.userId]: editor,
+            }));
+
+            clearAllShapes(editor, selectedUserId);
+
+            const pages = [
+              {
+                meta: {},
+                id: `page:${curPageIdRef.current}`,
+                name: `Slide ${curPageIdRef.current}`,
+                index: "a1",
+                typeName: "page",
+              },
+            ];
+
+            const hasShapes = shapes && Object.keys(shapes).length > 0;
+            const remoteShapesArray = hasShapes
+              ? Object.values(shapes).map((shape) => sanitizeShape(shape))
+              : [];
+
+            editor.store.mergeRemoteChanges(() => {
+              editor.batch(() => {
+                editor.store.put(pages);
+                editor.store.put(assets);
+                editor.setCurrentPage(`page:${curPageIdRef.current}`);
+                editor.store.put(bgShape);
+                if (hasShapes) {
+                  editor.store.put(remoteShapesArray);
+                }
+                editor.history.clear();
+              });
+            });
+            editor.setCurrentTool("noop");
+            editor.zoomToFit({ duration: 175 });
+          }}
+          tools={customTools}
+        />
+      </Styled.PanelBox>
+    ))}
+  </Styled.PanelContainer>
+
+  {/* Fixed Footer */}
+  <Styled.Footer>
+  {/* Focus Button */}
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      handleUserClick(tempSelectedUserId); // Handle focus logic
+    }}
+    style={{
+      backgroundColor: "#007BFF", // Blue for focus
+      color: "#fff",
+      border: "none",
+      borderRadius: "3px",
+      padding: "4px 8px",
+      fontSize: "12px",
+      fontWeight: "600",
+      cursor: "pointer",
+      transition: "transform 0.1s ease, background-color 0.3s ease",
+      width: "80px", // Fixed width
+      height: "30px", // Fixed height
+      lineHeight: "1.2", // Prevents text from causing height changes
+      textAlign: "center", // Center text inside the button
+    }}
+    onMouseOver={(e) =>
+      (e.target.style.backgroundColor = "#0056b3") // Darker blue on hover
+    }
+    onMouseOut={(e) =>
+      (e.target.style.backgroundColor = "#007BFF") // Default blue
+    }
+  >
+    {tempSelectedUserId === selectedUserId ? "Focused" : "Focus"}
+  </button>
+
+  {/* Share/Unshare Button */}
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      handleUserPushClick(tempSelectedUserId); // Handle share/unshare logic
+    }}
+    style={{
+      backgroundColor:
+        userSharedWithAll === tempSelectedUserId ? "#ffffff" : "#28A745",
+      color: userSharedWithAll === tempSelectedUserId ? "#155724" : "#fff",
+      border:
+        userSharedWithAll === tempSelectedUserId ? "1px solid #155724" : "none",
+      borderRadius: "3px",
+      padding: "4px 8px",
+      fontSize: "12px",
+      fontWeight: "600",
+      cursor: "pointer",
+      transition: "transform 0.1s ease, background-color 0.3s ease",
+      width: "80px", // Fixed width
+      height: "30px", // Fixed height
+      lineHeight: "1.2", // Prevents text from causing height changes
+      textAlign: "center", // Center text inside the button
+    }}
+    onMouseOver={(e) =>
+      (e.target.style.backgroundColor =
+        userSharedWithAll === tempSelectedUserId ? "#E2E6EA" : "#1E7E34")
+    }
+    onMouseOut={(e) =>
+      (e.target.style.backgroundColor =
+        userSharedWithAll === tempSelectedUserId ? "#ffffff" : "#28A745")
+    }
+  >
+    {userSharedWithAll === tempSelectedUserId ? "Unshare" : "Share"}
+  </button>
+</Styled.Footer>
+
+
+
+
+</Styled.PanelWrapper>
+
+
+  )}
+
+  {/* Whiteboard */}
+  <Tldraw
+    autoFocus={false}
+    key={`tldrawv2-${presentationId}-${animations}-`}
+    forceMobile
+    hideUi={!(hasWBAccessRef.current || isPresenter)}
+    onMount={handleTldrawMount}
+    tools={customTools}
+  />
+
+  {/* Global Styles */}
+  <Styled.TldrawV2GlobalStyle
+    {...{
+      hasWBAccess: hasWBAccessRef.current,
+      bgSelected: bgSelectedRef.current,
+      isPresenter,
+      isRTL,
+      isMultiUserActive,
+      isToolbarVisible,
+      presentationHeight,
+      isInWhiteboardVision,
+    }}
+  />
+</div>
   );
 });
 
