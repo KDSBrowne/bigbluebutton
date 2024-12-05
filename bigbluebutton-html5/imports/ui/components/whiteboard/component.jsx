@@ -2872,38 +2872,56 @@ const Whiteboard = React.memo((props) => {
 
   {/* Share/Unshare Button */}
   <button
-    onClick={(e) => {
-      e.stopPropagation();
-      handleUserPushClick(tempSelectedUserId); // Handle share/unshare logic
-    }}
-    style={{
-      backgroundColor:
-        userSharedWithAll === tempSelectedUserId ? "#ffffff" : "#28A745",
-      color: userSharedWithAll === tempSelectedUserId ? "#155724" : "#fff",
-      border:
-        userSharedWithAll === tempSelectedUserId ? "1px solid #155724" : "none",
-      borderRadius: "3px",
-      padding: "4px 8px",
-      fontSize: "12px",
-      fontWeight: "600",
-      cursor: "pointer",
-      transition: "transform 0.1s ease, background-color 0.3s ease",
-      width: "60px", // Fixed width
-      height: "20px", // Fixed height
-      lineHeight: "1.2", // Prevents text from causing height changes
-      textAlign: "center", // Center text inside the button
-    }}
-    onMouseOver={(e) =>
-      (e.target.style.backgroundColor =
-        userSharedWithAll === tempSelectedUserId ? "#E2E6EA" : "#1E7E34")
+  onClick={(e) => {
+    e.stopPropagation();
+    if (selectedUserId === tempSelectedUserId) {
+      handleUserPushClick(tempSelectedUserId);
     }
-    onMouseOut={(e) =>
-      (e.target.style.backgroundColor =
-        userSharedWithAll === tempSelectedUserId ? "#ffffff" : "#28A745")
-    }
-  >
-    {userSharedWithAll === tempSelectedUserId ? "Unshare" : "Share"}
-  </button>
+  }}
+  disabled={selectedUserId !== tempSelectedUserId}
+  style={{
+    // Determine if the button is disabled
+    backgroundColor: selectedUserId !== tempSelectedUserId
+      ? "#ccc" // Gray background when disabled
+      : userSharedWithAll === tempSelectedUserId
+      ? "#ffffff"
+      : "#28A745",
+    color: selectedUserId !== tempSelectedUserId
+      ? "#666" // Gray text when disabled
+      : userSharedWithAll === tempSelectedUserId
+      ? "#155724"
+      : "#fff",
+    border: selectedUserId !== tempSelectedUserId
+      ? "1px solid #ccc" // Light gray border when disabled
+      : userSharedWithAll === tempSelectedUserId
+      ? "1px solid #155724"
+      : "none",
+    borderRadius: "3px",
+    padding: "4px 8px",
+    fontSize: "12px",
+    fontWeight: "600",
+    cursor: selectedUserId !== tempSelectedUserId ? "not-allowed" : "pointer",
+    transition: "transform 0.1s ease, background-color 0.3s ease",
+    width: "60px",
+    height: "20px",
+    lineHeight: "1.2",
+    textAlign: "center",
+  }}
+  onMouseOver={(e) => {
+    if (selectedUserId !== tempSelectedUserId) return; // No hover effect if disabled
+    e.target.style.backgroundColor =
+      userSharedWithAll === tempSelectedUserId ? "#E2E6EA" : "#1E7E34";
+  }}
+  onMouseOut={(e) => {
+    if (selectedUserId !== tempSelectedUserId) return; // No hover effect if disabled
+    e.target.style.backgroundColor =
+      userSharedWithAll === tempSelectedUserId ? "#ffffff" : "#28A745";
+  }}
+>
+  {userSharedWithAll === tempSelectedUserId ? "Unshare" : "Share"}
+</button>
+
+
 </Styled.Footer>
 
 
