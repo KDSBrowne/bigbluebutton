@@ -2714,7 +2714,6 @@ const Whiteboard = React.memo((props) => {
             onClick={togglePanel}
             style={{
               position: "absolute",
-              bottom: "0px",
               left: isPanelVisible ? "200px" : "0px", // Adjust position dynamically
               zIndex: 1100,
               padding: "8px 16px",
@@ -2733,7 +2732,11 @@ const Whiteboard = React.memo((props) => {
               alignItems: "center", // Center vertically
             }}
           >
-            {isPanelVisible ? `<<` : `${selectedUserIdRef.current}`}
+            {isPanelVisible 
+              ? "<<" 
+              : selectedUserId 
+                ? `${selectedUserId}` 
+                : ">>"}
           </button>,
 
           <Styled.PanelContainer
