@@ -13,6 +13,14 @@ const intlMessages = defineMessages({
     id: 'app.whiteboard.annotations.numberExceeded',
     description: 'Label shown in toast when the user tries to add more shapes than the limit',
   },
+  notifyPresenterJoinedUser: {
+    id: 'app.whiteboard.annotations.PresenterJoinedUser',
+    description: '',
+  },
+  notifyPresenterLeftUser: {
+    id: 'app.whiteboard.annotations.PresenterLeftUser',
+    description: '',
+  }
 });
 
 const annotationsQueue = [];
@@ -120,11 +128,11 @@ const notifyShapeNumberExceeded = (intl, limit) => {
 };
 
 const notifyPresenterJoinedUser = (intl, limit) => {
-  if (intl) notify(intl.formatMessage(intlMessages.notifyNotAllowedChange, { 0: limit }), 'warning', 'whiteboard');
+  if (intl) notify(intl.formatMessage(intlMessages.notifyPresenterJoinedUser, { 0: limit }), 'warning', 'whiteboard');
 };
 
 const notifyPresenterLeftUser = (intl, limit) => {
-  if (intl) notify(intl.formatMessage(intlMessages.shapeNumberExceeded, { 0: limit }), 'warning', 'whiteboard');
+  if (intl) notify(intl.formatMessage(intlMessages.notifyPresenterLeftUser, { 0: limit }), 'warning', 'whiteboard');
 };
 
 
