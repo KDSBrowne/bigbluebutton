@@ -382,6 +382,7 @@ class PresentationToolbar extends PureComponent {
       tldrawAPI,
       maxNumberOfActiveUsers,
       numberOfJoinedUsers,
+      whiteboardVisionIcon,
     } = this.props;
 
     const { isMobile } = deviceInfo;
@@ -503,7 +504,7 @@ class PresentationToolbar extends PureComponent {
               }
               color="light"
               disabled={!isMeteorConnected}
-              customIcon={infiniteWhiteboardIcon(isWhiteboardVision)}
+              customIcon={whiteboardVisionIcon(isWhiteboardVision)}
               size="md"
               circle
               onClick={() => {

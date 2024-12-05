@@ -9,7 +9,7 @@ const TldrawV2GlobalStyle = createGlobalStyle`
     }
   `}
 
-  ${({ isMultiUserActive, isInWhiteboardVision }) => (!isMultiUserActive || isInWhiteboardVision) && `
+  ${({ isMultiUserActive, isInWhiteboardVision }) => (!isMultiUserActive) && `
     .tl-nametag {
       display: none;
     }
@@ -165,7 +165,17 @@ const PanelBox = styled.div`
   align-items: center;
   font-size: 16px;
   cursor: pointer;
-  transition: border 0.3s ease, background-color 0.3s ease;
+  transition: border 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+
+  // Add drop shadow
+  box-shadow: ${({ isPushed, isSelected, isFocused }) =>
+    isPushed
+      ? "0px 4px 8px rgba(40, 167, 69, 0.4)" // Green shadow for shared
+      : isSelected
+      ? "0px 4px 8px rgba(0, 123, 255, 0.4)" // Blue shadow for selected
+      : isFocused
+      ? "0px 4px 8px rgba(108, 117, 125, 0.4)" // Gray shadow for focused
+      : "0px 2px 4px rgba(0, 0, 0, 0.1)"}; // Subtle default shadow
 
   &:hover {
     background-color: ${({ isPushed, isSelected, isFocused }) =>
@@ -176,8 +186,17 @@ const PanelBox = styled.div`
         : isFocused
         ? "#E0E0E0" // Darker gray on hover
         : "#f7f7f7"}; // Light gray on hover
+    box-shadow: ${({ isPushed, isSelected, isFocused }) =>
+      isPushed
+        ? "0px 6px 12px rgba(40, 167, 69, 0.5)" // Larger green shadow on hover
+        : isSelected
+        ? "0px 6px 12px rgba(0, 123, 255, 0.5)" // Larger blue shadow on hover
+        : isFocused
+        ? "0px 6px 12px rgba(108, 117, 125, 0.5)" // Larger gray shadow on hover
+        : "0px 4px 8px rgba(0, 0, 0, 0.2)"}; // Larger default shadow on hover
   }
 `;
+
 
 
 
