@@ -27,6 +27,7 @@ const TldrawV2GlobalStyle = createGlobalStyle`
   #whiteboard-element {
     position: relative;
     height: 100%;
+    overflow: hidden;
   }
 
   #whiteboard-element > * {
@@ -118,12 +119,14 @@ const PanelContainer = styled.div`
   box-sizing: border-box;
   z-index: 1000;
 
-  /* Fade In/Out Effect */
+  /* Slide In/Out Effect */
+  transform: ${({ isVisible }) => (isVisible ? "translateX(0)" : "translateX(-100%)")};
   opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
-  pointer-events: ${({ isVisible }) => (isVisible ? 'auto' : 'none')};
-  visibility: ${({ isVisible }) => (isVisible ? 'visible' : 'hidden')};
-  transition: opacity 0.3s ease, visibility 0.3s ease; /* Smooth visibility change */
+  pointer-events: ${({ isVisible }) => (isVisible ? "auto" : "none")};
+  visibility: ${({ isVisible }) => (isVisible ? "visible" : "hidden")};
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
 `;
+
 
 
 const PanelBox = styled.div`

@@ -187,11 +187,11 @@ const Whiteboard = React.memo((props) => {
   };
 
   const handleUserPushClick = (userId) => {
-    console.log('setting shared id : ', userId)
+    console.log("setting shared id : ", userId);
 
     if (userId === currentPresentationPageRef.current?.userSharedWithAll) {
       setPresentationPageUserSharedWithAll("");
-    }else {
+    } else {
       setPresentationPageUserSharedWithAll(userId);
     }
   };
@@ -437,7 +437,6 @@ const Whiteboard = React.memo((props) => {
   //   currentUser,
   // ]);
 
-
   // React.useEffect(() => {
   //   const clearShapes = (editor, filterFn) => {
   //     const allRecords = editor.store.allRecords();
@@ -631,9 +630,6 @@ const Whiteboard = React.memo((props) => {
   /////////////////////////////////
   ////////////////////////////////
 
-
-
-
   React.useEffect(() => {
     if (
       shapes &&
@@ -645,9 +641,10 @@ const Whiteboard = React.memo((props) => {
       const visionShapes = Object.values(shapes).filter(
         (shape) => shape.meta?.whiteboardVision === true
       );
-  
-      const sharedUserId = currentPresentationPageRef.current?.userSharedWithAll;
-  
+
+      const sharedUserId =
+        currentPresentationPageRef.current?.userSharedWithAll;
+
       if (sharedUserId) {
         // **When a user is shared with all**
         const sharedShapes = visionShapes.filter((shape) => {
@@ -657,16 +654,18 @@ const Whiteboard = React.memo((props) => {
             shape.meta?.presenterForUser === sharedUserId // Shapes the presenter created for the shared user
           );
         });
-  
-        const sanitizedShapes = sharedShapes.map((shape) => sanitizeShape(shape));
-  
+
+        const sanitizedShapes = sharedShapes.map((shape) =>
+          sanitizeShape(shape)
+        );
+
         // Update the main whiteboard for both presenter and viewers
         tlEditorRef.current?.store.mergeRemoteChanges(() => {
           tlEditorRef.current?.store.put(sanitizedShapes);
         });
       } else if (isPresenter) {
         // **Presenter's Logic when no user is shared with all**
-  
+
         // Update panel editors for each user
         Object.entries(panelEditors).forEach(([userId, editor]) => {
           const userShapes = visionShapes.filter(
@@ -675,19 +674,19 @@ const Whiteboard = React.memo((props) => {
                 !shape.meta?.presenterForUser) || // Shapes created by the user
               shape.meta?.presenterForUser === userId // Shapes the presenter created for the user
           );
-  
+
           const sanitizedShapes = userShapes.map((shape) =>
             sanitizeShape(shape)
           );
-  
+
           editor?.store.mergeRemoteChanges(() => {
             editor?.store.put(sanitizedShapes);
           });
         });
-  
+
         // Update the presenter's main whiteboard
         const activeUserId = selectedUserIdRef.current || null;
-  
+
         const presenterShapes = visionShapes.filter((shape) => {
           if (!selectedUserIdRef.current) {
             // Show only the presenter's own shapes when no user is selected and not intended for any user
@@ -696,7 +695,7 @@ const Whiteboard = React.memo((props) => {
               !shape.meta?.presenterForUser
             );
           }
-  
+
           // Show selected user's shapes and those the presenter created for them
           return (
             (shape.meta?.createdBy === activeUserId &&
@@ -704,27 +703,29 @@ const Whiteboard = React.memo((props) => {
             shape.meta?.presenterForUser === activeUserId
           );
         });
-  
+
         const sanitizedShapes = presenterShapes.map((shape) =>
           sanitizeShape(shape)
         );
-  
+
         tlEditorRef.current.store.mergeRemoteChanges(() => {
           tlEditorRef.current.store.put(sanitizedShapes);
         });
       } else {
         // **Viewers' Logic when no user is shared with all**
         const currentUserId = currentUser?.userId;
-  
+
         const viewerShapes = visionShapes.filter(
           (shape) =>
             (shape.meta?.createdBy === currentUserId &&
               !shape.meta?.presenterForUser) || // Shapes created by the viewer
             shape.meta?.presenterForUser === currentUserId // Shapes the presenter created for the viewer
         );
-  
-        const sanitizedShapes = viewerShapes.map((shape) => sanitizeShape(shape));
-  
+
+        const sanitizedShapes = viewerShapes.map((shape) =>
+          sanitizeShape(shape)
+        );
+
         tlEditorRef.current?.store.mergeRemoteChanges(() => {
           tlEditorRef.current?.store.put(sanitizedShapes);
         });
@@ -739,7 +740,6 @@ const Whiteboard = React.memo((props) => {
     currentUser,
     userSharedWithAll,
   ]);
-  
 
   React.useEffect(() => {
     const clearShapes = (editor, filterFn) => {
@@ -747,24 +747,25 @@ const Whiteboard = React.memo((props) => {
       const shapeRecords = allRecords.filter(
         (record) => record.typeName === "shape"
       );
-  
+
       const shapesToClear = shapeRecords.filter((record) => {
         const isBackgroundShape = record.id.startsWith("shape:BG-");
         return !isBackgroundShape && filterFn(record);
       });
-  
+
       const shapeIds = shapesToClear.map((record) => record.id);
-  
+
       if (shapeIds.length > 0) {
         editor?.store.mergeRemoteChanges(() => {
           editor?.store.remove(shapeIds);
         });
       }
     };
-  
+
     if (isInWhiteboardVision) {
-      const sharedUserId = currentPresentationPageRef.current?.userSharedWithAll;
-  
+      const sharedUserId =
+        currentPresentationPageRef.current?.userSharedWithAll;
+
       if (sharedUserId) {
         // **When a user is shared with all**
         if (tlEditorRef.current) {
@@ -774,11 +775,11 @@ const Whiteboard = React.memo((props) => {
               shape.meta?.createdBy === sharedUserId &&
               !shape.meta?.presenterForUser &&
               shape.meta?.whiteboardVision === true;
-  
+
             const isPresenterForSharedUser =
               shape.meta?.presenterForUser === sharedUserId &&
               shape.meta?.whiteboardVision === true;
-  
+
             const shouldKeep = isSharedUserShape || isPresenterForSharedUser;
             return !shouldKeep; // Remove if not shouldKeep
           });
@@ -787,7 +788,7 @@ const Whiteboard = React.memo((props) => {
         // **Presenter's Logic when no user is shared with all**
         if (tlEditorRef.current) {
           const activeUserId = selectedUserId || null;
-  
+
           clearShapes(tlEditorRef.current, (shape) => {
             if (!selectedUserId) {
               // Keep only the presenter's own shapes created during Vision mode and not intended for any user
@@ -797,7 +798,7 @@ const Whiteboard = React.memo((props) => {
                 shape.meta?.whiteboardVision === true;
               return !shouldKeep; // Remove if not shouldKeep
             }
-  
+
             // Keep only shapes relevant to the selected user, created during Vision mode
             const isActiveUserShape =
               shape.meta?.createdBy === activeUserId &&
@@ -810,7 +811,7 @@ const Whiteboard = React.memo((props) => {
             return !shouldKeep; // Remove if not shouldKeep
           });
         }
-  
+
         // For panel editors, clear shapes not relevant to the associated user
         Object.entries(panelEditors).forEach(([userId, editor]) => {
           if (editor) {
@@ -831,7 +832,7 @@ const Whiteboard = React.memo((props) => {
         // **Viewers' Logic when no user is shared with all**
         if (tlEditorRef.current) {
           const currentUserId = currentUser?.userId;
-  
+
           clearShapes(tlEditorRef.current, (shape) => {
             const isUserShape =
               shape.meta?.createdBy === currentUserId &&
@@ -854,7 +855,7 @@ const Whiteboard = React.memo((props) => {
           (shape) => shape.meta?.whiteboardVision === true
         );
       }
-  
+
       // Clear all shapes in panel editors when leaving Whiteboard Vision mode
       Object.values(panelEditors).forEach((editor) => {
         if (editor) {
@@ -870,8 +871,6 @@ const Whiteboard = React.memo((props) => {
     isPresenter,
     userSharedWithAll,
   ]);
-  
-
 
   React.useEffect(() => {
     if (
@@ -880,30 +879,31 @@ const Whiteboard = React.memo((props) => {
       isInWhiteboardVision &&
       tlEditorRef.current
     ) {
-      const sharedUserId = currentPresentationPageRef.current?.userSharedWithAll;
-  
+      const sharedUserId =
+        currentPresentationPageRef.current?.userSharedWithAll;
+
       if (sharedUserId) {
         // **When a user is shared with all**
         const shapesToRemove = removedShapes.filter((shapeId) => {
           const shape = tlEditorRef.current.store.get(shapeId);
           if (!shape) return false;
-  
+
           const isSharedUserShape =
             shape.meta?.createdBy === sharedUserId &&
             !shape.meta?.presenterForUser;
-  
+
           const isPresenterForSharedUser =
             shape.meta?.presenterForUser === sharedUserId;
-  
+
           return isSharedUserShape || isPresenterForSharedUser;
         });
-  
+
         if (shapesToRemove.length > 0) {
           tlEditorRef.current?.store.remove(shapesToRemove);
         }
       } else if (isPresenter) {
         // **Presenter's Logic when no user is shared with all**
-  
+
         // Remove shapes from panel editors
         Object.entries(panelEditors).forEach(([userId, editor]) => {
           const shapesToRemove = removedShapes.filter((shapeId) => {
@@ -915,19 +915,19 @@ const Whiteboard = React.memo((props) => {
                 shape.meta?.presenterForUser === userId) // Shapes the presenter created for the user
             );
           });
-  
+
           if (shapesToRemove.length > 0) {
             editor?.store.remove(shapesToRemove);
           }
         });
-  
+
         // Remove shapes from the presenter's main whiteboard
         const activeUserId = selectedUserIdRef.current || null;
-  
+
         const shapesToRemove = removedShapes.filter((shapeId) => {
           const shape = tlEditorRef.current.store.get(shapeId);
           if (!shape) return false;
-  
+
           if (!selectedUserIdRef.current) {
             // Remove only the presenter's own shapes when no user is selected and not intended for any user
             return (
@@ -935,7 +935,7 @@ const Whiteboard = React.memo((props) => {
               !shape.meta?.presenterForUser
             );
           }
-  
+
           // Remove selected user's shapes and those the presenter created for them
           return (
             (shape.meta?.createdBy === activeUserId &&
@@ -943,14 +943,14 @@ const Whiteboard = React.memo((props) => {
             shape.meta?.presenterForUser === activeUserId
           );
         });
-  
+
         if (shapesToRemove.length > 0) {
           tlEditorRef.current?.store.remove(shapesToRemove);
         }
       } else {
         // **Viewers' Logic when no user is shared with all**
         const currentUserId = currentUser?.userId;
-  
+
         const shapesToRemove = removedShapes.filter((shapeId) => {
           const shape = tlEditorRef.current?.store.get(shapeId);
           return (
@@ -960,7 +960,7 @@ const Whiteboard = React.memo((props) => {
               shape.meta?.presenterForUser === currentUserId) // Shapes the presenter created for the viewer
           );
         });
-  
+
         if (shapesToRemove.length > 0) {
           tlEditorRef.current?.store.remove(shapesToRemove);
         }
@@ -975,9 +975,7 @@ const Whiteboard = React.memo((props) => {
     panelEditors,
     userSharedWithAll,
   ]);
-  
 
-  
   ///////////////////
   ///////////////
 
@@ -2722,8 +2720,8 @@ const Whiteboard = React.memo((props) => {
               cursor: "pointer",
               border: "none",
               borderRadius: "4px",
-              backgroundColor: "#007BFF", // Blue background
-              color: "#fff", // White text
+              backgroundColor: "rgba(0, 123, 255, 0.8)", // Semi-transparent blue
+              color: "#fff", // Solid white text
               fontSize: "14px",
               boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
               transition: "all 0.3s ease", // Smooth animation
@@ -2731,12 +2729,18 @@ const Whiteboard = React.memo((props) => {
               justifyContent: "center", // Center horizontally
               alignItems: "center", // Center vertically
             }}
+            onMouseOver={(e) =>
+              (e.target.style.backgroundColor = "rgba(0, 123, 255, 1)")
+            } // Fully solid on hover
+            onMouseOut={(e) =>
+              (e.target.style.backgroundColor = "rgba(0, 123, 255, 0.8)")
+            } // Semi-transparent when not hovered
           >
-            {isPanelVisible 
-              ? "<<" 
-              : selectedUserId 
-                ? `${selectedUserId}` 
-                : ">>"}
+            {isPanelVisible
+              ? "<<"
+              : selectedUserId
+              ? `${selectedUserId}`
+              : ">>"}
           </button>,
 
           <Styled.PanelContainer
@@ -2745,139 +2749,153 @@ const Whiteboard = React.memo((props) => {
           >
             {boxes.map((box, index) => (
               <>
+                <div
+                  style={{
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    backgroundColor:
+                      userSharedWithAll === box.userId
+                        ? "#28a745" // Green for pushed
+                        : selectedUserId === box.userId
+                        ? "#007BFF" // Blue for selected
+                        : "#f9f9f9", // Light gray otherwise
+                    color:
+                      userSharedWithAll === box.userId ||
+                      selectedUserId === box.userId
+                        ? "#fff" // White text for pushed or selected
+                        : "#000", // Black text otherwise
+                    fontWeight: "bold",
+                    border:
+                      userSharedWithAll === box.userId ||
+                      selectedUserId === box.userId
+                        ? "1px solid #007BFF"
+                        : "1px solid #ccc",
+                    borderRadius: "4px",
+                    padding: "4px 6px",
+                    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+                    transition: "all 0.3s ease",
+                    margin: "4px 0",
+                    width: "100%",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: "bold",
+                      marginRight: "8px",
+                    }}
+                  >
+                    {box.userId}
+                  </div>
 
-<div
-  style={{
-    position: 'relative',
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor:
-      userSharedWithAll === box.userId
-        ? "#28a745" // Green for pushed
-        : selectedUserId === box.userId
-        ? "#007BFF" // Blue for selected
-        : "#f9f9f9", // Light gray otherwise
-    color:
-      userSharedWithAll === box.userId || selectedUserId === box.userId
-        ? "#fff" // White text for pushed or selected
-        : "#000", // Black text otherwise
-    fontWeight: "bold",
-    border:
-      userSharedWithAll === box.userId || selectedUserId === box.userId
-        ? "1px solid #007BFF"
-        : "1px solid #ccc",
-    borderRadius: "4px",
-    padding: "4px 6px",
-    boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-    transition: "all 0.3s ease",
-    margin: "4px 0",
-    width: "100%",
-    textAlign: "center",
-  }}
->
-  <div style={{ fontSize: "10px", fontWeight: "bold", marginRight: "8px" }}>
-    {box.userId}
-  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: "4px",
+                    }}
+                  >
+                    {/* Focus Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUserClick(box.userId);
+                      }}
+                      style={{
+                        backgroundColor:
+                          selectedUserId === box.userId ? "#ffffff" : "#007BFF",
+                        color:
+                          selectedUserId === box.userId ? "#0056b3" : "#fff",
+                        border:
+                          selectedUserId === box.userId
+                            ? "1px solid #0056b3"
+                            : "none",
+                        borderRadius: "3px",
+                        padding: "2px 6px",
+                        fontSize: "10px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        boxShadow: "0 1px 2px rgba(0, 0, 0, 0.2)",
+                        transition:
+                          "transform 0.1s ease, background-color 0.3s ease",
+                      }}
+                      onMouseOver={(e) =>
+                        (e.target.style.backgroundColor =
+                          selectedUserId === box.userId ? "#f0f0f0" : "#004494")
+                      }
+                      onMouseOut={(e) =>
+                        (e.target.style.backgroundColor =
+                          selectedUserId === box.userId ? "#ffffff" : "#007BFF")
+                      }
+                      onMouseDown={(e) => {
+                        e.target.style.transform = "scale(0.95)";
+                        e.target.style.boxShadow = "0 0 0 rgba(0, 0, 0, 0)";
+                      }}
+                      onMouseUp={(e) => {
+                        e.target.style.transform = "scale(1)";
+                        e.target.style.boxShadow =
+                          "0 1px 2px rgba(0, 0, 0, 0.2)";
+                      }}
+                    >
+                      Focus
+                    </button>
 
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "row",
-      gap: "4px",
-    }}
-  >
-    {/* Focus Button */}
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        handleUserClick(box.userId);
-      }}
-      style={{
-        backgroundColor:
-          selectedUserId === box.userId ? "#ffffff" : "#007BFF",
-        color: selectedUserId === box.userId ? "#0056b3" : "#fff",
-        border:
-          selectedUserId === box.userId ? "1px solid #0056b3" : "none",
-        borderRadius: "3px",
-        padding: "2px 6px",
-        fontSize: "10px",
-        fontWeight: "600",
-        cursor: "pointer",
-        boxShadow: "0 1px 2px rgba(0, 0, 0, 0.2)",
-        transition: "transform 0.1s ease, background-color 0.3s ease",
-      }}
-      onMouseOver={(e) =>
-        (e.target.style.backgroundColor =
-          selectedUserId === box.userId ? "#f0f0f0" : "#004494")
-      }
-      onMouseOut={(e) =>
-        (e.target.style.backgroundColor =
-          selectedUserId === box.userId ? "#ffffff" : "#007BFF")
-      }
-      onMouseDown={(e) => {
-        e.target.style.transform = "scale(0.95)";
-        e.target.style.boxShadow = "0 0 0 rgba(0, 0, 0, 0)";
-      }}
-      onMouseUp={(e) => {
-        e.target.style.transform = "scale(1)";
-        e.target.style.boxShadow = "0 1px 2px rgba(0, 0, 0, 0.2)";
-      }}
-    >
-      Focus
-    </button>
-
-    {/* Share Button */}
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        handleUserPushClick(box.userId);
-      }}
-      style={{
-        backgroundColor:
-          userSharedWithAll === box.userId ? "#ffffff" : "#28a745",
-        color: userSharedWithAll === box.userId ? "#155724" : "#fff",
-        border:
-          userSharedWithAll === box.userId ? "1px solid #155724" : "none",
-        borderRadius: "3px",
-        padding: "2px 6px",
-        fontSize: "10px",
-        fontWeight: "600",
-        cursor: "pointer",
-        boxShadow: "0 1px 2px rgba(0, 0, 0, 0.2)",
-        transition: "transform 0.1s ease, background-color 0.3s ease",
-      }}
-      onMouseOver={(e) =>
-        (e.target.style.backgroundColor =
-          userSharedWithAll === box.userId ? "#e2e6ea" : "#1e7e34")
-      }
-      onMouseOut={(e) =>
-        (e.target.style.backgroundColor =
-          userSharedWithAll === box.userId ? "#ffffff" : "#28a745")
-      }
-      onMouseDown={(e) => {
-        e.target.style.transform = "scale(0.95)";
-        e.target.style.boxShadow = "0 0 0 rgba(0, 0, 0, 0)";
-      }}
-      onMouseUp={(e) => {
-        e.target.style.transform = "scale(1)";
-        e.target.style.boxShadow = "0 1px 2px rgba(0, 0, 0, 0.2)";
-      }}
-    >
-      Share
-    </button>
-  </div>
-</div>
-
-
-  
-
-
-
-
-
-
+                    {/* Share Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUserPushClick(box.userId);
+                      }}
+                      style={{
+                        backgroundColor:
+                          userSharedWithAll === box.userId
+                            ? "#ffffff"
+                            : "#28a745",
+                        color:
+                          userSharedWithAll === box.userId ? "#155724" : "#fff",
+                        border:
+                          userSharedWithAll === box.userId
+                            ? "1px solid #155724"
+                            : "none",
+                        borderRadius: "3px",
+                        padding: "2px 6px",
+                        fontSize: "10px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        boxShadow: "0 1px 2px rgba(0, 0, 0, 0.2)",
+                        transition:
+                          "transform 0.1s ease, background-color 0.3s ease",
+                      }}
+                      onMouseOver={(e) =>
+                        (e.target.style.backgroundColor =
+                          userSharedWithAll === box.userId
+                            ? "#e2e6ea"
+                            : "#1e7e34")
+                      }
+                      onMouseOut={(e) =>
+                        (e.target.style.backgroundColor =
+                          userSharedWithAll === box.userId
+                            ? "#ffffff"
+                            : "#28a745")
+                      }
+                      onMouseDown={(e) => {
+                        e.target.style.transform = "scale(0.95)";
+                        e.target.style.boxShadow = "0 0 0 rgba(0, 0, 0, 0)";
+                      }}
+                      onMouseUp={(e) => {
+                        e.target.style.transform = "scale(1)";
+                        e.target.style.boxShadow =
+                          "0 1px 2px rgba(0, 0, 0, 0.2)";
+                      }}
+                    >
+                      Share
+                    </button>
+                  </div>
+                </div>
 
                 <Styled.PanelBox key={index}>
                   <Tldraw
