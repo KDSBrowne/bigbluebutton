@@ -119,6 +119,16 @@ const notifyShapeNumberExceeded = (intl, limit) => {
   if (intl) notify(intl.formatMessage(intlMessages.shapeNumberExceeded, { 0: limit }), 'warning', 'whiteboard');
 };
 
+const notifyPresenterJoinedUser = (intl, limit) => {
+  if (intl) notify(intl.formatMessage(intlMessages.notifyNotAllowedChange, { 0: limit }), 'warning', 'whiteboard');
+};
+
+const notifyPresenterLeftUser = (intl, limit) => {
+  if (intl) notify(intl.formatMessage(intlMessages.shapeNumberExceeded, { 0: limit }), 'warning', 'whiteboard');
+};
+
+
+
 const toggleToolsAnimations = (activeAnim, anim, time, hasWBAccess = false) => {
   const handleOptionsDropdown = () => {
     const optionsDropdown = document.getElementById('WhiteboardOptionButton');
@@ -371,6 +381,8 @@ export {
   persistShape,
   notifyNotAllowedChange,
   notifyShapeNumberExceeded,
+  notifyPresenterLeftUser,
+  notifyPresenterJoinedUser,
   toggleToolsAnimations,
   formatAnnotations,
   getCustomEditorAssetUrls,

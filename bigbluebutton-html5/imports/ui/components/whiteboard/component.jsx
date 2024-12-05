@@ -151,6 +151,8 @@ const Whiteboard = React.memo((props) => {
     setPresentationPageSelectedUser,
     setPresentationPageUserSharedWithAll,
     userSharedWithAll,
+    notifyPresenterLeftUser,
+    notifyPresenterJoinedUser,
   } = props;
 
   clearTldrawCache();
@@ -253,7 +255,21 @@ const Whiteboard = React.memo((props) => {
   const customTools = [NoopTool];
 
   const prevFitToWidth = usePrevious(fitToWidth);
+  const prevSelectedUser = usePrevious(selectedUserId);
+  const prevUserSharedWithAll = usePrevious(userSharedWithAll);
   const presenterChanged = usePrevious(isPresenter) !== isPresenter;
+
+  React.useEffect(() => {
+    selectedUserIdRef.current = selectedUserId;
+    if (!isPresenter) {
+      //selected user notification
+      if (currentUser?.userId === selectedUserId && userSharedWithAll?.length < 1) {
+        notifyPresenterJoinedUser(intl)
+      } else if (prevSelectedUser === currentUser?.userId && userSharedWithAll?.length < 1) {
+        notifyPresenterLeftUser(intl)
+      }
+    }
+  }, [selectedUserId]);
 
   let clipboardContent = null;
   let isPasting = false;
@@ -2753,7 +2769,7 @@ const Whiteboard = React.memo((props) => {
   {/* Fixed Header */}
   <Styled.Header isShared={userSharedWithAll?.length > 0}>
     {selectedUserIdRef.current ? (
-      <div>{`${selectedUserIdRef.current}`}</div>
+      <div>{`${userSharedWithAll || selectedUserIdRef.current}`}</div>
     ) : (
       <div>No User Selected</div>
     )}
@@ -2769,6 +2785,12 @@ const Whiteboard = React.memo((props) => {
         isPushed={userSharedWithAll === box.userId} // Determines if this panel is pushed
         onClick={(e) => {
           e.stopPropagation();
+          if (userSharedWithAll?.length > 0) {
+            setTempSelectedUserId(box.userId);
+            handleUserClick(box.userId); 
+            handleUserPushClick(box.userId);
+            return;
+          }
           setTempSelectedUserId(box.userId);
           handleUserClick(box.userId); 
         }}
@@ -2787,6 +2809,12 @@ const Whiteboard = React.memo((props) => {
     }}
     onClick={(e) => {
       e.stopPropagation();
+      if (userSharedWithAll?.length > 0) {
+        setTempSelectedUserId(box.userId);
+        handleUserClick(box.userId); 
+        handleUserPushClick(box.userId);
+        return;
+      }
       setTempSelectedUserId(box.userId);
       handleUserClick(box.userId); 
     }}
@@ -2846,11 +2874,11 @@ const Whiteboard = React.memo((props) => {
   <button
   onClick={(e) => {
     e.stopPropagation();
-    if (selectedUserId === tempSelectedUserId) {
-      handleUserPushClick(tempSelectedUserId);
-    }
+  
+      handleUserPushClick(selectedUserId);
+    
   }}
-  disabled={selectedUserId !== tempSelectedUserId}
+  // disabled={selectedUserId !== tempSelectedUserId}
   style={{
     // Determine if the button is disabled
     backgroundColor: selectedUserId !== tempSelectedUserId
@@ -2890,7 +2918,7 @@ const Whiteboard = React.memo((props) => {
       userSharedWithAll === tempSelectedUserId ? "#ffffff" : "#28A745";
   }}
 >
-  {userSharedWithAll === tempSelectedUserId ? "Unshare" : "Share"}
+  {userSharedWithAll.length > 0 ? "Unshare" : "Share"}
 </button>
 
 

@@ -23,6 +23,8 @@ import {
   persistShape,
   notifyNotAllowedChange,
   notifyShapeNumberExceeded,
+  notifyPresenterLeftUser,
+  notifyPresenterJoinedUser,
   toggleToolsAnimations,
   formatAnnotations,
 } from './service';
@@ -457,6 +459,8 @@ const WhiteboardContainer = (props) => {
         zoomSlide,
         notifyNotAllowedChange,
         notifyShapeNumberExceeded,
+        notifyPresenterLeftUser,
+        notifyPresenterJoinedUser,
         whiteboardToolbarAutoHide: Settings?.application?.whiteboardToolbarAutoHide,
         animations: Settings?.application?.animations,
         toggleToolsAnimations,
