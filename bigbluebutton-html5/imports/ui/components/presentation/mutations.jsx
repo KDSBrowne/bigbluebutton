@@ -127,6 +127,15 @@ export const PRESENTATION_SET_PAGE_SELECTED_USER = gql`
   }
 `;
 
+export const PRESENTATION_SET_PAGE_USER_SHARED_WITH_ALL = gql`
+  mutation PresentationSetPageUserSharedWithAll($pageId: String!, $userSharedWithAll: String!) {
+    presentationSetPageUserSharedWithAll(
+      pageId: $pageId,
+      userSharedWithAll: $userSharedWithAll
+    )
+  }
+`;
+
 export default {
   PRESENTATION_SET_ZOOM,
   PRESENTATION_SET_WRITERS,
@@ -141,4 +150,5 @@ export default {
   PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD,
   PRESENTATION_SET_PAGE_WHITEBOARD_VISION,
   PRESENTATION_SET_PAGE_SELECTED_USER,
+  PRESENTATION_SET_PAGE_USER_SHARED_WITH_ALL,
 };

@@ -1270,7 +1270,8 @@ CREATE TABLE "pres_page" (
     "uploadCompleted" boolean,
     "infiniteWhiteboard" boolean,
     "whiteboardVision" boolean,
-    "selectedUser" varchar(50)
+    "selectedUser" varchar(50),
+    "userSharedWithAll" varchar(50)
 );
 CREATE INDEX "idx_pres_page_presentationId" ON "pres_page"("presentationId");
 CREATE INDEX "idx_pres_page_presentationId_curr" ON "pres_page"("presentationId") where "current" is true;
@@ -1331,7 +1332,8 @@ SELECT pres_presentation."meetingId",
     pres_page."uploadCompleted",
     pres_page."infiniteWhiteboard",
     pres_page."whiteboardVision",
-    pres_page."selectedUser"
+    pres_page."selectedUser",
+    pres_page."userSharedWithAll"
 FROM pres_page
 JOIN pres_presentation ON pres_presentation."presentationId" = pres_page."presentationId";
 
@@ -1366,7 +1368,8 @@ SELECT pres_presentation."meetingId",
     (pres_page."height" * pres_page."heightRatio" / 100 * LEAST(pres_page."maxImageWidth" / pres_page."width", pres_page."maxImageHeight" / pres_page."height")) AS "scaledViewBoxHeight",
     pres_page."infiniteWhiteboard",
     pres_page."whiteboardVision",
-    pres_page."selectedUser"
+    pres_page."selectedUser",
+    pres_page."userSharedWithAll"
 FROM pres_presentation
 JOIN pres_page ON pres_presentation."presentationId" = pres_page."presentationId" AND pres_page."current" IS TRUE
 and pres_presentation."current" IS TRUE;

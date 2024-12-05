@@ -43,7 +43,8 @@ import {
   PRES_ANNOTATION_SUBMIT,
   PRESENTATION_SET_PAGE,
   PRESENTATION_PUBLISH_CURSOR,
-  PRESENTATION_SET_PAGE_SELECTED_USER
+  PRESENTATION_SET_PAGE_SELECTED_USER,
+  PRESENTATION_SET_PAGE_USER_SHARED_WITH_ALL
 } from '../presentation/mutations';
 import { useMergedCursorData } from './hooks.ts';
 import useDeduplicatedSubscription from '../../core/hooks/useDeduplicatedSubscription';
@@ -98,6 +99,7 @@ const WhiteboardContainer = (props) => {
   const isInfiniteWhiteboard = currentPresentationPage?.infiniteWhiteboard;
   const isInWhiteboardVision = currentPresentationPage?.whiteboardVision;
   const selectedUser = currentPresentationPage?.selectedUser;
+  const userSharedWithAll = currentPresentationPage?.userSharedWithAll;
   const curPageIdRef = useRef();
 
   React.useEffect(() => {
@@ -120,6 +122,7 @@ const WhiteboardContainer = (props) => {
   const [presentationSetZoom] = useMutation(PRESENTATION_SET_ZOOM);
   const [presentationSetPage] = useMutation(PRESENTATION_SET_PAGE);
   const [presentationSetPageSelectedUser] = useMutation(PRESENTATION_SET_PAGE_SELECTED_USER);
+  const [presentationSetPageUserSharedWithAll] = useMutation(PRESENTATION_SET_PAGE_USER_SHARED_WITH_ALL);
   const [presentationDeleteAnnotations] = useMutation(PRES_ANNOTATION_DELETE);
   const [presentationSubmitAnnotations] = useMutation(PRES_ANNOTATION_SUBMIT);
   const [presentationPublishCursor] = useMutation(PRESENTATION_PUBLISH_CURSOR);
@@ -139,6 +142,17 @@ const WhiteboardContainer = (props) => {
       variables: {
         pageId,
         selectedUser,
+      },
+    });
+  };
+
+  const setPresentationPageUserSharedWithAll = (userSharedWithAll) => {
+    const pageId = `${presentationId}/${curPageNum}`;
+    console.log('sharing user with all :toakka: ', userSharedWithAll)
+    presentationSetPageUserSharedWithAll({
+      variables: {
+        pageId,
+        userSharedWithAll,
       },
     });
   };
@@ -282,7 +296,7 @@ const WhiteboardContainer = (props) => {
     if (curPageIdRef.current) {
       refetchInitialPageAnnotations();
     }
-  }, [curPageIdRef.current, presentationId, isInWhiteboardVision, selectedUser]);
+  }, [curPageIdRef.current, presentationId, isInWhiteboardVision, selectedUser, userSharedWithAll]);
 
   const processAnnotations = (data) => {
     let annotationsToBeRemoved = [];
@@ -457,10 +471,12 @@ const WhiteboardContainer = (props) => {
         zoomChanger,
         skipToSlide,
         setPresentationPageSelectedUser,
+        setPresentationPageUserSharedWithAll,
         locale: Settings?.application?.locale,
         darkTheme: Settings?.application?.darkTheme,
         selectedLayout: Settings?.application?.selectedLayout,
         isInfiniteWhiteboard,
+        userSharedWithAll,
         curPageNum,
         setEditor,
       }}

@@ -34,6 +34,7 @@ case class PresentationPage(
     infiniteWhiteboard: Boolean      = false,
     whiteboardVision: Boolean        = false,
     selectedUser: String             = "",
+    userSharedWithAll: String        = "",
 )
 
 object PresentationInPod {

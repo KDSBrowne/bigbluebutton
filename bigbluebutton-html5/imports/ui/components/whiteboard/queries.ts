@@ -56,6 +56,7 @@ export const CURRENT_PRESENTATION_PAGE_SUBSCRIPTION = gql`subscription CurrentPr
     infiniteWhiteboard
     whiteboardVision
     selectedUser
+    userSharedWithAll
   }  
 }`;
 

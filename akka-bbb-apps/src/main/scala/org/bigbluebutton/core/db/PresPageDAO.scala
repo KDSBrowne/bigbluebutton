@@ -29,6 +29,7 @@ case class PresPageDbModel(
     infiniteWhiteboard:  Boolean,
     whiteboardVision: Boolean,
     selectedUser:    String,
+    userSharedWithAll: String,
 )
 
 class PresPageDbTableDef(tag: Tag) extends Table[PresPageDbModel](tag, None, "pres_page") {
@@ -53,9 +54,10 @@ class PresPageDbTableDef(tag: Tag) extends Table[PresPageDbModel](tag, None, "pr
   val infiniteWhiteboard = column[Boolean]("infiniteWhiteboard")
   val whiteboardVision = column[Boolean]("whiteboardVision")
   val selectedUser = column[String]("selectedUser")
+  val userSharedWithAll = column[String]("userSharedWithAll")
 
   def * = (
-    pageId, presentationId, num, urlsJson, content, slideRevealed, current, xOffset, yOffset, widthRatio, heightRatio, width, height, viewBoxWidth, viewBoxHeight, maxImageWidth, maxImageHeight, uploadCompleted, infiniteWhiteboard, whiteboardVision, selectedUser
+    pageId, presentationId, num, urlsJson, content, slideRevealed, current, xOffset, yOffset, widthRatio, heightRatio, width, height, viewBoxWidth, viewBoxHeight, maxImageWidth, maxImageHeight, uploadCompleted, infiniteWhiteboard, whiteboardVision, selectedUser, userSharedWithAll
   ) <> (PresPageDbModel.tupled, PresPageDbModel.unapply)
 }
 
@@ -93,6 +95,7 @@ object PresPageDAO {
           infiniteWhiteboard = page.infiniteWhiteboard,
           whiteboardVision = page.whiteboardVision,
           selectedUser = page.selectedUser,
+          userSharedWithAll = page.userSharedWithAll
         )
       )
     )
@@ -159,6 +162,18 @@ object PresPageDAO {
     ).onComplete {
       case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated selected user on PresPage table")
       case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating selected user on PresPage: $e")
+    }
+  }
+
+  def updateUserSharedWithAll(pageId: String, userSharedWithAll: String) = {
+    DatabaseConnection.db.run(
+      TableQuery[PresPageDbTableDef]
+        .filter(_.pageId === pageId)
+        .map(p => p.userSharedWithAll)
+        .update(userSharedWithAll)
+    ).onComplete {
+      case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated user to share with all on PresPage table")
+      case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating user to share with all on PresPage: $e")
     }
   }
 }

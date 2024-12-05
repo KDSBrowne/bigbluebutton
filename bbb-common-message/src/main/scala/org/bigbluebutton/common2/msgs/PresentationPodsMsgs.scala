@@ -35,6 +35,10 @@ object SetPageSelectedUserPubMsg { val NAME = "SetPageSelectedUserPubMsg" }
 case class SetPageSelectedUserPubMsg(header: BbbClientMsgHeader, body: SetPageSelectedUserPubMsgBody) extends StandardMsg
 case class SetPageSelectedUserPubMsgBody(pageId: String, selectedUser: String)
 
+object SetPageUserSharedWithAllPubMsg { val NAME = "SetPageUserSharedWithAllPubMsg" }
+case class SetPageUserSharedWithAllPubMsg(header: BbbClientMsgHeader, body: SetPageUserSharedWithAllPubMsgBody) extends StandardMsg
+case class SetPageUserSharedWithAllPubMsgBody(pageId: String, userSharedWithAll: String)
+
 object RemovePresentationPubMsg { val NAME = "RemovePresentationPubMsg" }
 case class RemovePresentationPubMsg(header: BbbClientMsgHeader, body: RemovePresentationPubMsgBody) extends StandardMsg
 case class RemovePresentationPubMsgBody(podId: String, presentationId: String)
@@ -386,6 +390,10 @@ case class SetPageWhiteboardVisionEvtMsgBody(pageId: String, whiteboardVision: B
 object SetPageSelectedUserEvtMsg { val NAME = "SetPageSelectedUserEvtMsg" }
 case class SetPageSelectedUserEvtMsg(header: BbbClientMsgHeader, body: SetPageSelectedUserEvtMsgBody) extends BbbCoreMsg
 case class SetPageSelectedUserEvtMsgBody(pageId: String, selectedUser: String)
+
+object SetPageUserSharedWithAllEvtMsg { val NAME = "SetPageUserSharedWithAllEvtMsg" }
+case class SetPageUserSharedWithAllEvtMsg(header: BbbClientMsgHeader, body: SetPageUserSharedWithAllEvtMsgBody) extends BbbCoreMsg
+case class SetPageUserSharedWithAllEvtMsgBody(pageId: String, userSharedWithAll: String)
 
 object SetPresenterInPodRespMsg { val NAME = "SetPresenterInPodRespMsg" }
 case class SetPresenterInPodRespMsg(header: BbbClientMsgHeader, body: SetPresenterInPodRespMsgBody) extends StandardMsg

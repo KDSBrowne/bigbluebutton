@@ -178,6 +178,7 @@ object PresPresentationDAO {
               infiniteWhiteboard = page._2.infiniteWhiteboard,
               whiteboardVision = page._2.whiteboardVision,
               selectedUser = page._2.selectedUser,
+              userSharedWithAll = page._2.userSharedWithAll,
             )
           )
         }

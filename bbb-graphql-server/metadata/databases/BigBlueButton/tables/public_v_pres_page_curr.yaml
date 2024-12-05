@@ -40,6 +40,7 @@ select_permissions:
         - infiniteWhiteboard
         - whiteboardVision
         - selectedUser
+        - userSharedWithAll
       filter:
         meetingId:
           _eq: X-Hasura-MeetingId
