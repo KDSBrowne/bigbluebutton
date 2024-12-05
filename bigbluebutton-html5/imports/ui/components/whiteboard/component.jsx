@@ -2855,8 +2855,8 @@ const Whiteboard = React.memo((props) => {
       fontWeight: "600",
       cursor: "pointer",
       transition: "transform 0.1s ease, background-color 0.3s ease",
-      width: "80px", // Fixed width
-      height: "30px", // Fixed height
+      width: "60px", // Fixed width
+      height: "20px", // Fixed height
       lineHeight: "1.2", // Prevents text from causing height changes
       textAlign: "center", // Center text inside the button
     }}
@@ -2888,8 +2888,8 @@ const Whiteboard = React.memo((props) => {
       fontWeight: "600",
       cursor: "pointer",
       transition: "transform 0.1s ease, background-color 0.3s ease",
-      width: "80px", // Fixed width
-      height: "30px", // Fixed height
+      width: "60px", // Fixed width
+      height: "20px", // Fixed height
       lineHeight: "1.2", // Prevents text from causing height changes
       textAlign: "center", // Center text inside the button
     }}
