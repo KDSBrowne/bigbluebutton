@@ -128,11 +128,11 @@ const notifyShapeNumberExceeded = (intl, limit) => {
 };
 
 const notifyPresenterJoinedUser = (intl, limit) => {
-  if (intl) notify(intl.formatMessage(intlMessages.notifyPresenterJoinedUser, { 0: limit }), 'warning', 'whiteboard');
+  if (intl) notify('Presenter joined your whiteboard', 'info', 'whiteboard');
 };
 
 const notifyPresenterLeftUser = (intl, limit) => {
-  if (intl) notify(intl.formatMessage(intlMessages.notifyPresenterLeftUser, { 0: limit }), 'warning', 'whiteboard');
+  if (intl) notify('Presenter left your whiteboard', 'info', 'whiteboard');
 };
 
 

@@ -498,8 +498,8 @@ class PresentationToolbar extends PureComponent {
               role="button"
               aria-label={
                 isWhiteboardVision
-                  ? 'intl.formatMessage(intlMessages.infiniteWhiteboardOff)'
-                  : 'intl.formatMessage(intlMessages.infiniteWhiteboardOn)'
+                  ? 'Turn Vison Off'
+                  : 'Turn Vison On'
               }
               color="light"
               disabled={!isMeteorConnected}
@@ -511,8 +511,8 @@ class PresentationToolbar extends PureComponent {
               }}
               label={
                 isWhiteboardVision
-                  ? 'intl.formatMessage(intlMessages.infiniteWhiteboardOff)'
-                  : 'intl.formatMessage(intlMessages.infiniteWhiteboardOn)'
+                  ? 'Turn Vison Off'
+                  : 'Turn Vison On'
               }
               hideLabel
             />
