@@ -1,5 +1,6 @@
 import styled, { createGlobalStyle } from 'styled-components';
 import { colorOffWhite } from '/imports/ui/stylesheets/styled-components/palette';
+import { ScrollboxVertical } from '/imports/ui/stylesheets/styled-components/scrollable';
 
 const TldrawV2GlobalStyle = createGlobalStyle`
   ${({ isPresenter, hasWBAccess }) => (!isPresenter && hasWBAccess) && `
@@ -124,41 +125,14 @@ const PanelWrapper = styled.div`
 
 
 
-const PanelContainer = styled.div`
+const PanelContainer = styled(ScrollboxVertical)`
   flex-grow: 1;
-  overflow-y: auto; /* Enable vertical scrolling */
-  overflow-x: hidden; /* Disable horizontal scrolling */
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 10px;
-
-  /* Custom Scrollbar Styling */
-  scrollbar-width: thin; /* Slim scrollbar for Firefox */
-  scrollbar-color: #bbb #f0f0f0; /* Gray thumb on light track */
-
-  /* WebKit Browsers (Chrome, Edge, Safari) */
-  &::-webkit-scrollbar {
-    width: 6px; /* Slim scrollbar width */
-  }
-  &::-webkit-scrollbar-track {
-    background: #f0f0f0; /* Light gray background */
-    border-radius: 10px; /* Rounded track corners */
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: #bbb; /* Gray thumb */
-    border-radius: 10px; /* Rounded thumb */
-    border: 2px solid #f0f0f0; /* Match track padding */
-  }
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: #999; /* Darker gray on hover */
-  }
-
-  &::-webkit-scrollbar-button {
-    display: none; /* Hide up/down buttons */
-    height: 0; /* Ensure no space for buttons */
-  }
 `;
+
 
 
 
@@ -217,13 +191,16 @@ const Header = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 14px;
   position: sticky; /* Keep it fixed within the wrapper */
   top: 0;
   z-index: 2; /* Ensure it's above the scrollable content */
-  border-bottom: 1px solid ${({ isShared }) => (isShared ? "#28A745" : "#007BFF")}; /* Subtle bottom border */
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  border-bottom: 1px solid
+    ${({ isShared }) => (isShared ? "#28A745" : "#007BFF")}; /* Subtle bottom border */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow at the bottom */
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 `;
+
 
 
 

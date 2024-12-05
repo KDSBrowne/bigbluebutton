@@ -2721,7 +2721,7 @@ const Whiteboard = React.memo((props) => {
     left: isPanelVisible ? "200px" : "0px",
     zIndex: 1101,
     padding: "8px 16px",
-    height: "2rem",
+    height: "20px",
     width: isPanelVisible ? "2rem" : "11rem",
     cursor: "pointer",
     border: "1px solid #ccc", // Add a subtle border
