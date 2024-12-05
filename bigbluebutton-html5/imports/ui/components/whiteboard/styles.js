@@ -218,7 +218,7 @@ const Footer = styled.div`
   background-color: #f8f9fa; /* Light gray background */
   padding: 6px; /* Smaller padding */
   display: flex;
-  justify-content: space-between; /* Space between buttons */
+  justify-content: end; /* Space between buttons */
   align-items: center; /* Center buttons vertically */
   border-top: 1px solid #ddd; /* Subtle top border */
   z-index: 2; /* Ensure it appears above content */

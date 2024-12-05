@@ -2770,6 +2770,7 @@ const Whiteboard = React.memo((props) => {
         onClick={(e) => {
           e.stopPropagation();
           setTempSelectedUserId(box.userId);
+          handleUserClick(box.userId); 
         }}
       >
 
@@ -2787,6 +2788,7 @@ const Whiteboard = React.memo((props) => {
     onClick={(e) => {
       e.stopPropagation();
       setTempSelectedUserId(box.userId);
+      handleUserClick(box.userId); 
     }}
   ></div>
         <Tldraw
@@ -2839,36 +2841,6 @@ const Whiteboard = React.memo((props) => {
 
   {/* Fixed Footer */}
   <Styled.Footer>
-  {/* Focus Button */}
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      handleUserClick(tempSelectedUserId); // Handle focus logic
-    }}
-    style={{
-      backgroundColor: "#007BFF", // Blue for focus
-      color: "#fff",
-      border: "none",
-      borderRadius: "3px",
-      padding: "4px 8px",
-      fontSize: "12px",
-      fontWeight: "600",
-      cursor: "pointer",
-      transition: "transform 0.1s ease, background-color 0.3s ease",
-      width: "60px", // Fixed width
-      height: "20px", // Fixed height
-      lineHeight: "1.2", // Prevents text from causing height changes
-      textAlign: "center", // Center text inside the button
-    }}
-    onMouseOver={(e) =>
-      (e.target.style.backgroundColor = "#0056b3") // Darker blue on hover
-    }
-    onMouseOut={(e) =>
-      (e.target.style.backgroundColor = "#007BFF") // Default blue
-    }
-  >
-    {tempSelectedUserId === selectedUserId ? "Focused" : "Focus"}
-  </button>
 
   {/* Share/Unshare Button */}
   <button
