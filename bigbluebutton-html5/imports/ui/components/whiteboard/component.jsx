@@ -2351,42 +2351,41 @@ const Whiteboard = React.memo((props) => {
         );
         return;
       }
-
+  
       const idsToRemove = [];
       const allRecords = editor.store.allRecords();
       const presenceRecords = allRecords.filter((record) =>
         record.id.startsWith("instance_presence:")
       );
-
+  
       // Remove outdated cursors
       presenceRecords.forEach((record) => {
         const recordUserId = record.id.split("instance_presence:")[1];
         const isCursorStillActive = userCursors.some(
           (cursor) => cursor.userId === recordUserId
         );
-
+  
         if (!isCursorStillActive) {
           idsToRemove.push(record.id);
         }
       });
-
+  
       // Prepare updated presences
       const updatedPresences = userCursors
         .map(({ userId, user, xPercent, yPercent }) => {
           if (xPercent === -1 || yPercent === -1) {
-            // console.debug(`[updateCursorsForEditor]: Skipping inactive cursor for userId: ${userId}`);
             return null; // Skip invalid cursors
           }
-
+  
           const cursor = {
             x: xPercent,
             y: yPercent,
             type: "default",
             rotation: 0,
           };
-
+  
           const color = user?.presenter ? "#FF0000" : "#70DB70"; // Red for presenter, green for others
-
+  
           const presenceRecord = {
             ...InstancePresenceRecordType.create({
               id: InstancePresenceRecordType.createId(userId),
@@ -2398,86 +2397,89 @@ const Whiteboard = React.memo((props) => {
             }),
             lastActivityTimestamp: Date.now(),
           };
-
-          // console.debug(`[updateCursorsForEditor]: Prepared presence for userId: ${userId}`, presenceRecord);
+  
           return presenceRecord;
         })
         .filter(Boolean);
-
+  
       if (idsToRemove.length) {
-        // console.info(`[updateCursorsForEditor]: Removing outdated cursors for userId: ${userId}`, idsToRemove);
         editor.store.remove(idsToRemove);
       }
-
+  
       if (updatedPresences.length) {
-        // console.info(`[updateCursorsForEditor]: Adding/updating cursors for userId: ${userId}`, updatedPresences);
         editor.store.put(updatedPresences);
       }
     };
-
+  
     if (isInWhiteboardVision) {
-      // console.info(`[Effect]: Whiteboard Vision Enabled`);
-
+      const selectedUserId = currentPresentationPage?.selectedUser;
+  
+      // Exclude the presenter's own cursor from otherCursors
+      const otherCursorsExcludingPresenter = otherCursors.filter(
+        (cursor) => cursor.userId !== currentUser.userId
+      );
+  
       // **Panel Updates**
       Object.entries(panelEditors).forEach(([userId, editor]) => {
-        const userCursors = otherCursors.filter(
+        const isPresenterPanel = isPresenter && currentUser.userId === userId;
+  
+        // Get the cursors for the panel's user, excluding the presenter
+        let userCursors = otherCursorsExcludingPresenter.filter(
           (cursor) => cursor.userId === userId
         );
-        const shouldIncludePresenterCursor =
-          userId === currentPresentationPage?.selectedUser;
-
-        const mergedCursors = shouldIncludePresenterCursor
-          ? [
-              ...userCursors,
-              otherCursors.find((cursor) => cursor.user?.presenter),
-            ].filter(Boolean)
-          : userCursors;
-
-        // console.info(`[Panel]: Merged cursors for panel userId: ${userId}`, mergedCursors);
-        updateCursorsForEditor(editor, userId, mergedCursors);
+  
+        let shouldIncludePresenterCursor = false;
+  
+        if (isPresenterPanel) {
+          // Presenter's own panel
+          // Include presenter's cursor if they haven't selected someone else
+          shouldIncludePresenterCursor =
+            !selectedUserId || selectedUserId === currentUser.userId;
+        } else {
+          // Other user's panel
+          // Include presenter's cursor if this panel belongs to the selected user
+          shouldIncludePresenterCursor = userId === selectedUserId;
+        }
+  
+        if (shouldIncludePresenterCursor) {
+          // Add presenter's cursor
+          const presenterCursor = otherCursors.find(
+            (cursor) => cursor.user?.presenter && cursor.xPercent !== -1
+          );
+          if (presenterCursor) {
+            userCursors = [...userCursors, presenterCursor];
+          }
+        }
+  
+        updateCursorsForEditor(editor, userId, userCursors);
       });
-
+  
       // **Presenter Main Whiteboard**
       if (isPresenter && tlEditorRef.current) {
-        // Changed condition here
-        // console.info(`[Presenter]: Updating main whiteboard cursors`);
-
         const selectedUserCursor = otherCursors.find(
-          (cursor) => cursor.userId === currentPresentationPage?.selectedUser
+          (cursor) =>
+            cursor.userId === currentPresentationPage?.selectedUser &&
+            cursor.xPercent !== -1
         );
-
-        // console.info(`[Presenter]: Selected user cursor:`, selectedUserCursor);
-
-        // Include the selected user's cursor if valid
-        const mergedCursors =
-          selectedUserCursor && selectedUserCursor.xPercent !== -1
-            ? [selectedUserCursor]
-            : [];
-
-        // console.info(`[Presenter]: Merged cursors for main whiteboard`, mergedCursors);
+  
+        const mergedCursors = selectedUserCursor ? [selectedUserCursor] : [];
+  
         updateCursorsForEditor(tlEditorRef.current, null, mergedCursors);
       }
-
+  
       // **Viewer Main Whiteboard**
       if (!isPresenter && tlEditorRef.current) {
-        // Changed condition here
-        // console.info(`[Viewer]: Updating main whiteboard cursors`);
-
-        // Viewers should only see the presenter cursor if they are the selected user
         const isSelectedUser =
           currentUser?.userId === currentPresentationPage?.selectedUser;
+  
         const presenterCursor = isSelectedUser
-          ? otherCursors.find((cursor) => cursor.user?.presenter)
+          ? otherCursors.find(
+              (cursor) => cursor.user?.presenter && cursor.xPercent !== -1
+            )
           : null;
-
-        // console.info(`[Viewer]: Presenter cursor for viewer:`, presenterCursor);
-
-        const mergedCursors =
-          presenterCursor && presenterCursor.xPercent !== -1
-            ? [presenterCursor]
-            : [];
-
-        // console.info(`[Viewer]: Merged cursors for main whiteboard`, mergedCursors);
+  
+        const mergedCursors = presenterCursor ? [presenterCursor] : [];
+  
         updateCursorsForEditor(tlEditorRef.current, null, mergedCursors);
       }
     }
@@ -2487,7 +2489,10 @@ const Whiteboard = React.memo((props) => {
     panelEditors,
     currentPresentationPage?.selectedUser,
     isPresenter,
+    currentUser,
   ]);
+  
+  
 
   const createPage = (currentPageId) => [
     {
