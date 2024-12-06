@@ -96,6 +96,11 @@ const TldrawV2GlobalStyle = createGlobalStyle`
     outline: none !important;
   }
 
+
+  .tlui-button__tool {
+    height: 40px !important;
+    width: 40px !important;
+
 `;
 
 const EditableWBWrapper = styled.div`
