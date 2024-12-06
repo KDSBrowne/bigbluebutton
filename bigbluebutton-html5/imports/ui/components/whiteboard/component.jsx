@@ -169,6 +169,9 @@ const Whiteboard = React.memo((props) => {
     currentPresentationPage?.selectedUser || ""
   );
   const [tempSelectedUserId, setTempSelectedUserId] = React.useState("");
+  const [isSearchVisible, setIsSearchVisible] = React.useState(false); // Toggle state for search bar
+  const [searchQuery, setSearchQuery] = React.useState("");
+
 
   const selectedUserIdRef = React.useRef(null);
 
@@ -182,6 +185,10 @@ const Whiteboard = React.memo((props) => {
 
   const addBox = () => {
     setBoxes((prev) => [...prev, prev.length + 1]);
+  };
+
+  const toggleSearch = () => {
+    setIsSearchVisible((prev) => !prev); // Toggle the search bar visibility
   };
 
   const handleUserClick = (userId) => {
@@ -1100,11 +1107,21 @@ const Whiteboard = React.memo((props) => {
 
   const handleKeyDown = useCallback(
     (event) => {
+      // If the event target is an input or textarea, let it handle the keys.
+      if (
+        event.target.tagName === "INPUT" ||
+        event.target.tagName === "TEXTAREA" ||
+        event.target.isContentEditable
+      ) {
+        return; // Don't run tldraw shortcuts if the user is typing in a search input.
+      }
+  
       if (event.repeat) {
         event.preventDefault();
         event.stopPropagation();
         return;
       }
+  
       // ignore if the edit link dialog is open
       if (
         document.querySelector("h2.tlui-dialog__header__title")?.textContent ===
@@ -1112,26 +1129,26 @@ const Whiteboard = React.memo((props) => {
       ) {
         return;
       }
-
+  
       const key = event.key.toLowerCase();
-
+  
       if (key === "escape" || event.keyCode === 27) {
         tlEditorRef.current?.deselect(
           ...tlEditorRef.current?.getSelectedShapes()
         );
         return;
       }
-
+  
       const editingShape = tlEditorRef.current?.getEditingShape();
       if (editingShape && (isPresenterRef.current || hasWBAccessRef.current)) {
         return;
       }
-
+  
       if (["delete", "backspace"].includes(key.toLowerCase())) {
         handleCut(false);
         return;
       }
-
+  
       if (
         key === " " &&
         tlEditorRef.current?.getCurrentToolId() !== "hand" &&
@@ -1141,7 +1158,7 @@ const Whiteboard = React.memo((props) => {
         tlEditorRef.current?.setCurrentTool("hand");
         return;
       }
-
+  
       // Mapping of simple key shortcuts to tldraw functions
       const simpleKeyMap = {
         v: () => tlEditorRef.current?.setCurrentTool("select"),
@@ -1160,7 +1177,7 @@ const Whiteboard = React.memo((props) => {
         f: () => tlEditorRef.current?.setCurrentTool("frame"),
         n: () => tlEditorRef.current?.setCurrentTool("note"),
       };
-
+  
       if (event.ctrlKey || event.metaKey) {
         if (key === "z") {
           event.preventDefault();
@@ -1174,7 +1191,7 @@ const Whiteboard = React.memo((props) => {
           }
           return;
         }
-
+  
         const ctrlKeyMap = {
           a: () => {
             tlEditorRef.current?.selectAll();
@@ -1199,7 +1216,7 @@ const Whiteboard = React.memo((props) => {
             }
           },
         };
-
+  
         if (ctrlKeyMap[key]) {
           event.preventDefault();
           event.stopPropagation();
@@ -1207,39 +1224,32 @@ const Whiteboard = React.memo((props) => {
           return;
         }
       }
-
-      if (
-        !event.altKey &&
-        !event.ctrlKey &&
-        !event.shiftKey &&
-        simpleKeyMap[key]
-      ) {
+  
+      if (!event.altKey && !event.ctrlKey && !event.shiftKey && simpleKeyMap[key]) {
         event.preventDefault();
         event.stopPropagation();
         simpleKeyMap[key]();
         return;
       }
-
+  
       const moveDistance = 10;
       const selectedShapes = tlEditorRef.current
         ?.getSelectedShapes()
         .map((shape) => shape.id);
-
+  
       const arrowKeyMap = {
         ArrowUp: { x: 0, y: -moveDistance },
         ArrowDown: { x: 0, y: moveDistance },
         ArrowLeft: { x: -moveDistance, y: 0 },
         ArrowRight: { x: moveDistance, y: 0 },
       };
-
+  
       if (arrowKeyMap[event.key]) {
         event.preventDefault();
         event.stopPropagation();
-        tlEditorRef.current?.nudgeShapes(
-          selectedShapes,
-          arrowKeyMap[event.key],
-          { squashing: true }
-        );
+        tlEditorRef.current?.nudgeShapes(selectedShapes, arrowKeyMap[event.key], {
+          squashing: true,
+        });
       }
     },
     [
@@ -1252,6 +1262,7 @@ const Whiteboard = React.memo((props) => {
       handlePaste,
     ]
   );
+  
 
   React.useEffect(() => {
     if (whiteboardRef.current) {
@@ -2722,6 +2733,12 @@ const Whiteboard = React.memo((props) => {
     return null;
   }
 
+  const filteredBoxes = boxes.filter((box) =>
+    box.userId.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  
+
   return (
 <div
   ref={whiteboardRef}
@@ -2768,16 +2785,54 @@ const Whiteboard = React.memo((props) => {
     <Styled.PanelWrapper isVisible={isPanelVisible}>
   {/* Fixed Header */}
   <Styled.Header isShared={userSharedWithAll?.length > 0}>
-    {selectedUserIdRef.current ? (
-      <div>{`${userSharedWithAll || selectedUserIdRef.current}`}</div>
-    ) : (
-      <div>No User Selected</div>
-    )}
-  </Styled.Header>
+          <div className="header-row">
+            <div className="id-display">
+              {selectedUserIdRef.current || "No User Selected"}
+            </div>
+            <button
+              className="toggle-button"
+              onClick={toggleSearch}
+              aria-label="Toggle Search"
+            >
+              {/* SVG Filter Icon */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path d="M6 10.293l-4.5-4.5v-.793A1.5 1.5 0 0 1 3 .5h10A1.5 1.5 0 0 1 14.5 2v.793l-4.5 4.5V11l-2 2v-2.707z" />
+              </svg>
+            </button>
+          </div>
+          {/* Search Bar */}
+          {isSearchVisible && (
+            <div className="search-row">
+              <input
+                type="text"
+                placeholder="Search user..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.stopPropagation()}
+                style={{
+                  padding: "6px 8px",
+                  fontSize: "12px",
+                  borderRadius: "3px",
+                  border: "1px solid #ccc",
+                  width: "100%",
+                }}
+              />
+            </div>
+          )}
+        </Styled.Header>
+
+
+
 
   {/* Scrollable Panel Content */}
   <Styled.PanelContainer>
-    {boxes.map((box, index) => (
+    {filteredBoxes.map((box, index) => (
       <Styled.PanelBox
         key={index}
         isSelected={selectedUserId === box.userId}

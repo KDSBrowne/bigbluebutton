@@ -202,23 +202,64 @@ const PanelBox = styled.div`
 
 
 const Header = styled.div`
-  height: 2rem; /* Fixed height */
-  width: 100%; /* Full width of the wrapper */
-  background: ${({ isShared }) =>
-    isShared ? "rgba(40, 167, 69, 1)" : "rgba(0, 123, 255, 1)"}; /* Green for shared, blue otherwise */
-  color: #ffffff; /* White text */
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  position: sticky; /* Keep it fixed within the wrapper */
-  top: 0;
-  z-index: 2; /* Ensure it's above the scrollable content */
-  border-bottom: 1px solid
-    ${({ isShared }) => (isShared ? "#28A745" : "#007BFF")}; /* Subtle bottom border */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow at the bottom */
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  flex-direction: column;
+  background: ${({ isShared }) =>
+    isShared ? "rgba(40, 167, 69, 1)" : "rgba(0, 123, 255, 1)"};
+  color: #ffffff;
+  padding: ${({ isSearchVisible }) => (isSearchVisible ? "10px" : "5px 10px")};
+  border-bottom: 1px solid ${({ isShared }) => (isShared ? "#28A745" : "#007BFF")};
+
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Push elements to edges */
+    margin-bottom: ${({ isSearchVisible }) => (isSearchVisible ? "5px" : "0")};
+  }
+
+  .id-display {
+    font-size: 12px;
+    font-weight: normal; /* Remove bold styling */
+  }
+
+  .toggle-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%; /* Circular button */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2); /* Subtle hover effect */
+    }
+
+    svg {
+      width: 14px;
+      height: 14px; /* Smaller icon size */
+    }
+  }
+
+  .search-row {
+    margin-top: 8px;
+    input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+  }
 `;
+
+
+
+
+
 
 
 
