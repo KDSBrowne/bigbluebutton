@@ -205,14 +205,13 @@ const PanelBox = styled.div`
 
 
 
-
 const Header = styled.div`
   display: flex;
   flex-direction: column;
   background: ${({ isShared }) =>
     isShared ? "rgba(40, 167, 69, 1)" : "rgba(0, 123, 255, 1)"};
   color: #ffffff;
-  padding: ${({ isSearchVisible }) => (isSearchVisible ? "10px" : "5px 10px")};
+  padding: 5px 10px;
   border-bottom: 1px solid ${({ isShared }) => (isShared ? "#28A745" : "#007BFF")};
 
   .header-row {
@@ -250,7 +249,11 @@ const Header = styled.div`
   }
 
   .search-row {
-    margin-top: 8px;
+    max-height: ${({ isSearchVisible }) => (isSearchVisible ? "50px" : "0")};
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: ${({ isSearchVisible }) => (isSearchVisible ? "1" : "0")};
+    margin-top: ${({ isSearchVisible }) => (isSearchVisible ? "8px" : "0")};
     input {
       width: 100%;
       padding: 6px 8px;
@@ -260,7 +263,6 @@ const Header = styled.div`
     }
   }
 `;
-
 
 
 

@@ -2784,48 +2784,37 @@ const Whiteboard = React.memo((props) => {
   {isInWhiteboardVision && isPresenter && (
     <Styled.PanelWrapper isVisible={isPanelVisible}>
   {/* Fixed Header */}
-  <Styled.Header isShared={userSharedWithAll?.length > 0}>
-          <div className="header-row">
-            <div className="id-display">
-              {selectedUserIdRef.current || "No User Selected"}
-            </div>
-            <button
-              className="toggle-button"
-              onClick={toggleSearch}
-              aria-label="Toggle Search"
-            >
-              {/* SVG Filter Icon */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                fill="currentColor"
-                viewBox="0 0 16 16"
-              >
-                <path d="M6 10.293l-4.5-4.5v-.793A1.5 1.5 0 0 1 3 .5h10A1.5 1.5 0 0 1 14.5 2v.793l-4.5 4.5V11l-2 2v-2.707z" />
-              </svg>
-            </button>
-          </div>
-          {/* Search Bar */}
-          {isSearchVisible && (
-            <div className="search-row">
-              <input
-                type="text"
-                placeholder="Search user..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.stopPropagation()}
-                style={{
-                  padding: "6px 8px",
-                  fontSize: "12px",
-                  borderRadius: "3px",
-                  border: "1px solid #ccc",
-                  width: "100%",
-                }}
-              />
-            </div>
-          )}
-        </Styled.Header>
+  <Styled.Header isShared={userSharedWithAll?.length > 0} isSearchVisible={isSearchVisible}>
+  <div className="header-row">
+    <div className="id-display">
+      {selectedUserIdRef.current || "No User Selected"}
+    </div>
+    <button
+      className="toggle-button"
+      onClick={toggleSearch}
+      aria-label="Toggle Search"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        fill="currentColor"
+        viewBox="0 0 16 16"
+      >
+        <path d="M6 10.293l-4.5-4.5v-.793A1.5 1.5 0 0 1 3 .5h10A1.5 1.5 0 0 1 14.5 2v.793l-4.5 4.5V11l-2 2v-2.707z" />
+      </svg>
+    </button>
+  </div>
+  <div className="search-row">
+    <input
+      type="text"
+      placeholder="Search user..."
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      onKeyDown={(e) => e.stopPropagation()}
+    />
+  </div>
+</Styled.Header>
 
 
 
