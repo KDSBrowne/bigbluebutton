@@ -365,122 +365,505 @@ const Whiteboard = React.memo((props) => {
   //   debouncedUpdateShapes();
   // }, [shapes, isInWhiteboardVision]);
 
+  // React.useEffect(() => {
+  //   const clearShapes = (editor, filterFn) => {
+  //     if (!editor) return;
+  
+  //     // Get all shape records in the store
+  //     const allRecords = editor.store.allRecords();
+  //     const shapeRecords = allRecords.filter((record) => record.typeName === 'shape');
+  
+  //     // Apply the filter function to determine which shapes to clear
+  //     const shapesToClear = shapeRecords.filter((record) => {
+  //       const isBackgroundShape = record.id.startsWith('shape:BG-');
+  //       return !isBackgroundShape && filterFn(record); // Exclude background shapes and apply filter
+  //     });
+  
+  //     const shapeIds = shapesToClear.map((record) => record.id);
+  
+  //     if (shapeIds.length > 0) {
+  //       console.log(`Clearing shapes based on filter:`, shapeIds);
+  //       editor?.store.mergeRemoteChanges(() => {
+  //         editor?.store.remove(shapeIds);
+  //       });
+  //     }
+  //   };
+  
+  //   if (shapes && Object.keys(shapes).length > 0) {
+  //     if (isInWhiteboardVision) {
+  //       const activeUserId = selectedUserId || currentUser?.userId;
+  
+  //       // Clear shapes that are NOT relevant to Whiteboard Vision in the main editor
+  //       if (tlEditorRef.current) {
+  //         clearShapes(tlEditorRef.current, (shape) => {
+  //           const isNotWhiteboardVision = !shape.meta?.whiteboardVision;
+  //           const isNotActiveUser = shape.meta?.createdBy !== activeUserId;
+  //           return isNotWhiteboardVision || isNotActiveUser;
+  //         });
+  //       }
+  
+  //       // For each panel editor, clear shapes not created by the associated user
+  //       Object.entries(panelEditors).forEach(([userId, editor]) => {
+  //         if (editor) {
+  //           clearShapes(editor, (shape) => {
+  //             const isNotCreatedByUser = shape.meta?.createdBy !== userId;
+  //             const isNotWhiteboardVision = !shape.meta?.whiteboardVision;
+  //             return isNotWhiteboardVision || isNotCreatedByUser;
+  //           });
+  //         }
+  //       });
+  
+  //       // Update panel editors with Whiteboard Vision shapes
+  //       Object.entries(panelEditors).forEach(([userId, editor]) => {
+  //         if (editor) {
+  //           const userShapes = Object.values(shapes).filter(
+  //             (shape) =>
+  //               shape.meta?.createdBy === userId && shape.meta?.whiteboardVision === true
+  //           );
+  
+  //           const sanitizedShapes = userShapes.map((shape) => sanitizeShape(shape));
+  //           console.log(`UPDATING PANEL SHAPES for user ${userId}:`, sanitizedShapes);
+  
+  //           editor?.store.mergeRemoteChanges(() => {
+  //             editor?.store.put(sanitizedShapes);
+  //           });
+  //         }
+  //       });
+  
+  //       // Update the main editor for the active user
+  //       if (tlEditorRef.current && activeUserId) {
+  //         const userShapes = Object.values(shapes).filter(
+  //           (shape) =>
+  //             shape.meta?.createdBy === activeUserId && shape.meta?.whiteboardVision === true
+  //         );
+  
+  //         const sanitizedShapes = userShapes.map((shape) => sanitizeShape(shape));
+  //         console.log(`UPDATING MAIN WHITEBOARD SHAPES for activeUserId ${activeUserId}:`, sanitizedShapes);
+  
+  //         tlEditorRef.current.store.mergeRemoteChanges(() => {
+  //           tlEditorRef.current.store.put(sanitizedShapes);
+  //         });
+  //       }
+  //     } else {
+  //       // Clear shapes that ARE Whiteboard Vision in the main editor
+  //       if (tlEditorRef.current) {
+  //         clearShapes(tlEditorRef.current, (shape) => shape.meta?.whiteboardVision);
+  //       }
+  
+  //       // Clear all shapes in panel editors when leaving Whiteboard Vision mode
+  //       Object.values(panelEditors).forEach((editor) => {
+  //         if (editor) {
+  //           clearShapes(editor, () => true); // Clear all shapes
+  //         }
+  //       });
+  
+  //       // Update the main editor with all shapes excluding Whiteboard Vision shapes
+  //       if (tlEditorRef.current) {
+  //         const sanitizedShapes = Object.values(shapes)
+  //           .filter((shape) => !shape.meta?.whiteboardVision)
+  //           .map((shape) => sanitizeShape(shape));
+  
+  //         console.log('UPDATING SHAPES in main editor:', sanitizedShapes);
+  //         tlEditorRef.current.store.mergeRemoteChanges(() => {
+  //           tlEditorRef.current.store.put(sanitizedShapes);
+  //         });
+  //       }
+  //     }
+  //   }
+  
+  //   // Preserve the debounced update function
+  //   debouncedUpdateShapes();
+  // }, [shapes, panelEditors, isInWhiteboardVision, selectedUserId, currentUser]);
+  
+
+  // React.useEffect(() => {
+  //   if (removedShapes && removedShapes.length > 0 && !isInWhiteboardVision) {
+  //     tlEditorRef.current?.store.remove([...removedShapes]);
+  //   }
+  // }, [removedShapes]);
+
+  React.useEffect(() => {
+    if (shapes && Object.keys(shapes).length > 0 && !isInWhiteboardVision) {
+      prevShapesRef.current = shapes;
+
+      console.log('------[shapes]-------')
+      console.log(shapes)
+      console.log('-------------')
+
+      const remoteShapesArray = Object.values(shapes)
+        .filter((shape) => !shape.meta?.whiteboardVision) // Exclude shapes from Whiteboard Vision
+        .map((shape) => sanitizeShape(shape));
+      tlEditorRef.current?.store.mergeRemoteChanges(() => {
+        tlEditorRef.current?.store.put(remoteShapesArray);
+      });
+    }
+  }, [shapes]);
+
+  React.useEffect(() => {
+    if (removedShapes && removedShapes.length > 0 && !isInWhiteboardVision) {
+      console.log('------[removedShapes]-------')
+      console.log(removedShapes)
+      console.log('-------------')
+      tlEditorRef.current?.store.remove([...removedShapes]);
+    }
+  }, [removedShapes]);
+
+///////////////////
+////////////////////////
+///////////////////////////////
+
+  React.useEffect(() => {
+    if (
+      shapes &&
+      Object.keys(shapes).length > 0 &&
+      isInWhiteboardVision &&
+      tlEditorRef.current
+    ) {
+      // Filter out shapes that were not created in Whiteboard Vision mode
+      const visionShapes = Object.values(shapes).filter(
+        (shape) => shape.meta?.whiteboardVision === true
+      );
+
+      const sharedUserId =
+        currentPresentationPageRef.current?.userSharedWithAll;
+
+      if (sharedUserId) {
+        // **When a user is shared with all**
+        const sharedShapes = visionShapes.filter((shape) => {
+          return (
+            (shape.meta?.createdBy === sharedUserId &&
+              !shape.meta?.presenterForUser) || // Shapes created by the shared user
+            shape.meta?.presenterForUser === sharedUserId // Shapes the presenter created for the shared user
+          );
+        });
+
+        const sanitizedShapes = sharedShapes.map((shape) =>
+          sanitizeShape(shape)
+        );
+
+        // Update the main whiteboard for both presenter and viewers
+        tlEditorRef.current?.store.mergeRemoteChanges(() => {
+          tlEditorRef.current?.store.put(sanitizedShapes);
+        });
+      } else if (isPresenter) {
+        // **Presenter's Logic when no user is shared with all**
+
+        // Update panel editors for each user
+        Object.entries(panelEditors).forEach(([userId, editor]) => {
+          const userShapes = visionShapes.filter(
+            (shape) =>
+              (shape.meta?.createdBy === userId &&
+                !shape.meta?.presenterForUser) || // Shapes created by the user
+              shape.meta?.presenterForUser === userId // Shapes the presenter created for the user
+          );
+
+          const sanitizedShapes = userShapes.map((shape) =>
+            sanitizeShape(shape)
+          );
+
+          editor?.store.mergeRemoteChanges(() => {
+            editor?.store.put(sanitizedShapes);
+          });
+        });
+
+        // Update the presenter's main whiteboard
+        const activeUserId = selectedUserIdRef.current || null;
+
+        const presenterShapes = visionShapes.filter((shape) => {
+          if (!selectedUserIdRef.current) {
+            // Show only the presenter's own shapes when no user is selected and not intended for any user
+            return (
+              shape.meta?.createdBy === currentUser?.userId &&
+              !shape.meta?.presenterForUser
+            );
+          }
+
+          // Show selected user's shapes and those the presenter created for them
+          return (
+            (shape.meta?.createdBy === activeUserId &&
+              !shape.meta?.presenterForUser) ||
+            shape.meta?.presenterForUser === activeUserId
+          );
+        });
+
+        const sanitizedShapes = presenterShapes.map((shape) =>
+          sanitizeShape(shape)
+        );
+
+        tlEditorRef.current.store.mergeRemoteChanges(() => {
+          tlEditorRef.current.store.put(sanitizedShapes);
+        });
+      } else {
+        // **Viewers' Logic when no user is shared with all**
+        const currentUserId = currentUser?.userId;
+
+        const viewerShapes = visionShapes.filter(
+          (shape) =>
+            (shape.meta?.createdBy === currentUserId &&
+              !shape.meta?.presenterForUser) || // Shapes created by the viewer
+            shape.meta?.presenterForUser === currentUserId // Shapes the presenter created for the viewer
+        );
+
+        const sanitizedShapes = viewerShapes.map((shape) =>
+          sanitizeShape(shape)
+        );
+
+        tlEditorRef.current?.store.mergeRemoteChanges(() => {
+          tlEditorRef.current?.store.put(sanitizedShapes);
+        });
+      }
+    }
+  }, [
+    shapes,
+    panelEditors,
+    isInWhiteboardVision,
+    selectedUserId,
+    isPresenter,
+    currentUser,
+    userSharedWithAll,
+  ]);
+
   React.useEffect(() => {
     const clearShapes = (editor, filterFn) => {
-      if (!editor) return;
-  
-      // Get all shape records in the store
       const allRecords = editor.store.allRecords();
-      const shapeRecords = allRecords.filter((record) => record.typeName === 'shape');
-  
-      // Apply the filter function to determine which shapes to clear
+      const shapeRecords = allRecords.filter(
+        (record) => record.typeName === "shape"
+      );
+
       const shapesToClear = shapeRecords.filter((record) => {
-        const isBackgroundShape = record.id.startsWith('shape:BG-');
-        return !isBackgroundShape && filterFn(record); // Exclude background shapes and apply filter
+        const isBackgroundShape = record.id.startsWith("shape:BG-");
+        return !isBackgroundShape && filterFn(record);
       });
-  
+
       const shapeIds = shapesToClear.map((record) => record.id);
-  
+
       if (shapeIds.length > 0) {
-        console.log(`Clearing shapes based on filter:`, shapeIds);
         editor?.store.mergeRemoteChanges(() => {
           editor?.store.remove(shapeIds);
         });
       }
     };
-  
-    if (shapes && Object.keys(shapes).length > 0) {
-      if (isInWhiteboardVision) {
-        const activeUserId = selectedUserId || currentUser?.userId;
-  
-        // Clear shapes that are NOT relevant to Whiteboard Vision in the main editor
+
+    if (isInWhiteboardVision) {
+      const sharedUserId =
+        currentPresentationPageRef.current?.userSharedWithAll;
+
+      if (sharedUserId) {
+        // **When a user is shared with all**
         if (tlEditorRef.current) {
           clearShapes(tlEditorRef.current, (shape) => {
-            const isNotWhiteboardVision = !shape.meta?.whiteboardVision;
-            const isNotActiveUser = shape.meta?.createdBy !== activeUserId;
-            return isNotWhiteboardVision || isNotActiveUser;
+            // Keep only shapes from the shared user
+            const isSharedUserShape =
+              shape.meta?.createdBy === sharedUserId &&
+              !shape.meta?.presenterForUser &&
+              shape.meta?.whiteboardVision === true;
+
+            const isPresenterForSharedUser =
+              shape.meta?.presenterForUser === sharedUserId &&
+              shape.meta?.whiteboardVision === true;
+
+            const shouldKeep = isSharedUserShape || isPresenterForSharedUser;
+            return !shouldKeep; // Remove if not shouldKeep
           });
         }
-  
-        // For each panel editor, clear shapes not created by the associated user
+      } else if (isPresenter) {
+        // **Presenter's Logic when no user is shared with all**
+        if (tlEditorRef.current) {
+          const activeUserId = selectedUserId || null;
+
+          clearShapes(tlEditorRef.current, (shape) => {
+            if (!selectedUserId) {
+              // Keep only the presenter's own shapes created during Vision mode and not intended for any user
+              const shouldKeep =
+                shape.meta?.createdBy === currentUser?.userId &&
+                !shape.meta?.presenterForUser &&
+                shape.meta?.whiteboardVision === true;
+              return !shouldKeep; // Remove if not shouldKeep
+            }
+
+            // Keep only shapes relevant to the selected user, created during Vision mode
+            const isActiveUserShape =
+              shape.meta?.createdBy === activeUserId &&
+              !shape.meta?.presenterForUser &&
+              shape.meta?.whiteboardVision === true;
+            const isPresenterForActiveUser =
+              shape.meta?.presenterForUser === activeUserId &&
+              shape.meta?.whiteboardVision === true;
+            const shouldKeep = isActiveUserShape || isPresenterForActiveUser;
+            return !shouldKeep; // Remove if not shouldKeep
+          });
+        }
+
+        // For panel editors, clear shapes not relevant to the associated user
         Object.entries(panelEditors).forEach(([userId, editor]) => {
           if (editor) {
             clearShapes(editor, (shape) => {
-              const isNotCreatedByUser = shape.meta?.createdBy !== userId;
-              const isNotWhiteboardVision = !shape.meta?.whiteboardVision;
-              return isNotWhiteboardVision || isNotCreatedByUser;
+              const isUserShape =
+                shape.meta?.createdBy === userId &&
+                !shape.meta?.presenterForUser &&
+                shape.meta?.whiteboardVision === true;
+              const isPresenterForUser =
+                shape.meta?.presenterForUser === userId &&
+                shape.meta?.whiteboardVision === true;
+              const shouldKeep = isUserShape || isPresenterForUser;
+              return !shouldKeep; // Remove if not shouldKeep
             });
           }
         });
-  
-        // Update panel editors with Whiteboard Vision shapes
-        Object.entries(panelEditors).forEach(([userId, editor]) => {
-          if (editor) {
-            const userShapes = Object.values(shapes).filter(
-              (shape) =>
-                shape.meta?.createdBy === userId && shape.meta?.whiteboardVision === true
-            );
-  
-            const sanitizedShapes = userShapes.map((shape) => sanitizeShape(shape));
-            console.log(`UPDATING PANEL SHAPES for user ${userId}:`, sanitizedShapes);
-  
-            editor?.store.mergeRemoteChanges(() => {
-              editor?.store.put(sanitizedShapes);
-            });
-          }
-        });
-  
-        // Update the main editor for the active user
-        if (tlEditorRef.current && activeUserId) {
-          const userShapes = Object.values(shapes).filter(
-            (shape) =>
-              shape.meta?.createdBy === activeUserId && shape.meta?.whiteboardVision === true
-          );
-  
-          const sanitizedShapes = userShapes.map((shape) => sanitizeShape(shape));
-          console.log(`UPDATING MAIN WHITEBOARD SHAPES for activeUserId ${activeUserId}:`, sanitizedShapes);
-  
-          tlEditorRef.current.store.mergeRemoteChanges(() => {
-            tlEditorRef.current.store.put(sanitizedShapes);
-          });
-        }
       } else {
-        // Clear shapes that ARE Whiteboard Vision in the main editor
+        // **Viewers' Logic when no user is shared with all**
         if (tlEditorRef.current) {
-          clearShapes(tlEditorRef.current, (shape) => shape.meta?.whiteboardVision);
-        }
-  
-        // Clear all shapes in panel editors when leaving Whiteboard Vision mode
-        Object.values(panelEditors).forEach((editor) => {
-          if (editor) {
-            clearShapes(editor, () => true); // Clear all shapes
-          }
-        });
-  
-        // Update the main editor with all shapes excluding Whiteboard Vision shapes
-        if (tlEditorRef.current) {
-          const sanitizedShapes = Object.values(shapes)
-            .filter((shape) => !shape.meta?.whiteboardVision)
-            .map((shape) => sanitizeShape(shape));
-  
-          console.log('UPDATING SHAPES in main editor:', sanitizedShapes);
-          tlEditorRef.current.store.mergeRemoteChanges(() => {
-            tlEditorRef.current.store.put(sanitizedShapes);
+          const currentUserId = currentUser?.userId;
+
+          clearShapes(tlEditorRef.current, (shape) => {
+            const isUserShape =
+              shape.meta?.createdBy === currentUserId &&
+              !shape.meta?.presenterForUser &&
+              shape.meta?.whiteboardVision === true;
+            const isPresenterForUser =
+              shape.meta?.presenterForUser === currentUserId &&
+              shape.meta?.whiteboardVision === true;
+            const shouldKeep = isUserShape || isPresenterForUser;
+            return !shouldKeep; // Remove if not shouldKeep
           });
         }
       }
+    } else {
+      // **When not in Whiteboard Vision mode**
+      if (tlEditorRef.current) {
+        // Remove shapes created during Whiteboard Vision mode
+        clearShapes(
+          tlEditorRef.current,
+          (shape) => shape.meta?.whiteboardVision === true
+        );
+      }
+
+      // Clear all shapes in panel editors when leaving Whiteboard Vision mode
+      Object.values(panelEditors).forEach((editor) => {
+        if (editor) {
+          clearShapes(editor, () => true); // Remove all shapes
+        }
+      });
     }
-  
-    // Preserve the debounced update function
-    debouncedUpdateShapes();
-  }, [shapes, panelEditors, isInWhiteboardVision, selectedUserId, currentUser]);
-  
+  }, [
+    isInWhiteboardVision,
+    panelEditors,
+    selectedUserId,
+    currentUser,
+    isPresenter,
+    userSharedWithAll,
+  ]);
 
   React.useEffect(() => {
-    if (removedShapes && removedShapes.length > 0 && !isInWhiteboardVision) {
-      tlEditorRef.current?.store.remove([...removedShapes]);
+    if (
+      removedShapes &&
+      removedShapes.length > 0 &&
+      isInWhiteboardVision &&
+      tlEditorRef.current
+    ) {
+      const sharedUserId =
+        currentPresentationPageRef.current?.userSharedWithAll;
+
+      if (sharedUserId) {
+        // **When a user is shared with all**
+        const shapesToRemove = removedShapes.filter((shapeId) => {
+          const shape = tlEditorRef.current.store.get(shapeId);
+          if (!shape) return false;
+
+          const isSharedUserShape =
+            shape.meta?.createdBy === sharedUserId &&
+            !shape.meta?.presenterForUser;
+
+          const isPresenterForSharedUser =
+            shape.meta?.presenterForUser === sharedUserId;
+
+          return isSharedUserShape || isPresenterForSharedUser;
+        });
+
+        if (shapesToRemove.length > 0) {
+          tlEditorRef.current?.store.remove(shapesToRemove);
+        }
+      } else if (isPresenter) {
+        // **Presenter's Logic when no user is shared with all**
+
+        // Remove shapes from panel editors
+        Object.entries(panelEditors).forEach(([userId, editor]) => {
+          const shapesToRemove = removedShapes.filter((shapeId) => {
+            const shape = editor.store.get(shapeId);
+            return (
+              shape &&
+              ((shape.meta?.createdBy === userId &&
+                !shape.meta?.presenterForUser) || // Shapes created by the user
+                shape.meta?.presenterForUser === userId) // Shapes the presenter created for the user
+            );
+          });
+
+          if (shapesToRemove.length > 0) {
+            editor?.store.remove(shapesToRemove);
+          }
+        });
+
+        // Remove shapes from the presenter's main whiteboard
+        const activeUserId = selectedUserIdRef.current || null;
+
+        const shapesToRemove = removedShapes.filter((shapeId) => {
+          const shape = tlEditorRef.current.store.get(shapeId);
+          if (!shape) return false;
+
+          if (!selectedUserIdRef.current) {
+            // Remove only the presenter's own shapes when no user is selected and not intended for any user
+            return (
+              shape.meta?.createdBy === currentUser?.userId &&
+              !shape.meta?.presenterForUser
+            );
+          }
+
+          // Remove selected user's shapes and those the presenter created for them
+          return (
+            (shape.meta?.createdBy === activeUserId &&
+              !shape.meta?.presenterForUser) ||
+            shape.meta?.presenterForUser === activeUserId
+          );
+        });
+
+        if (shapesToRemove.length > 0) {
+          tlEditorRef.current?.store.remove(shapesToRemove);
+        }
+      } else {
+        // **Viewers' Logic when no user is shared with all**
+        const currentUserId = currentUser?.userId;
+
+        const shapesToRemove = removedShapes.filter((shapeId) => {
+          const shape = tlEditorRef.current?.store.get(shapeId);
+          return (
+            shape &&
+            ((shape.meta?.createdBy === currentUserId &&
+              !shape.meta?.presenterForUser) || // Shapes created by the viewer
+              shape.meta?.presenterForUser === currentUserId) // Shapes the presenter created for the viewer
+          );
+        });
+
+        if (shapesToRemove.length > 0) {
+          tlEditorRef.current?.store.remove(shapesToRemove);
+        }
+      }
     }
-  }, [removedShapes]);
+  }, [
+    removedShapes,
+    isInWhiteboardVision,
+    isPresenter,
+    currentUser,
+    selectedUserId,
+    panelEditors,
+    userSharedWithAll,
+  ]);
+
+
+
+  /////////////////
+  //////////////////////
+  ////////////////////////
+
 
   const handleCopy = useCallback(() => {
     const selectedShapes = tlEditorRef.current?.getSelectedShapes();
