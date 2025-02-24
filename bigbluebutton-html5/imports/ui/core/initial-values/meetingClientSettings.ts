@@ -834,6 +834,7 @@ export const meetingClientSettingsInitialValues: MeetingClientSettings = {
       maxNumberOfActiveUsers: 25,
       allowInfiniteWhiteboard: false,
       allowInfiniteWhiteboardInBreakouts: false,
+      allowWhiteboardVision: true,
       annotations: {
         status: {
           start: 'DRAW_START',

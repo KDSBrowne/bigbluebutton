@@ -1036,6 +1036,7 @@ public:
     cursorInterval: 150
     allowInfiniteWhiteboard: false
     allowInfiniteWhiteboardInBreakouts: false
+    allowWhiteboardVision: true
     pointerDiameter: 5
     maxStickyNoteLength: 1000
     # limit number of annotations per slide

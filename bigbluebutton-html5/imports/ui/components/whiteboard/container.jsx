@@ -23,6 +23,8 @@ import {
   persistShape,
   notifyNotAllowedChange,
   notifyShapeNumberExceeded,
+  notifyPresenterLeftUser,
+  notifyPresenterJoinedUser,
   toggleToolsAnimations,
   formatAnnotations,
 } from './service';
@@ -44,6 +46,8 @@ import {
   PRES_ANNOTATION_SUBMIT,
   PRESENTATION_SET_PAGE,
   PRESENTATION_PUBLISH_CURSOR,
+  PRESENTATION_SET_PAGE_SELECTED_USER,
+  PRESENTATION_SET_PAGE_USER_SHARED_WITH_ALL
 } from '../presentation/mutations';
 import { useMergedCursorData } from './hooks.ts';
 import useDeduplicatedSubscription from '../../core/hooks/useDeduplicatedSubscription';
@@ -108,6 +112,9 @@ const WhiteboardContainer = (props) => {
   const curPageNum = currentPresentationPage?.num;
   const curPageId = currentPresentationPage?.pageId;
   const isInfiniteWhiteboard = currentPresentationPage?.infiniteWhiteboard;
+  const isInWhiteboardVision = currentPresentationPage?.whiteboardVision;
+  const selectedUser = currentPresentationPage?.selectedUser;
+  const userSharedWithAll = currentPresentationPage?.userSharedWithAll;
   const curPageIdRef = useRef();
 
   React.useEffect(() => {
@@ -129,6 +136,8 @@ const WhiteboardContainer = (props) => {
 
   const [presentationSetZoom] = useMutation(PRESENTATION_SET_ZOOM);
   const [presentationSetPage] = useMutation(PRESENTATION_SET_PAGE);
+  const [presentationSetPageSelectedUser] = useMutation(PRESENTATION_SET_PAGE_SELECTED_USER);
+  const [presentationSetPageUserSharedWithAll] = useMutation(PRESENTATION_SET_PAGE_USER_SHARED_WITH_ALL);
   const [presentationDeleteAnnotations] = useMutation(PRES_ANNOTATION_DELETE);
   const [presentationSubmitAnnotations] = useMutation(PRES_ANNOTATION_SUBMIT);
   const [presentationPublishCursor] = useMutation(PRESENTATION_PUBLISH_CURSOR);
@@ -138,6 +147,27 @@ const WhiteboardContainer = (props) => {
       variables: {
         presentationId,
         pageId,
+      },
+    });
+  };
+
+  const setPresentationPageSelectedUser = (selectedUser) => {
+    const pageId = `${presentationId}/${curPageNum}`;
+    presentationSetPageSelectedUser({
+      variables: {
+        pageId,
+        selectedUser,
+      },
+    });
+  };
+
+  const setPresentationPageUserSharedWithAll = (userSharedWithAll) => {
+    const pageId = `${presentationId}/${curPageNum}`;
+    console.log('sharing user with all :toakka: ', userSharedWithAll)
+    presentationSetPageUserSharedWithAll({
+      variables: {
+        pageId,
+        userSharedWithAll,
       },
     });
   };
@@ -226,16 +256,18 @@ const WhiteboardContainer = (props) => {
   );
 
   const lastUpdatedAt = useMemo(() => {
-    if (!initialPageAnnotations?.pres_annotation_curr?.length) {
-      return currentMeeting?.createdTime
-        ? new Date(currentMeeting.createdTime).toISOString()
-        : null;
-    }
-    return initialPageAnnotations.pres_annotation_curr.reduce((latest, annotation) => {
-      const updatedAt = new Date(annotation.lastUpdatedAt);
-      return updatedAt > latest ? updatedAt : latest;
-    }, new Date(0)).toISOString();
-  }, [initialPageAnnotations]);
+  //   if (!initialPageAnnotations?.pres_annotation_curr?.length) {
+  //     return currentMeeting?.createdTime
+  //       ? new Date(currentMeeting.createdTime).toISOString()
+  //       : null;
+  //   }
+  //   return initialPageAnnotations.pres_annotation_curr.reduce((latest, annotation) => {
+  //     const updatedAt = new Date(annotation.lastUpdatedAt);
+  //     return updatedAt > latest ? updatedAt : latest;
+  //   }, new Date(0)).toISOString();
+  // }, [initialPageAnnotations]);
+  return new Date(0).toISOString(); // Start of time
+  }, []);
 
   const { data: annotationStreamData } = useSubscription(ANNOTATION_HISTORY_STREAM, {
     variables: { updatedAt: lastUpdatedAt },
@@ -288,7 +320,7 @@ const WhiteboardContainer = (props) => {
     if (isTabVisible && curPageId) {
       refetchInitialPageAnnotations();
     }
-  }, [isTabVisible, curPageId, presentationId]);
+  }, [isTabVisible, curPageId, presentationId, isInWhiteboardVision, selectedUser, userSharedWithAll]);
 
   const processAnnotations = (data) => {
     let annotationsToBeRemoved = [];
@@ -449,11 +481,14 @@ const WhiteboardContainer = (props) => {
           zoomSlide,
           notifyNotAllowedChange,
           notifyShapeNumberExceeded,
+          notifyPresenterLeftUser,
+          notifyPresenterJoinedUser,
           whiteboardToolbarAutoHide: Settings?.application?.whiteboardToolbarAutoHide,
           animations: Settings?.application?.animations,
           toggleToolsAnimations,
           isIphone,
           isPhone,
+          isInWhiteboardVision,
           currentPresentationPage,
           numberOfPages: currentPresentationPage?.totalPages,
           presentationId,
@@ -461,10 +496,13 @@ const WhiteboardContainer = (props) => {
           whiteboardWriters,
           zoomChanger,
           skipToSlide,
+          setPresentationPageSelectedUser,
+          setPresentationPageUserSharedWithAll,
           locale: Settings?.application?.locale,
           darkTheme: Settings?.application?.darkTheme,
           selectedLayout: Settings?.application?.selectedLayout,
           isInfiniteWhiteboard,
+          userSharedWithAll,
           curPageNum,
           setEditor,
         }}

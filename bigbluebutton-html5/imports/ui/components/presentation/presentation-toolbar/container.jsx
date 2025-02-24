@@ -5,7 +5,7 @@ import FullscreenService from '/imports/ui/components/common/fullscreen-button/s
 import { useIsInfiniteWhiteboardEnabled, useIsPollingEnabled } from '/imports/ui/services/features';
 import { PluginsContext } from '/imports/ui/components/components-data/plugin-context/context';
 import { POLL_CANCEL, POLL_CREATE } from '/imports/ui/components/poll/mutations';
-import { PRESENTATION_SET_ZOOM, PRESENTATION_SET_PAGE, PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD } from '../mutations';
+import { PRESENTATION_SET_ZOOM, PRESENTATION_SET_PAGE, PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD, PRESENTATION_SET_PAGE_WHITEBOARD_VISION } from '../mutations';
 import PresentationToolbar from './component';
 import Session from '/imports/ui/services/storage/in-memory';
 import { useMeetingIsBreakout } from '/imports/ui/components/app/service';
@@ -81,6 +81,58 @@ const infiniteWhiteboardIcon = (isinfiniteWhiteboard) => {
   );
 };
 
+const whiteboardVisionIcon = (isWhiteboardVision) => {
+  if (isWhiteboardVision) {
+    // Vision "ON" State
+    return (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="8" cy="8" r="7" stroke="#4E5A66" strokeWidth="1.2" />
+        <path
+          d="M8 5.5C6.5 5.5 5 6.5 4 8C5 9.5 6.5 10.5 8 10.5C9.5 10.5 11 9.5 12 8C11 6.5 9.5 5.5 8 5.5Z"
+          stroke="#4E5A66"
+          strokeWidth="1.2"
+          fill="none"
+        />
+        <circle cx="8" cy="8" r="1.2" fill="#4E5A66" />
+      </svg>
+    );
+  }
+  // Vision "OFF" State
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="8" cy="8" r="7" stroke="#4E5A66" strokeWidth="1.2" />
+      <path
+        d="M8 5.5C6.5 5.5 5 6.5 4 8C5 9.5 6.5 10.5 8 10.5C9.5 10.5 11 9.5 12 8C11 6.5 9.5 5.5 8 5.5Z"
+        stroke="#4E5A66"
+        strokeWidth="1.2"
+        fill="none"
+      />
+      <circle cx="8" cy="8" r="1.2" fill="#4E5A66" />
+      <line
+        x1="3"
+        y1="3"
+        x2="13"
+        y2="13"
+        stroke="#4E5A66"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+};
+
 const PresentationToolbarContainer = (props) => {
   const pluginsContext = useContext(PluginsContext);
   const { pluginsExtensibleAreasAggregatedState } = pluginsContext;
@@ -105,6 +157,7 @@ const PresentationToolbarContainer = (props) => {
   const [presentationSetZoom] = useMutation(PRESENTATION_SET_ZOOM);
   const [presentationSetPage] = useMutation(PRESENTATION_SET_PAGE);
   const [presentationSetPageInfiniteWhiteboard] = useMutation(PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD);
+  const [presentationSetPageWhiteboardVision] = useMutation(PRESENTATION_SET_PAGE_WHITEBOARD_VISION);
 
   const resetSlide = () => {
     const { pageId, num } = currentPresentationPage;
@@ -140,6 +193,16 @@ const PresentationToolbarContainer = (props) => {
       variables: {
         pageId,
         infiniteWhiteboard,
+      },
+    });
+  };
+
+  const setPresentationPageWhiteboardVision = (whiteboardVision) => {
+    const pageId = `${presentationId}/${currentSlideNum}`;
+    presentationSetPageWhiteboardVision({
+      variables: {
+        pageId,
+        whiteboardVision,
       },
     });
   };
@@ -214,9 +277,11 @@ const PresentationToolbarContainer = (props) => {
           nextSlide,
           skipToSlide,
           setPresentationPageInfiniteWhiteboard,
+          setPresentationPageWhiteboardVision,
           currentSlide,
           currentPresentationPage,
           infiniteWhiteboardIcon,
+          whiteboardVisionIcon,
           resetSlide,
           meetingIsBreakout,
         }}

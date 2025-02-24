@@ -17,6 +17,9 @@ select_permissions:
         - height
         - heightRatio
         - infiniteWhiteboard
+        - whiteboardVision
+        - selectedUser
+        - userSharedWithAll
         - isCurrentPage
         - isDefaultPresentation
         - nextPagesSvg

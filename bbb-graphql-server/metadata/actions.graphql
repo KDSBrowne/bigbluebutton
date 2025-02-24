@@ -446,6 +446,27 @@ type Mutation {
 }
 
 type Mutation {
+  presentationSetPageWhiteboardVision(
+    whiteboardVision: Boolean!
+    pageId: String!
+  ): Boolean
+}
+
+type Mutation {
+  presentationSetPageSelectedUser(
+    selectedUser: String!
+    pageId: String!
+  ): Boolean
+}
+
+type Mutation {
+  presentationSetPageUserSharedWithAll(
+    userSharedWithAll: String!
+    pageId: String!
+  ): Boolean
+}
+
+type Mutation {
   presentationSetUploadCompletionNotified(
     presentationId: String!
   ): Boolean

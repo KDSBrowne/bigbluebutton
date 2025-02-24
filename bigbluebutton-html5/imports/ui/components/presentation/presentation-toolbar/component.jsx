@@ -373,6 +373,7 @@ class PresentationToolbar extends PureComponent {
       multiUserSize,
       multiUser,
       setPresentationPageInfiniteWhiteboard,
+      setPresentationPageWhiteboardVision,
       allowInfiniteWhiteboard,
       allowInfiniteWhiteboardInBreakouts,
       infiniteWhiteboardIcon,
@@ -381,6 +382,7 @@ class PresentationToolbar extends PureComponent {
       tldrawAPI,
       maxNumberOfActiveUsers,
       numberOfJoinedUsers,
+      whiteboardVisionIcon,
     } = this.props;
 
     const { isMobile } = deviceInfo;
@@ -399,6 +401,7 @@ class PresentationToolbar extends PureComponent {
       })`;
 
     const isInfiniteWhiteboard = currentSlide?.infiniteWhiteboard;
+    const isWhiteboardVision = currentSlide?.whiteboardVision;
 
     const showIWB = (allowInfiniteWhiteboard && !meetingIsBreakout)
       || (meetingIsBreakout && allowInfiniteWhiteboardInBreakouts);
@@ -490,6 +493,31 @@ class PresentationToolbar extends PureComponent {
           />
         </Styled.PresentationSlideControls>
         <Styled.PresentationZoomControls>
+        {
+            <Styled.InfiniteWhiteboardButton
+              data-test={isWhiteboardVision ? 'turnInfiniteWhiteboardOff' : 'turnInfiniteWhiteboardOn'}
+              role="button"
+              aria-label={
+                isWhiteboardVision
+                  ? 'Turn Vison Off'
+                  : 'Turn Vison On'
+              }
+              color="light"
+              disabled={!isMeteorConnected}
+              customIcon={whiteboardVisionIcon(isWhiteboardVision)}
+              size="md"
+              circle
+              onClick={() => {
+                setPresentationPageWhiteboardVision(!isWhiteboardVision);
+              }}
+              label={
+                isWhiteboardVision
+                  ? 'Turn Vison Off'
+                  : 'Turn Vison On'
+              }
+              hideLabel
+            />
+          }
           {(showIWB) && (
           <Styled.InfiniteWhiteboardButton
             data-test={isInfiniteWhiteboard ? 'turnInfiniteWhiteboardOff' : 'turnInfiniteWhiteboardOn'}

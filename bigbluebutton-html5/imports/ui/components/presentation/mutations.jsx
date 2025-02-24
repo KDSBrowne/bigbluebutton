@@ -109,6 +109,33 @@ export const PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD = gql`
   }
 `;
 
+export const PRESENTATION_SET_PAGE_WHITEBOARD_VISION = gql`
+  mutation PresentationSetPageWhiteboardVision($pageId: String!, $whiteboardVision: Boolean!) {
+    presentationSetPageWhiteboardVision(
+      pageId: $pageId,
+      whiteboardVision: $whiteboardVision
+    )
+  }
+`;
+
+export const PRESENTATION_SET_PAGE_SELECTED_USER = gql`
+  mutation PresentationSetPageSelectedUser($pageId: String!, $selectedUser: String!) {
+    presentationSetPageSelectedUser(
+      pageId: $pageId,
+      selectedUser: $selectedUser
+    )
+  }
+`;
+
+export const PRESENTATION_SET_PAGE_USER_SHARED_WITH_ALL = gql`
+  mutation PresentationSetPageUserSharedWithAll($pageId: String!, $userSharedWithAll: String!) {
+    presentationSetPageUserSharedWithAll(
+      pageId: $pageId,
+      userSharedWithAll: $userSharedWithAll
+    )
+  }
+`;
+
 export default {
   PRESENTATION_SET_ZOOM,
   PRESENTATION_SET_WRITERS,
@@ -121,4 +148,7 @@ export default {
   PRES_ANNOTATION_SUBMIT,
   PRESENTATION_PUBLISH_CURSOR,
   PRESENTATION_SET_PAGE_INFINITE_WHITEBOARD,
+  PRESENTATION_SET_PAGE_WHITEBOARD_VISION,
+  PRESENTATION_SET_PAGE_SELECTED_USER,
+  PRESENTATION_SET_PAGE_USER_SHARED_WITH_ALL,
 };

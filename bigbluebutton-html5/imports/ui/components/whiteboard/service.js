@@ -13,6 +13,14 @@ const intlMessages = defineMessages({
     id: 'app.whiteboard.annotations.numberExceeded',
     description: 'Label shown in toast when the user tries to add more shapes than the limit',
   },
+  notifyPresenterJoinedUser: {
+    id: 'app.whiteboard.annotations.PresenterJoinedUser',
+    description: '',
+  },
+  notifyPresenterLeftUser: {
+    id: 'app.whiteboard.annotations.PresenterLeftUser',
+    description: '',
+  }
 });
 
 const annotationsQueue = [];
@@ -117,6 +125,14 @@ const notifyNotAllowedChange = (intl) => {
 
 const notifyShapeNumberExceeded = (intl, limit) => {
   if (intl) notify(intl.formatMessage(intlMessages.shapeNumberExceeded, { 0: limit }), 'warning', 'whiteboard');
+};
+
+const notifyPresenterJoinedUser = (intl, limit) => {
+  if (intl) notify('Presenter joined your whiteboard', 'info', 'whiteboard');
+};
+
+const notifyPresenterLeftUser = (intl, limit) => {
+  if (intl) notify('Presenter left your whiteboard', 'info', 'whiteboard');
 };
 
 const toggleToolsAnimations = (activeAnim, anim, time, hasWBAccess = false) => {
@@ -372,6 +388,8 @@ export {
   persistShape,
   notifyNotAllowedChange,
   notifyShapeNumberExceeded,
+  notifyPresenterLeftUser,
+  notifyPresenterJoinedUser,
   toggleToolsAnimations,
   formatAnnotations,
   getCustomEditorAssetUrls,
