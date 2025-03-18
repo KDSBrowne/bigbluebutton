@@ -300,7 +300,10 @@ const Whiteboard = React.memo((props) => {
 
   React.useEffect(() => {
     debouncedUpdateShapes();
-  }, [shapes]);
+
+    tlEditorRef.current?.store.put(assets);
+    console.log('tlEditorRef.current?.store - allRecords :: ', tlEditorRef.current?.store?.allRecords(), shapes, assets)
+  }, [shapes, assets, tlEditorRef.current]);
 
   React.useEffect(() => {
     if (removedShapes && removedShapes.length > 0) {
@@ -976,7 +979,12 @@ const Whiteboard = React.memo((props) => {
         if (path === 'select.idle' || path === 'draw.idle' || path === 'select.editing_shape' || path === 'highlight.idle') {
           if (Object.keys(shapeBatchRef.current).length > 0) {
             const shapesToPersist = Object.values(shapeBatchRef.current);
+
+
+            console.log('shapesToPersist ::: ', shapesToPersist)
+
             shapesToPersist.forEach((shape) => {
+              console.log('SHAPE TO PERSIS HERE : ', shape)
               persistShapeWrapper(
                 shape,
                 whiteboardIdRef.current,
@@ -1022,6 +1030,8 @@ const Whiteboard = React.memo((props) => {
 
       // eslint-disable-next-line no-param-reassign
       editor.store.onBeforeChange = (prev, next) => {
+
+        // console.log(' ON BEFORE CHANGE: ', prev, next)
         if (isPhone) {
           const path = editor.getPath();
           const activePaths = [
@@ -1135,6 +1145,12 @@ const Whiteboard = React.memo((props) => {
 
       // eslint-disable-next-line no-param-reassign
       editor.store.onAfterChange = (prev, next) => {
+
+
+
+        // console.log(' ON AFTER CHANGE: ', prev, next)
+
+
         if (next.selectedShapeIds && next.selectedShapeIds?.some((id) => id.includes('shape:BG'))) {
           bgSelectedRef.current = true;
         } else if ((next.selectedShapeIds && !next.selectedShapeIds?.some((id) => id.includes('shape:BG')))) {

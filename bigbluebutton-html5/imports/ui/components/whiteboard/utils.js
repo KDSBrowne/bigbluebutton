@@ -9,7 +9,7 @@ const usePrevious = (value) => {
 };
 
 const isValidShapeType = (shape) => {
-  const invalidTypes = ['image', 'embed'];
+  const invalidTypes = ['embed'];
   return !invalidTypes.includes(shape?.type);
 };
 

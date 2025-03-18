@@ -68,6 +68,7 @@ const WhiteboardContainer = (props) => {
   const [editor, setEditor] = useState(null);
   const [annotations, setAnnotations] = useState([]);
   const [shapes, setShapes] = useState([]);
+  const [assets, setAssets] = useState([]);
   const [removedShapes, setRemovedShapes] = useState([]);
   const [isTabVisible, setIsTabVisible] = useState(document.visibilityState === 'visible');
   const [currentPresentationPage, setCurrentPresentationPage] = useState(null);
@@ -238,6 +239,70 @@ const WhiteboardContainer = (props) => {
     }, new Date(0)).toISOString();
   }, [initialPageAnnotations]);
 
+
+  const assetId = AssetRecordType.createId(curPageNum);
+  const bgShape = [];
+
+      // use -0.5 offset to avoid white borders rounding erros
+      bgShape.push({
+        x: -0.5,
+        y: -0.5,
+        rotation: 0,
+        isLocked: true,
+        opacity: 1,
+        meta: {},
+        id: `shape:BG-${curPageNum}`,
+        type: 'image',
+        props: {
+          w: currentPresentationPage?.scaledWidth + 1.5 || 1,
+          h: currentPresentationPage?.scaledHeight + 1.5 || 1,
+          assetId,
+          playing: true,
+          url: '',
+          crop: null,
+        },
+        parentId: `page:${curPageNum}`,
+        index: 'a0',
+        typeName: 'shape',
+      });
+
+  useEffect(() => {
+    setAssets([{
+      id: assetId,
+      typeName: 'asset',
+      type: 'image',
+      meta: {},
+      props: {
+        w: currentPresentationPage?.scaledWidth,
+        h: currentPresentationPage?.scaledHeight,
+        src: currentPresentationPage?.svgUrl,
+        name: '',
+        isAnimated: false,
+        mimeType: null,
+      },
+    }]);
+
+
+  }, [curPageNum, currentPresentationPage]);
+  
+
+  // const assetId = AssetRecordType.createId(curPageNum);
+
+  // setAssets([{
+  //   id: assetId,
+  //   typeName: 'asset',
+  //   type: 'image',
+  //   meta: {},
+  //   props: {
+  //     w: currentPresentationPage?.scaledWidth,
+  //     h: currentPresentationPage?.scaledHeight,
+  //     src: currentPresentationPage?.svgUrl,
+  //     name: '',
+  //     isAnimated: false,
+  //     mimeType: null,
+  //   },
+  // }]);
+
   const { data: annotationStreamData } = useSubscription(ANNOTATION_HISTORY_STREAM, {
     variables: { updatedAt: lastUpdatedAt },
     skip: !curPageId || !lastUpdatedAt,
@@ -245,8 +310,11 @@ const WhiteboardContainer = (props) => {
       const annotationStream =
         subscriptionData.data?.pres_annotation_history_curr_stream || [];
 
+        console.log('annotationStream', annotationStream)
+
       const processedAnnotationIds = new Set();
       const validShapes = [];
+      const validAssets = [];
       const annotationsToBeRemoved = new Set();
 
       for (let i = annotationStream.length - 1; i >= 0; i--) {
@@ -262,9 +330,22 @@ const WhiteboardContainer = (props) => {
         if (!annotationInfo) {
           annotationsToBeRemoved.add(annotationId);
         } else {
-          validShapes.push({ ...annotationInfo, id: annotationId });
+          if (annotationId?.includes('asset:')) {
+            console.log('WE GOT HERE ', annotationInfo)
+            let cleaned = annotationInfo;
+            delete cleaned.isModerator;
+            validAssets.push({ ...cleaned });
+          } else {
+            validShapes.push({ ...annotationInfo, id: annotationId });
+          }
         }
       }
+
+      console.log('validShapes', validShapes)
+
+
+      setAssets(prevAssets => [...prevAssets, ...validAssets]);
+      console.log('assets', assets)
 
       setShapes(() => {
         if (validShapes.length > 0) {
@@ -358,26 +439,8 @@ const WhiteboardContainer = (props) => {
     }
   }, [curPageId, lastUpdatedAt]);
 
-  const bgShape = [];
 
   const { isIphone, isPhone } = deviceInfo;
-
-  const assetId = AssetRecordType.createId(curPageNum);
-  const assets = [{
-    id: assetId,
-    typeName: 'asset',
-    type: 'image',
-    meta: {},
-    props: {
-      w: currentPresentationPage?.scaledWidth,
-      h: currentPresentationPage?.scaledHeight,
-      src: currentPresentationPage?.svgUrl,
-      name: '',
-      isAnimated: false,
-      mimeType: null,
-    },
-  }];
-
   const Settings = getSettingsSingletonInstance();
   const { isRTL } = Settings.application;
   const width = layoutSelect((i) => i?.output?.presentation?.width);
@@ -391,29 +454,6 @@ const WhiteboardContainer = (props) => {
     colorStyle, dashStyle, fillStyle, fontStyle, sizeStyle,
   } = WHITEBOARD_CONFIG.styles;
   const handleToggleFullScreen = (ref) => FullscreenService.toggleFullScreen(ref);
-
-  // use -0.5 offset to avoid white borders rounding erros
-  bgShape.push({
-    x: -0.5,
-    y: -0.5,
-    rotation: 0,
-    isLocked: true,
-    opacity: 1,
-    meta: {},
-    id: `shape:BG-${curPageNum}`,
-    type: 'image',
-    props: {
-      w: currentPresentationPage?.scaledWidth + 1.5 || 1,
-      h: currentPresentationPage?.scaledHeight + 1.5 || 1,
-      assetId,
-      playing: true,
-      url: '',
-      crop: null,
-    },
-    parentId: `page:${curPageNum}`,
-    index: 'a0',
-    typeName: 'shape',
-  });
 
   if (!currentPresentationPage) return null;
 
