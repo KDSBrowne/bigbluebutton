@@ -23,7 +23,6 @@ import {
   notifyNotAllowedChange,
   notifyShapeNumberExceeded,
   toggleToolsAnimations,
-  formatAnnotations,
 } from './service';
 import { getSettingsSingletonInstance } from '/imports/ui/services/settings';
 import Auth from '/imports/ui/services/auth';
@@ -34,7 +33,7 @@ import {
 import FullscreenService from '/imports/ui/components/common/fullscreen-button/service';
 import deviceInfo from '/imports/utils/deviceInfo';
 import Whiteboard from './component';
-import ErrorBoundaryWithReload from '../common/error-boundary/error-boundary-with-reload/component'
+import ErrorBoundaryWithReload from '../common/error-boundary/error-boundary-with-reload/component';
 
 import useCurrentUser from '/imports/ui/core/hooks/useCurrentUser';
 import {
@@ -56,7 +55,6 @@ const FORCE_RESTORE_PRESENTATION_ON_NEW_EVENTS = 'bbb_force_restore_presentation
 
 const WhiteboardContainer = (props) => {
   const {
-    intl,
     zoomChanger,
     fitToWidth,
   } = props;
@@ -65,7 +63,6 @@ const WhiteboardContainer = (props) => {
   const layoutContextDispatch = layoutDispatch();
 
   const [editor, setEditor] = useState(null);
-  const [annotations, setAnnotations] = useState([]);
   const [shapes, setShapes] = useState([]);
   const [removedShapes, setRemovedShapes] = useState([]);
   const [isTabVisible, setIsTabVisible] = useState(document.visibilityState === 'visible');
@@ -237,39 +234,35 @@ const WhiteboardContainer = (props) => {
     }, new Date(0)).toISOString();
   }, [initialPageAnnotations]);
 
-  const { data: annotationStreamData } = useSubscription(ANNOTATION_HISTORY_STREAM, {
+  useSubscription(ANNOTATION_HISTORY_STREAM, {
     variables: { updatedAt: lastUpdatedAt },
     skip: !curPageId || !lastUpdatedAt,
     onData: ({ data: subscriptionData }) => {
-      const annotationStream =
-        subscriptionData.data?.pres_annotation_history_curr_stream || [];
+      const annotationStream = subscriptionData.data?.pres_annotation_history_curr_stream || [];
 
       const processedAnnotationIds = new Set();
       const validShapes = [];
       const annotationsToBeRemoved = new Set();
 
-      for (let i = annotationStream.length - 1; i >= 0; i--) {
-        const annotation = annotationStream[i];
+      [...annotationStream].reverse().forEach((annotation) => {
         const { annotationId, annotationInfo } = annotation;
 
-        if (processedAnnotationIds.has(annotationId)) {
-          continue;
-        }
+        if (!processedAnnotationIds.has(annotationId)) {
+          processedAnnotationIds.add(annotationId);
 
-        processedAnnotationIds.add(annotationId);
-
-        if (!annotationInfo) {
-          annotationsToBeRemoved.add(annotationId);
-        } else {
-          validShapes.push({ ...annotationInfo, id: annotationId });
+          if (!annotationInfo) {
+            annotationsToBeRemoved.add(annotationId);
+          } else {
+            validShapes.push({ ...annotationInfo, id: annotationId });
+          }
         }
-      }
+      });
 
       setShapes(() => {
         if (validShapes.length > 0) {
           const restoreOnUpdate = getFromUserSettings(
             FORCE_RESTORE_PRESENTATION_ON_NEW_EVENTS,
-            window.meetingClientSettings.public.presentation.restoreOnUpdate
+            window.meetingClientSettings.public.presentation.restoreOnUpdate,
           );
 
           if (restoreOnUpdate) {
@@ -308,7 +301,7 @@ const WhiteboardContainer = (props) => {
           });
 
           annotationsToBeRemoved = annotationsToBeRemoved.filter(
-            (id) => id !== item.annotationId
+            (id) => id !== item.annotationId,
           );
         } else {
           newAnnotations.push({
@@ -483,6 +476,7 @@ WhiteboardContainer.propTypes = {
     formatMessage: PropTypes.func.isRequired,
   }).isRequired,
   zoomChanger: PropTypes.func.isRequired,
+  fitToWidth: PropTypes.bool,
 };
 
 export default WhiteboardContainer;
