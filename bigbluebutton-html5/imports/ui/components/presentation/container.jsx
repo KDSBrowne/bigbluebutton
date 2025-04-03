@@ -16,7 +16,6 @@ import MediaService from '../media/service';
 import {
   CURRENT_PRESENTATION_PAGE_SUBSCRIPTION,
   CURRENT_PAGE_WRITERS_SUBSCRIPTION,
-  CURRENT_PAGE_ANNOTATIONS_STREAM,
 } from '/imports/ui/components/whiteboard/queries';
 import POLL_SUBSCRIPTION from '/imports/ui/core/graphql/queries/pollSubscription';
 import useMeeting from '/imports/ui/core/hooks/useMeeting';
@@ -38,22 +37,11 @@ const PresentationContainer = (props) => {
     CURRENT_PRESENTATION_PAGE_SUBSCRIPTION,
   );
 
-  const { data: annotationStreamData } = useDeduplicatedSubscription(
-    CURRENT_PAGE_ANNOTATIONS_STREAM,
-    {
-      variables: { lastUpdatedAt: new Date(0).toISOString() },
-    },
-  );
-
   useEffect(() => {
-    if (
-      (
-        annotationStreamData?.pres_annotation_curr_stream
-        && annotationStreamData.pres_annotation_curr_stream.length > 0)
-      && !presentationIsOpen) {
+    if (!presentationIsOpen) {
       MediaService.setPresentationIsOpen(layoutContextDispatch, true);
     }
-  }, [annotationStreamData]);
+  }, []);
 
   const { pres_page_curr: presentationPageArray } = (presentationPageData || {});
   const currentPresentationPage = presentationPageArray && presentationPageArray[0];
