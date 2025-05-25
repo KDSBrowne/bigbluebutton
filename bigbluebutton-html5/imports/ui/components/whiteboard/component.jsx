@@ -981,10 +981,7 @@ const Whiteboard = React.memo((props) => {
             const shapesToPersist = Object.values(shapeBatchRef.current);
 
 
-            console.log('shapesToPersist ::: ', shapesToPersist)
-
             shapesToPersist.forEach((shape) => {
-              console.log('SHAPE TO PERSIS HERE : ', shape)
               persistShapeWrapper(
                 shape,
                 whiteboardIdRef.current,
