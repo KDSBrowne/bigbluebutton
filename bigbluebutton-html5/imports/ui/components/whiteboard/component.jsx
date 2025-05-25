@@ -902,7 +902,7 @@ const Whiteboard = React.memo((props) => {
         }
 
         // Update existing shapes and add them to the batch
-        Object.values(updated).forEach(([, record]) => {
+        Object.entries(updated).forEach(([id, record]) => {
           const formattedLookup = createLookup(editor.getCurrentPageShapes());
           const createdBy = formattedLookup[record?.id]?.meta?.createdBy || currentUser?.userId;
           const updatedRecord = {
@@ -914,7 +914,7 @@ const Whiteboard = React.memo((props) => {
             },
           };
 
-          const diff = getDifferences(prevShapesRef.current[record?.id], updatedRecord);
+          const diff = getDifferences(prevShapesRef.current[id], updatedRecord);
 
           if (diff) {
             diff.id = record.id;
