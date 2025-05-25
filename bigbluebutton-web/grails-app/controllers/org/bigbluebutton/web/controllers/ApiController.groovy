@@ -100,6 +100,7 @@ class ApiController {
             bbbVersion paramsProcessorUtil.getBbbVersion()
             graphqlWebsocketUrl paramsProcessorUtil.getGraphqlWebsocketUrl()
             graphqlApiUrl paramsProcessorUtil.getGraphqlApiUrl()
+            html5PluginSdkVersion paramsProcessorUtil.getHtml5PluginSdkVersion()
           }
           render(contentType: "application/json", text: builder.toPrettyString())
         }
@@ -111,6 +112,7 @@ class ApiController {
                   paramsProcessorUtil.getApiVersion(),
                   paramsProcessorUtil.getBbbVersion(),
                   paramsProcessorUtil.getGraphqlWebsocketUrl(),
+                  paramsProcessorUtil.getHtml5PluginSdkVersion(),
                   paramsProcessorUtil.getGraphqlApiUrl(),
                   RESP_CODE_SUCCESS),
                   contentType: "text/xml")
@@ -1070,7 +1072,7 @@ class ApiController {
                     , contentType: "text/xml")
           }
         }
-      } else if (meetingService.isMeetingWithDisabledPresentation(meetingId)) {
+      } else if (meetingService.isMeetingWithDisabledPresentation(meeting.getInternalId())) {
         withFormat {
           xml {
             render(text: responseBuilder.buildInsertDocumentResponse("Presentation feature is disabled, ignoring.",
@@ -1221,13 +1223,27 @@ class ApiController {
           queryParameters.put("sessionName", params.sessionName);
         }
 
-        // If the user calling getJoinUrl is a moderator (except in breakout rooms), allow to specify additional parameters
-        if (us.role.equals(ROLE_MODERATOR) && !meeting.isBreakout()) {
-          request.getParameterMap()
-                  .findAll { key, value -> ["enforceLayout"].contains(key) || key.startsWith("userdata-") }
-                  .findAll { key, value -> !StringUtils.isEmpty(value[-1]) }
-                  .each { key, value -> queryParameters.put(key, value[-1]) };
-        }
+        List<String> userdataBlocklistForViewers=Arrays.asList(paramsProcessorUtil.getGetJoinUrlUserdataBlocklist().split(","));
+
+        boolean isModerator = us.role?.equals(ROLE_MODERATOR);
+        boolean blockAllUserdataForViewers = userdataBlocklistForViewers.any { it.equalsIgnoreCase("all") };
+
+        request.getParameterMap()
+                .findAll { key, value ->
+                  // always allow `enforceLayout`
+                  if (key == "enforceLayout") return true
+
+                  // For prefix userdata-
+                  if (key.startsWith("userdata-")) {
+                    if (isModerator && !meeting.isBreakout()) return true
+                    if (blockAllUserdataForViewers) return false
+                    return !userdataBlocklistForViewers.contains(key - "userdata-")
+                  }
+
+                  return false
+                }
+                .findAll { key, value -> !StringUtils.isEmpty(value[-1]) }
+                .each { key, value -> queryParameters.put(key, value[-1]) }
 
         String httpQueryString = "";
         for(String parameterName : queryParameters.keySet()) {

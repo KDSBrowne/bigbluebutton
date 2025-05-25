@@ -135,8 +135,6 @@ const ChatMessageForm: React.FC<ChatMessageFormProps> = ({
   isRTL,
   getUserLastSentMessage,
 }) => {
-  const isChatEnabled = useIsChatEnabled();
-  if (!isChatEnabled) return null;
   const intl = useIntl();
   const [hasErrors, setHasErrors] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -153,11 +151,10 @@ const ChatMessageForm: React.FC<ChatMessageFormProps> = ({
   const messageRef = useRef<string>('');
   const messageBeforeEditingRef = useRef<string | null>(null);
   messageRef.current = message;
-  const updateUnreadMessages = (chatId: string, message: string) => {
-    const storedData = localStorage.getItem('unsentMessages') || '{}';
-    const unsentMessages = JSON.parse(storedData);
+  const updateUnsentMessages = (chatId: string, message: string) => {
+    const unsentMessages = Storage.getItem('unsentMessages') as Record<string, string> || {};
     unsentMessages[chatId] = message;
-    localStorage.setItem('unsentMessages', JSON.stringify(unsentMessages));
+    Storage.setItem('unsentMessages', unsentMessages);
   };
 
   const [chatSetTyping] = useMutation(CHAT_SET_TYPING);
@@ -202,16 +199,15 @@ const ChatMessageForm: React.FC<ChatMessageFormProps> = ({
 
     return () => {
       const unsentMessage = messageRef.current;
-      updateUnreadMessages(chatId, unsentMessage);
+      updateUnsentMessages(chatId, unsentMessage);
     };
   }, []);
 
   useEffect(() => {
-    const storedData = localStorage.getItem('unsentMessages') || '{}';
-    const unsentMessages = JSON.parse(storedData);
+    const unsentMessages = Storage.getItem('unsentMessages') as Record<string, string> || {};
 
     if (prevChatId) {
-      updateUnreadMessages(prevChatId, message);
+      updateUnsentMessages(prevChatId, message);
     }
 
     const unsentMessage = unsentMessages[chatId] || '';
@@ -301,6 +297,12 @@ const ChatMessageForm: React.FC<ChatMessageFormProps> = ({
   }, [message]);
 
   useEffect(() => {
+    if (editingMessage.current) {
+      textAreaRef.current?.dispatchEvent?.('autosize:update');
+    }
+  }, [message]);
+
+  useEffect(() => {
     const handleReplyIntention = (e: Event) => {
       if (e instanceof CustomEvent) {
         setRepliedMessageId(e.detail.messageId);
@@ -314,9 +316,9 @@ const ChatMessageForm: React.FC<ChatMessageFormProps> = ({
           if (messageBeforeEditingRef.current === null) {
             messageBeforeEditingRef.current = messageRef.current;
           }
+          editingMessage.current = e.detail;
           setMessage(e.detail.message);
           textAreaRef.current?.textarea.focus();
-          editingMessage.current = e.detail;
         }
       }
     };
@@ -419,7 +421,7 @@ const ChatMessageForm: React.FC<ChatMessageFormProps> = ({
       }
 
       setMessage('');
-      updateUnreadMessages(chatId, '');
+      updateUnsentMessages(chatId, '');
       setError(null);
       setHasErrors(false);
       setShowEmojiPicker(false);
@@ -639,6 +641,7 @@ const ChatMessageFormContainer: React.FC = () => {
   const idChatOpen: string = layoutSelect((i: Layout) => i.idChatOpen);
   const isRTL = layoutSelect((i: Layout) => i.isRTL);
   const isConnected = useReactiveVar(connectionStatus.getConnectedStatusVar());
+  const isChatEnabled = useIsChatEnabled();
   const { data: chat } = useChat((c: Partial<Chat>) => ({
     participant: c?.participant,
     chatId: c?.chatId,
@@ -714,6 +717,7 @@ const ChatMessageFormContainer: React.FC = () => {
   const CHAT_CONFIG = window.meetingClientSettings.public.chat;
 
   const disabled = locked && !isModerator && disablePrivateChat && !isPublicChat && !chat?.participant?.isModerator;
+  if (!isChatEnabled) return null;
 
   return (
     <ChatMessageForm
