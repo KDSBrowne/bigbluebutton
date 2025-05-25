@@ -161,6 +161,8 @@ const Whiteboard = React.memo((props) => {
   const presentationIdRef = React.useRef(presentationId);
   const innerWrapperPollingFrameRef = React.useRef(null);
   const isMountedPollingFrameRef = React.useRef(null);
+  const prevCameraRef = React.useRef(null);
+  const ignoreNextCameraChangeRef = React.useRef(false);
 
   const [pageZoomMap, setPageZoomMap] = useState(() => {
     try {
@@ -870,6 +872,18 @@ const Whiteboard = React.memo((props) => {
           .length + addedCount - 1 > maxNumberOfAnnotations;
         const invalidShapeType = Object.keys(added).find((id) => !isValidShapeType(added[id]));
 
+        const bigImageAdded = Object.values(added).some(
+          (rec) =>
+            rec?.type === 'image' &&
+            rec?.index !== 'a0' &&
+            (rec?.props?.w > currentPresentationPageRef.current?.scaledWidth ||
+              rec?.props?.h > currentPresentationPageRef.current?.scaledHeight),
+        );
+        if (bigImageAdded) {
+          prevCameraRef.current = editor.getCamera();
+          ignoreNextCameraChangeRef.current = true;
+        }
+
         if (addedCount > 0 && (shapeNumberExceeded || invalidShapeType)) {
           // notify and undo last command without persisting
           // to not generate the onUndo/onRedo callback
@@ -951,26 +965,31 @@ const Whiteboard = React.memo((props) => {
         const { [camKey]: cameras } = updated;
 
         if (cameras) {
-          const [prevCam, nextCam] = cameras;
-          const panned = prevCam.x !== nextCam.x || prevCam.y !== nextCam.y;
+          if (ignoreNextCameraChangeRef.current && prevCameraRef.current) {
+            editor.setCamera(prevCameraRef.current, { duration: 175 });
+            ignoreNextCameraChangeRef.current = false;
+          } else {
+            const [prevCam, nextCam] = cameras;
+            const panned = prevCam.x !== nextCam.x || prevCam.y !== nextCam.y;
 
-          const zoomed = prevCam.z !== nextCam.z;
+            const zoomed = prevCam.z !== nextCam.z;
 
-          if ((panned || (zoomed && fitToWidthRef.current)) && isPresenterRef.current) {
-            const viewedRegionW = SlideCalcUtil.calcViewedRegionWidth(
-              editor?.getViewportPageBounds()?.w,
-              currentPresentationPageRef.current?.scaledWidth,
-            );
-            const viewedRegionH = SlideCalcUtil.calcViewedRegionHeight(
-              editor?.getViewportPageBounds()?.h,
-              currentPresentationPageRef.current?.scaledHeight,
-            );
-
-            if (isMountedRef.current) {
-              zoomSlide(
-                viewedRegionW, viewedRegionH, nextCam.x, nextCam.y,
-                currentPresentationPageRef.current,
+            if ((panned || (zoomed && fitToWidthRef.current)) && isPresenterRef.current) {
+              const viewedRegionW = SlideCalcUtil.calcViewedRegionWidth(
+                editor?.getViewportPageBounds()?.w,
+                currentPresentationPageRef.current?.scaledWidth,
               );
+              const viewedRegionH = SlideCalcUtil.calcViewedRegionHeight(
+                editor?.getViewportPageBounds()?.h,
+                currentPresentationPageRef.current?.scaledHeight,
+              );
+
+              if (isMountedRef.current) {
+                zoomSlide(
+                  viewedRegionW, viewedRegionH, nextCam.x, nextCam.y,
+                  currentPresentationPageRef.current,
+                );
+              }
             }
           }
         }
