@@ -63,10 +63,10 @@ const QuickPollDropdown = (props) => {
   const CANCELED_POLL_DELAY = 250;
 
   // Utility function to escape special characters for regex
-  const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   // Function to create a regex pattern
-  const createPattern = (values) => new RegExp(`.*(${escapeRegExp(values[0])}\\/${escapeRegExp(values[1])}|${escapeRegExp(values[1])}\\/${escapeRegExp(values[0])}).*`, 'gmi');
+  const createPattern = (v) => new RegExp(`.*(${escapeRegExp(v[0])}\\/${escapeRegExp(v[1])}|${escapeRegExp(v[1])}\\/${escapeRegExp(v[0])}).*`, 'gmi');
 
   const yesValue = intl.formatMessage(intlMessages.yesOptionLabel);
   const noValue = intl.formatMessage(intlMessages.noOptionLabel);
@@ -75,16 +75,13 @@ const QuickPollDropdown = (props) => {
   const falseValue = intl.formatMessage(intlMessages.falseOptionLabel);
 
   const quickPollOptions = [];
-
   let {
     content,
   } = currentSlide;
 
   const questionPattern = /^[a-zA-Z0-9][.)]\s+.*/;
-
   const yesNoPatt = createPattern([yesValue, noValue]);
   const trueFalsePatt = createPattern([trueValue, falseValue]);
-  // const optionsPattern = /^\s*(yes\s*\/\s*no|true\s*\/\s*false)\s*$/i;
   const optionsPattern = new RegExp(
     [yesNoPatt, trueFalsePatt].map((r) => r.source).join('|'),
     'i',
@@ -95,17 +92,13 @@ const QuickPollDropdown = (props) => {
   let isOptionSection = false;
   const options = [];
 
-  // Group consecutive non-option lines as question
   lines.forEach((line) => {
-    const trimmedLine = line.trim();
-
-    if (questionPattern.test(trimmedLine) || optionsPattern.test(trimmedLine)) {
-      // We've found explicit options (e.g., "a) Yes" or "Yes / No")
+    const trimmed = line.trim();
+    if (questionPattern.test(trimmed) || optionsPattern.test(trimmed)) {
       isOptionSection = true;
-      options.push(trimmedLine);
-    } else if (!isOptionSection && trimmedLine.length > 0) {
-      // Any non-empty line before options is considered question text
-      questionLines.push(trimmedLine);
+      options.push(trimmed);
+    } else if (!isOptionSection && trimmed.length) {
+      questionLines.push(trimmed);
     }
   });
 
@@ -114,38 +107,34 @@ const QuickPollDropdown = (props) => {
 
   // Check explicitly if options exist or if the question ends with '?'
   const hasExplicitQuestionMark = /\?$/.test(question);
+
   // Process standard lettered options
-  const processedOptions = options
-    .filter((opt) => questionPattern.test(opt))
-    .map((opt) => opt.replace(/^[a-zA-Z0-9][.)]\s+/, '').trim());
+  const processedOptions = options.filter((o) => questionPattern.test(o)).map((o) => o.replace(/^[a-zA-Z0-9][.)]\s+/, '').trim());
 
   // Identify Yes/No or True/False options
-  const hasYesNo = options.some((opt) => /^yes\s*\/\s*no$/i.test(opt));
-  const hasTrueFalse = options.some((opt) => /^true\s*\/\s*false$/i.test(opt));
+  const hasYesNo = options.some((o) => /^yes\s*\/\s*no$/i.test(o));
+  const hasTrueFalse = options.some((o) => /^true\s*\/\s*false$/i.test(o));
 
-  if (question?.length > 0) {
-    question[0] = question[0]?.replace(/\n/g, ' ');
+  if (question.length) {
+    question[0] = question[0].replace(/\n/g, ' ');
     const urlRegex = /\bhttps?:\/\/\S+\b/g;
     const hasUrl = safeMatch(urlRegex, question[0], '');
-    if (hasUrl.length > 0) question.pop();
+    if (hasUrl.length) question.pop();
   }
 
-  // Determine whether to actually consider it a question based on your conditions
-  const isValidQuestion = (processedOptions.length > 0 || hasYesNo || hasTrueFalse)
+  const isValidQuestion = (processedOptions.length || hasYesNo || hasTrueFalse)
     || hasExplicitQuestionMark;
 
   const doubleQuestionRegex = /\?{2}/gm;
   const doubleQuestion = safeMatch(doubleQuestionRegex, content, false);
 
   const hasYN = safeMatch(yesNoPatt, content, false);
-
   const hasTF = safeMatch(trueFalsePatt, content, false);
 
-  const pollRegex = /\b[1-9A-Ia-i][.)] .*/g;
+  const pollRegex = /^\s*[1-9A-Za-z][.)]\s+.+$/gm;
   let optionsPoll = safeMatch(pollRegex, content, []);
 
   const optionsWithLabels = [];
-
   if (hasYN) {
     optionsPoll = ['yes', 'no'];
   }
@@ -158,221 +147,168 @@ const QuickPollDropdown = (props) => {
     });
   }
 
-  optionsPoll.reduce((acc, currentValue) => {
-    const lastElement = acc[acc.length - 1];
-
-    if (!lastElement) {
-      acc.push({
-        options: [currentValue],
-      });
+  optionsPoll.reduce((acc, cur) => {
+    const last = acc[acc.length - 1];
+    if (!last) {
+      acc.push({ options: [cur] });
       return acc;
     }
+    const { options: lastOpts } = last;
+    const lastOpt = lastOpts[lastOpts.length - 1];
+    const lastInt = !!parseInt(lastOpt.charAt(1), 10);
+    const curInt = !!parseInt(cur.charAt(1), 10);
 
-    const {
-      options,
-    } = lastElement;
-
-    const lastOption = options[options.length - 1];
-
-    const isLastOptionInteger = !!parseInt(lastOption.charAt(1), 10);
-    const isCurrentValueInteger = !!parseInt(currentValue.charAt(1), 10);
-
-    if (isLastOptionInteger === isCurrentValueInteger) {
-      if (currentValue.toLowerCase().charCodeAt(1) > lastOption.toLowerCase().charCodeAt(1)) {
-        options.push(currentValue);
-      } else {
-        acc.push({
-          options: [currentValue],
-        });
-      }
-    } else {
-      acc.push({
-        options: [currentValue],
-      });
-    }
+    if (lastInt === curInt) {
+      if (cur.toLowerCase().charCodeAt(1) > lastOpt.toLowerCase().charCodeAt(1)) lastOpts.push(cur);
+      else acc.push({ options: [cur] });
+    } else acc.push({ options: [cur] });
     return acc;
-  }, []).filter(({
-    options,
-  }) => options.length > 1 && options.length < 10).forEach((p) => {
+  }, []).filter(({ options: ops }) => ops?.length > 1 && ops?.length < 10).forEach((p) => {
     const poll = p;
     if (doubleQuestion) poll.multiResp = true;
     if (poll.options.length <= 5 || MAX_CUSTOM_FIELDS <= 5) {
       const maxAnswer = poll.options.length > MAX_CUSTOM_FIELDS
         ? MAX_CUSTOM_FIELDS
         : poll.options.length;
-      quickPollOptions.push({
-        type: `${pollTypes.Letter}${maxAnswer}`,
-        poll,
-      });
-    } else {
-      quickPollOptions.push({
-        type: pollTypes.Custom,
-        poll,
-      });
-    }
+      quickPollOptions.push({ type: `${pollTypes.Letter}${maxAnswer}`, poll });
+    } else quickPollOptions.push({ type: pollTypes.Custom, poll });
   });
 
-  if (question.length > 0
-    && optionsPoll.length === 0
+  if (
+    question.length
+    && !optionsPoll.length
     && !doubleQuestion
     && !hasYN
     && !hasTF
     && isValidQuestion
   ) {
-    quickPollOptions.push({
-      type: 'R-',
-      poll: {
-        question: question[0],
-      },
-    });
+    quickPollOptions.push({ type: 'R-', poll: { question: question[0] } });
   }
 
-  if (quickPollOptions.length > 0) {
-    content = content.replace(new RegExp(pollRegex), '');
-  }
+  if (quickPollOptions.length) content = content.replace(new RegExp(pollRegex), '');
 
   const ynPoll = PollService.matchYesNoPoll(yesValue, noValue, content);
   const ynaPoll = PollService.matchYesNoAbstentionPoll(yesValue, noValue, abstentionValue, content);
   const tfPoll = PollService.matchTrueFalsePoll(trueValue, falseValue, content);
 
-  ynPoll.forEach((poll) => quickPollOptions.push({
-    type: pollTypes.YesNo,
-    poll,
-  }));
+  ynPoll.forEach((p) => quickPollOptions.push({ type: pollTypes.YesNo, poll: p }));
+  ynaPoll.forEach((p) => quickPollOptions.push({ type: pollTypes.YesNoAbstention, poll: p }));
+  tfPoll.forEach((p) => quickPollOptions.push({ type: pollTypes.TrueFalse, poll: p }));
 
-  ynaPoll.forEach((poll) => quickPollOptions.push({
-    type: pollTypes.YesNoAbstention,
-    poll,
-  }));
+  let pollQuestion = '';
+  const pollQuestionCandidates = questionLines.filter((l) => l.trim().length);
+  const potentialQuestion = [];
+  pollQuestionCandidates.some((line) => {
+    const trimmed = line.trim();
+    if (/^\s*[A-Z0-9][.)]\s+/.test(trimmed)) return true;
+    potentialQuestion.push(trimmed);
+    return false;
+  });
 
-  tfPoll.forEach((poll) => quickPollOptions.push({
-    type: pollTypes.TrueFalse,
-    poll,
-  }));
+  while (
+    potentialQuestion.length > 1
+    && !/\?/.test(potentialQuestion[0])
+    && (/\bChapter\s*\d+\b/i.test(potentialQuestion[0]) || potentialQuestion[0].includes('|'))
+  ) {
+    potentialQuestion.shift();
+  }
 
-  const pollQuestion = (question?.length > 0 && question[0]?.replace(/ *\([^)]*\) */g, '')) || '';
+  const combinedText = potentialQuestion
+    .join(' ')
+    .replace(/ *\([^)]*\) */g, '')
+    .trim();
+  const tokens = combinedText.split(/\s+/);
+  const interrogatives = /^(Which|What|Who|Whose|Whom|Where|When|Why|How)$/i;
+  const startIdx = tokens.findIndex((t, i) => i < tokens.length - 1
+    && /^[A-Z][a-z]/.test(t)
+    && (/^[a-z]/.test(tokens[i + 1]) || interrogatives.test(t)));
 
+  pollQuestion = tokens.slice(startIdx === -1 ? 0 : startIdx).join(' ').trim();
+
+  const typedOrParsedQuestion = question[0] || pollQuestion;
   const slideId = currentSlide.id;
 
-  const handleClickQuickPoll = (lCDispatch) => {
-    lCDispatch({
-      type: ACTIONS.SET_SIDEBAR_CONTENT_IS_OPEN,
-      value: true,
-    });
-    lCDispatch({
-      type: ACTIONS.SET_SIDEBAR_CONTENT_PANEL,
-      value: PANELS.POLL,
-    });
+  const handleClickQuickPoll = (d) => {
+    d({ type: ACTIONS.SET_SIDEBAR_CONTENT_IS_OPEN, value: true });
+    d({ type: ACTIONS.SET_SIDEBAR_CONTENT_PANEL, value: PANELS.POLL });
     Session.setItem('forcePollOpen', true);
     Session.setItem('pollInitiated', true);
   };
 
-  const getAvailableQuickPolls = (
-    slideId, parsedSlides, funcStartPoll, _pollTypes, _layoutContextDispatch,
-  ) => {
-    const pollItemElements = parsedSlides.map((poll) => {
-      const { poll: label } = poll;
-      const { type, poll: pollData } = poll;
-      let itemLabel = label;
-      const letterAnswers = [];
+  const getAvailableQuickPolls = (sId, parsed, fStart, _types, d) => parsed.map((p) => {
+    const { type, poll: pData } = p;
+    let itemLabel = p.poll;
+    const letterAnswers = [];
 
-      if (type === 'R-') {
-        return (
-          <Dropdown.DropdownListItem
-            label={intl.formatMessage(intlMessages.typedRespLabel)}
-            key={uniqueId('quick-poll-item')}
-            onClick={() => {
-              if (activePoll) {
-                stopPoll();
-              }
-              setTimeout(() => {
-                handleClickQuickPoll(_layoutContextDispatch);
-                funcStartPoll(type, slideId, letterAnswers, pollData?.question);
-              }, CANCELED_POLL_DELAY);
-            }}
-            question={pollData?.question}
-          />
-        );
-      }
-
-      if (type !== _pollTypes.YesNo
-          && type !== _pollTypes.YesNoAbstention
-          && type !== _pollTypes.TrueFalse) {
-        const { options } = itemLabel;
-        itemLabel = options.join('/').replace(/[\n.)]/g, '');
-        if (type === _pollTypes.Custom) {
-          for (let i = 0; i < options.length; i += 1) {
-            const letterOption = options[i]?.replace(/[\r.)]/g, '').toUpperCase();
-            if (letterAnswers.length < MAX_CUSTOM_FIELDS) {
-              letterAnswers.push(letterOption);
-            } else {
-              break;
-            }
-          }
-        }
-      }
-
-      // removes any whitespace from the label
-      itemLabel = itemLabel?.replace(/\s+/g, '').toUpperCase();
-
-      const numChars = {
-        1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F', 7: 'G', 8: 'H', 9: 'I',
-      };
-      itemLabel = itemLabel.split('').map((c) => {
-        if (numChars[c]) return numChars[c];
-        return c;
-      }).join('');
-
+    if (type === 'R-') {
       return (
         <Dropdown.DropdownListItem
-          label={itemLabel}
+          label={intl.formatMessage(intlMessages.typedRespLabel)}
           key={uniqueId('quick-poll-item')}
           onClick={() => {
-            if (activePoll) {
-              stopPoll();
-            }
+            if (activePoll) stopPoll();
             setTimeout(() => {
-              handleClickQuickPoll(_layoutContextDispatch);
-              funcStartPoll(type, slideId, letterAnswers, pollQuestion, pollData?.multiResp);
+              handleClickQuickPoll(d);
+              fStart(type, sId, letterAnswers, pData?.question);
             }, CANCELED_POLL_DELAY);
           }}
-          answers={letterAnswers}
-          multiResp={pollData?.multiResp}
+          question={pData?.question}
         />
       );
-    });
+    }
 
-    const sizes = [];
-    return pollItemElements.filter((el) => {
-      const { label } = el.props;
-      if (label.length === sizes[sizes.length - 1]) return false;
-      sizes.push(label.length);
-      return el;
-    });
-  };
+    if (![_types.YesNo, _types.YesNoAbstention, _types.TrueFalse].includes(type)) {
+      const { options: opts } = itemLabel;
+      itemLabel = opts.join('/').replace(/[\n.)]/g, '');
+      if (type === _types.Custom) {
+        for (let i = 0; i < opts.length && letterAnswers.length < MAX_CUSTOM_FIELDS; i += 1) {
+          letterAnswers.push(opts[i].replace(/[\r.)]/g, '').toUpperCase());
+        }
+      }
+    }
+
+    itemLabel = itemLabel.replace(/\s+/g, '').toUpperCase();
+    const mapNum = {
+      1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'F', 7: 'G', 8: 'H', 9: 'I',
+    };
+    itemLabel = itemLabel.split('').map((c) => mapNum[c] || c).join('');
+
+    return (
+      <Dropdown.DropdownListItem
+        label={itemLabel}
+        key={uniqueId('quick-poll-item')}
+        onClick={() => {
+          if (activePoll) stopPoll();
+          setTimeout(() => {
+            handleClickQuickPoll(d);
+            fStart(type, sId, letterAnswers, pollQuestion, pData?.multiResp);
+          }, CANCELED_POLL_DELAY);
+        }}
+        answers={letterAnswers}
+        multiResp={pData?.multiResp}
+      />
+    );
+  });
 
   const quickPolls = getAvailableQuickPolls(
-    slideId, quickPollOptions, startPoll, pollTypes, layoutContextDispatch,
+    slideId,
+    quickPollOptions,
+    startPoll,
+    pollTypes,
+    layoutContextDispatch,
   );
+  if (!quickPollOptions.length) return <Styled.QuickPollButtonPlaceholder aria-hidden />;
 
-  if (quickPollOptions.length === 0) return <Styled.QuickPollButtonPlaceholder aria-hidden />;
-
-  let answers = null;
-  let quickPollLabel = '';
-  let multiResponse = false;
-
-  if (quickPolls.length > 0) {
-    const { props: pollProps } = quickPolls[0];
-    quickPollLabel = pollProps?.label;
-    answers = pollProps?.answers;
-    multiResponse = pollProps?.multiResp;
+  let answers = null; let quickPollLabel = ''; let multiResponse = false;
+  if (quickPolls.length) {
+    const { props: pp } = quickPolls[0];
+    quickPollLabel = pp?.label;
+    answers = pp?.answers;
+    multiResponse = pp?.multiResp;
   }
 
   let singlePollType = null;
-  if (quickPolls.length === 1 && quickPollOptions.length) {
-    const { type } = quickPollOptions[0];
-    singlePollType = type;
-  }
+  if (quickPolls.length === 1 && quickPollOptions.length) singlePollType = quickPollOptions[0].type;
 
   let btn = (
     <Styled.QuickPollButton
@@ -380,14 +316,17 @@ const QuickPollDropdown = (props) => {
       label={quickPollLabel}
       tooltipLabel={intl.formatMessage(intlMessages.quickPollLabel)}
       onClick={() => {
-        if (activePoll) {
-          stopPoll();
-        }
-
+        if (activePoll) stopPoll();
         setTimeout(() => {
           handleClickQuickPoll(layoutContextDispatch);
           if (singlePollType === 'R-' || singlePollType === 'TF' || singlePollType === 'YN') {
-            startPoll(singlePollType, currentSlide.id, answers, pollQuestion, multiResponse);
+            startPoll(
+              singlePollType,
+              currentSlide.id,
+              answers,
+              typedOrParsedQuestion,
+              multiResponse,
+            );
           } else {
             startPoll(
               pollTypes.Custom,
@@ -405,7 +344,7 @@ const QuickPollDropdown = (props) => {
     />
   );
 
-  const usePollDropdown = quickPollOptions && quickPollOptions.length && quickPolls.length > 1;
+  const usePollDropdown = quickPollOptions.length && quickPolls.length > 1;
   let dropdown = null;
 
   if (usePollDropdown) {
@@ -419,26 +358,17 @@ const QuickPollDropdown = (props) => {
         data-test="yesNoQuickPoll"
       />
     );
-
     dropdown = (
       <Dropdown className={className}>
-        <Dropdown.DropdownTrigger tabIndex={0}>
-          {btn}
-        </Dropdown.DropdownTrigger>
+        <Dropdown.DropdownTrigger tabIndex={0}>{btn}</Dropdown.DropdownTrigger>
         <Dropdown.DropdownContent>
-          <Dropdown.DropdownList>
-            {quickPolls}
-          </Dropdown.DropdownList>
+          <Dropdown.DropdownList>{quickPolls}</Dropdown.DropdownList>
         </Dropdown.DropdownContent>
       </Dropdown>
     );
   }
 
-  return amIPresenter && usePollDropdown ? (
-    dropdown
-  ) : (
-    btn
-  );
+  return amIPresenter && usePollDropdown ? dropdown : btn;
 };
 
 QuickPollDropdown.propTypes = propTypes;
