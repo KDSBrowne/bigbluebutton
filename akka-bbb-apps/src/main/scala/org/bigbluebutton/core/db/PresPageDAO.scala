@@ -88,32 +88,12 @@ class PresPageDbTableDef(tag: Tag) extends Table[PresPageDbModel](tag, None, "pr
       fitToWidth
     )
 
-    (partA ~ partB).shaped.<>(
+    (partA, partB) <> (
       {
         case (
-          pageId,
-          presentationId,
-          num,
-          urlsJson,
-          content,
-          slideRevealed,
-          current,
-          xOffset,
-          yOffset,
-          widthRatio,
-          heightRatio,
-          width,
-          height,
-          viewBoxWidth,
-          viewBoxHeight,
-          maxImageWidth,
-          maxImageHeight,
-          uploadCompleted,
-          infiniteWhiteboard,
-          whiteboardVision,
-          selectedUser,
-          userSharedWithAll,
-          fitToWidth
+          (pageId, presentationId, num, urlsJson, content, slideRevealed, current, xOffset, yOffset, widthRatio, heightRatio),
+          (width, height, viewBoxWidth, viewBoxHeight, maxImageWidth, maxImageHeight,
+            uploadCompleted, infiniteWhiteboard, whiteboardVision, selectedUser, userSharedWithAll, fitToWidth)
           ) =>
           PresPageDbModel(
             pageId,
@@ -141,9 +121,39 @@ class PresPageDbTableDef(tag: Tag) extends Table[PresPageDbModel](tag, None, "pr
             fitToWidth
           )
       },
-      PresPageDbModel.unapply
+      (model: PresPageDbModel) =>
+        Some((
+          (
+            model.pageId,
+            model.presentationId,
+            model.num,
+            model.urlsJson,
+            model.content,
+            model.slideRevealed,
+            model.current,
+            model.xOffset,
+            model.yOffset,
+            model.widthRatio,
+            model.heightRatio
+          ),
+            (
+              model.width,
+              model.height,
+              model.viewBoxWidth,
+              model.viewBoxHeight,
+              model.maxImageWidth,
+              model.maxImageHeight,
+              model.uploadCompleted,
+              model.infiniteWhiteboard,
+              model.whiteboardVision,
+              model.selectedUser,
+              model.userSharedWithAll,
+              model.fitToWidth
+            )
+        ))
     )
   }
+
 }
 
 object PresPageDAO {

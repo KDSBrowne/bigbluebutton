@@ -1,5 +1,4 @@
 import styled, { createGlobalStyle } from 'styled-components';
-import { colorOffWhite } from '/imports/ui/stylesheets/styled-components/palette';
 import { ScrollboxVertical } from '/imports/ui/stylesheets/styled-components/scrollable';
 import { colorOffWhite, colorWhite } from '/imports/ui/stylesheets/styled-components/palette';
 
