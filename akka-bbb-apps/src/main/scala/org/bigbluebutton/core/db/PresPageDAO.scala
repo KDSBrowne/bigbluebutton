@@ -1,36 +1,36 @@
 package org.bigbluebutton.core.db
 
-import org.bigbluebutton.core.models.{PresentationInPod, PresentationPage}
+import org.bigbluebutton.core.models.{ PresentationInPod, PresentationPage }
 import PostgresProfile.api._
 import spray.json.JsValue
 import spray.json._
-import scala.util.{Success, Failure}
+import scala.util.{ Success, Failure }
 import scala.concurrent.ExecutionContext
 
 case class PresPageDbModel(
-    pageId:          String,
-    presentationId:  String,
-    num:             Int,
-    urlsJson:        JsValue,
-    content:         String,
-    slideRevealed:   Boolean,
-    current:         Boolean,
-    xOffset:         Double,
-    yOffset:         Double,
-    widthRatio:      Double,
-    heightRatio:     Double,
-    width:           Double,
-    height:          Double,
-    viewBoxWidth:    Double,
-    viewBoxHeight:   Double,
-    maxImageWidth:   Int,
-    maxImageHeight:  Int,
-    uploadCompleted: Boolean,
-    infiniteWhiteboard:  Boolean,
-    whiteboardVision: Boolean,
-    selectedUser:    String,
-    userSharedWithAll: String,
-    fitToWidth:  Boolean
+    pageId:             String,
+    presentationId:     String,
+    num:                Int,
+    urlsJson:           JsValue,
+    content:            String,
+    slideRevealed:      Boolean,
+    current:            Boolean,
+    xOffset:            Double,
+    yOffset:            Double,
+    widthRatio:         Double,
+    heightRatio:        Double,
+    width:              Double,
+    height:             Double,
+    viewBoxWidth:       Double,
+    viewBoxHeight:      Double,
+    maxImageWidth:      Int,
+    maxImageHeight:     Int,
+    uploadCompleted:    Boolean,
+    infiniteWhiteboard: Boolean,
+    whiteboardVision:   Boolean,
+    selectedUser:       String,
+    userSharedWithAll:  String,
+    fitToWidth:         Boolean
 )
 
 class PresPageDbTableDef(tag: Tag) extends Table[PresPageDbModel](tag, None, "pres_page") {
@@ -58,41 +58,92 @@ class PresPageDbTableDef(tag: Tag) extends Table[PresPageDbModel](tag, None, "pr
   val userSharedWithAll = column[String]("userSharedWithAll")
   val fitToWidth = column[Boolean]("fitToWidth")
 
-  def * = (
-    pageId,
-    presentationId,
-    num,
-    urlsJson,
-    content,
-    slideRevealed,
-    current,
-    xOffset,
-    yOffset,
-    widthRatio,
-    heightRatio,
-    width,
-    height,
-    viewBoxWidth,
-    viewBoxHeight,
-    maxImageWidth,
-    maxImageHeight,
-    uploadCompleted,
-    infiniteWhiteboard,
-    whiteboardVision,
-    selectedUser,
-    userSharedWithAll,
-    fitToWidth
-  ).shaped.<>(
-    { tuple =>
-      PresPageDbModel(
-        tuple._1,  tuple._2,  tuple._3,  tuple._4,  tuple._5,  tuple._6,
-        tuple._7,  tuple._8,  tuple._9,  tuple._10, tuple._11, tuple._12,
-        tuple._13, tuple._14, tuple._15, tuple._16, tuple._17, tuple._18,
-        tuple._19, tuple._20, tuple._21, tuple._22, tuple._23
-      )
-    },
-    PresPageDbModel.unapply
-  )
+  def * = {
+    val partA = (
+      pageId,
+      presentationId,
+      num,
+      urlsJson,
+      content,
+      slideRevealed,
+      current,
+      xOffset,
+      yOffset,
+      widthRatio,
+      heightRatio
+    )
+
+    val partB = (
+      width,
+      height,
+      viewBoxWidth,
+      viewBoxHeight,
+      maxImageWidth,
+      maxImageHeight,
+      uploadCompleted,
+      infiniteWhiteboard,
+      whiteboardVision,
+      selectedUser,
+      userSharedWithAll,
+      fitToWidth
+    )
+
+    (partA ~ partB).shaped.<>(
+      {
+        case (
+          pageId,
+          presentationId,
+          num,
+          urlsJson,
+          content,
+          slideRevealed,
+          current,
+          xOffset,
+          yOffset,
+          widthRatio,
+          heightRatio,
+          width,
+          height,
+          viewBoxWidth,
+          viewBoxHeight,
+          maxImageWidth,
+          maxImageHeight,
+          uploadCompleted,
+          infiniteWhiteboard,
+          whiteboardVision,
+          selectedUser,
+          userSharedWithAll,
+          fitToWidth
+          ) =>
+          PresPageDbModel(
+            pageId,
+            presentationId,
+            num,
+            urlsJson,
+            content,
+            slideRevealed,
+            current,
+            xOffset,
+            yOffset,
+            widthRatio,
+            heightRatio,
+            width,
+            height,
+            viewBoxWidth,
+            viewBoxHeight,
+            maxImageWidth,
+            maxImageHeight,
+            uploadCompleted,
+            infiniteWhiteboard,
+            whiteboardVision,
+            selectedUser,
+            userSharedWithAll,
+            fitToWidth
+          )
+      },
+      PresPageDbModel.unapply
+    )
+  }
 }
 
 object PresPageDAO {
@@ -171,9 +222,9 @@ object PresPageDAO {
         .map(p => p.infiniteWhiteboard)
         .update(infiniteWhiteboard)
     ).onComplete {
-      case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated infiniteWhiteboard on PresPage table")
-      case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating infiniteWhiteboard on PresPage: $e")
-    }
+        case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated infiniteWhiteboard on PresPage table")
+        case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating infiniteWhiteboard on PresPage: $e")
+      }
   }
 
   def updateWhiteboardVision(pageId: String, whiteboardVision: Boolean) = {
@@ -183,9 +234,9 @@ object PresPageDAO {
         .map(p => p.whiteboardVision)
         .update(whiteboardVision)
     ).onComplete {
-      case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated whiteboardVision on PresPage table")
-      case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating whiteboardVision on PresPage: $e")
-    }
+        case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated whiteboardVision on PresPage table")
+        case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating whiteboardVision on PresPage: $e")
+      }
   }
 
   def updateSelectedUser(pageId: String, selectedUser: String) = {
@@ -195,9 +246,9 @@ object PresPageDAO {
         .map(p => p.selectedUser)
         .update(selectedUser)
     ).onComplete {
-      case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated selected user on PresPage table")
-      case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating selected user on PresPage: $e")
-    }
+        case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated selected user on PresPage table")
+        case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating selected user on PresPage: $e")
+      }
   }
 
   def updateUserSharedWithAll(pageId: String, userSharedWithAll: String) = {
@@ -207,9 +258,9 @@ object PresPageDAO {
         .map(p => p.userSharedWithAll)
         .update(userSharedWithAll)
     ).onComplete {
-      case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated user to share with all on PresPage table")
-      case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating user to share with all on PresPage: $e")
-    }
+        case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated user to share with all on PresPage table")
+        case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating user to share with all on PresPage: $e")
+      }
   }
 
   def updateFitToWidth(pageId: String, fitToWidth: Boolean): Unit = {
@@ -219,8 +270,8 @@ object PresPageDAO {
         .map(p => p.fitToWidth)
         .update(fitToWidth)
     ).onComplete {
-      case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated fitToWidth on PresPage table")
-      case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating fitToWidth on PresPage: $e")
-    }
+        case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated fitToWidth on PresPage table")
+        case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating fitToWidth on PresPage: $e")
+      }
   }
 }
