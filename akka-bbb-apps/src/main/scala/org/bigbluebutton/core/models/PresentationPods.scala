@@ -20,23 +20,23 @@ object PresentationPodFactory {
 }
 
 case class PresentationPage(
-    id:          String,
-    num:         Int,
-    urls:        Map[String, String],
-    content:     String,
-    current:     Boolean             = false,
-    xOffset:     Double              = 0,
-    yOffset:     Double              = 0,
-    widthRatio:  Double              = 100.0,
-    heightRatio: Double              = 100.0,
-    width:       Double              = 1440D,
-    height:      Double              = 1080D,
-    converted:   Boolean             = false,
-    infiniteWhiteboard: Boolean      = false,
-    whiteboardVision: Boolean        = false,
-    selectedUser: String             = "",
-    userSharedWithAll: String        = "",
-    fitToWidth:         Boolean      = false
+    id:                 String,
+    num:                Int,
+    urls:               Map[String, String],
+    content:            String,
+    current:            Boolean             = false,
+    xOffset:            Double              = 0,
+    yOffset:            Double              = 0,
+    widthRatio:         Double              = 100.0,
+    heightRatio:        Double              = 100.0,
+    width:              Double              = 1440D,
+    height:             Double              = 1080D,
+    converted:          Boolean             = false,
+    infiniteWhiteboard: Boolean             = false,
+    whiteboardVision:   Boolean             = false,
+    selectedUser:       String              = "",
+    userSharedWithAll:  String              = "",
+    fitToWidth:         Boolean             = false
 )
 
 object PresentationInPod {
