@@ -30,7 +30,7 @@ case class PresPageDbModel(
     whiteboardVision: Boolean,
     selectedUser:    String,
     userSharedWithAll: String,
-    fitToWidth:  Boolean,
+    fitToWidth:  Boolean
 )
 
 class PresPageDbTableDef(tag: Tag) extends Table[PresPageDbModel](tag, None, "pres_page") {
@@ -59,8 +59,40 @@ class PresPageDbTableDef(tag: Tag) extends Table[PresPageDbModel](tag, None, "pr
   val fitToWidth = column[Boolean]("fitToWidth")
 
   def * = (
-    pageId, presentationId, num, urlsJson, content, slideRevealed, current, xOffset, yOffset, widthRatio, heightRatio, width, height, viewBoxWidth, viewBoxHeight, maxImageWidth, maxImageHeight, uploadCompleted, infiniteWhiteboard, whiteboardVision, selectedUser, userSharedWithAll, fitToWidth
-  ) <> (PresPageDbModel.tupled, PresPageDbModel.unapply)
+    pageId,
+    presentationId,
+    num,
+    urlsJson,
+    content,
+    slideRevealed,
+    current,
+    xOffset,
+    yOffset,
+    widthRatio,
+    heightRatio,
+    width,
+    height,
+    viewBoxWidth,
+    viewBoxHeight,
+    maxImageWidth,
+    maxImageHeight,
+    uploadCompleted,
+    infiniteWhiteboard,
+    whiteboardVision,
+    selectedUser,
+    userSharedWithAll,
+    fitToWidth
+  ).shaped.<>(
+    { tuple =>
+      PresPageDbModel(
+        tuple._1,  tuple._2,  tuple._3,  tuple._4,  tuple._5,  tuple._6,
+        tuple._7,  tuple._8,  tuple._9,  tuple._10, tuple._11, tuple._12,
+        tuple._13, tuple._14, tuple._15, tuple._16, tuple._17, tuple._18,
+        tuple._19, tuple._20, tuple._21, tuple._22, tuple._23
+      )
+    },
+    PresPageDbModel.unapply
+  )
 }
 
 object PresPageDAO {
@@ -91,12 +123,8 @@ object PresPageDAO {
           height = page.height,
           viewBoxWidth = 1,
           viewBoxHeight = 1,
-
-          // These values should be kept in sync across all BBB components.
-          // See the values under "process" in bbb-export-annotations/config/settings.json
           maxImageWidth = 1440,
           maxImageHeight = 1080,
-
           uploadCompleted = page.converted,
           infiniteWhiteboard = page.infiniteWhiteboard,
           whiteboardVision = page.whiteboardVision,
