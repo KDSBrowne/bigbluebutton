@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import withShortcutHelper from '/imports/ui/components/shortcut-help/service';
 import { defineMessages, injectIntl } from 'react-intl';
 import * as PluginSdk from 'bigbluebutton-html-plugin-sdk';
 import { NavBarItemType } from 'bigbluebutton-html-plugin-sdk/dist/cjs/extensible-areas/nav-bar-item/enums';
@@ -21,6 +20,7 @@ import { getSettingsSingletonInstance } from '/imports/ui/services/settings';
 import Tooltip from '/imports/ui/components/common/tooltip/component';
 import SessionDetailsModal from '/imports/ui/components/session-details/component';
 import Icon from '/imports/ui/components/common/icon/icon-ts/component';
+import getStorageSingletonInstance from '../../services/storage';
 
 const intlMessages = defineMessages({
   toggleUserListLabel: {
@@ -159,24 +159,27 @@ class NavBar extends Component {
 
     this.handleToggleUserList = this.handleToggleUserList.bind(this);
     this.splitPluginItems = this.splitPluginItems.bind(this);
+    this.setModalIsOpen = this.setModalIsOpen.bind(this);
+
+    const ShownId = getStorageSingletonInstance().getItem('alreadyShowSessionDetailsOnJoin');
 
     this.state = {
-      isModalOpen: props.showSessionDetailsOnJoin,
+      isModalOpen: props.showSessionDetailsOnJoin && !(ShownId === props.meetingId),
     };
   }
 
-  setModalIsOpen = (isOpen) => this.setState({ isModalOpen: isOpen })
-
   renderModal(isOpen, setIsOpen, priority, Component, otherOptions) {
-    return isOpen ? <Component
-      {...{
-        ...otherOptions,
-        onRequestClose: () => setIsOpen(false),
-        priority,
-        setIsOpen,
-        isOpen
-      }}
-    /> : null
+    return isOpen ? (
+      <Component
+        {...{
+          ...otherOptions,
+          onRequestClose: () => setIsOpen(false),
+          priority,
+          setIsOpen,
+          isOpen,
+        }}
+      />
+    ) : null;
   }
 
   componentDidMount() {
@@ -220,6 +223,14 @@ class NavBar extends Component {
 
   componentWillUnmount() {
     clearInterval(this.interval);
+  }
+
+  setModalIsOpen(isOpen) {
+    if (!isOpen) {
+      const { meetingId } = this.props;
+      getStorageSingletonInstance().setItem('alreadyShowSessionDetailsOnJoin', meetingId);
+    }
+    this.setState({ isModalOpen: isOpen });
   }
 
   handleToggleUserList() {
@@ -361,7 +372,7 @@ class NavBar extends Component {
                   tooltipplacement="right"
                   onClick={this.handleToggleUserList}
                   color={isPhone && isExpanded ? 'primary' : 'dark'}
-                  size='md'
+                  size="md"
                   circle
                   hideLabel
                   data-test={hasNotification ? 'hasUnreadMessages' : 'toggleUserList'}
@@ -393,7 +404,7 @@ class NavBar extends Component {
                   </span>
                 </Tooltip>
               </Styled.PresentationTitle>
-              {this.renderModal(isModalOpen, this.setModalIsOpen, "low", SessionDetailsModal)}
+              {this.renderModal(isModalOpen, this.setModalIsOpen, 'low', SessionDetailsModal)}
               <RecordingIndicator
                 amIModerator={amIModerator}
                 currentUserId={currentUserId}
@@ -401,7 +412,7 @@ class NavBar extends Component {
               {renderPluginItems(centerPluginItems)}
             </Styled.Center>
             <Styled.Right>
-              <h2 class="sr-only">{intl.formatMessage(intlMessages.sessionControlLabel)}</h2>
+              <h2 className="sr-only">{intl.formatMessage(intlMessages.sessionControlLabel)}</h2>
               {renderPluginItems(rightPluginItems)}
               {ConnectionStatusService.isEnabled() ? <ConnectionStatusButton /> : null}
               {ConnectionStatusService.isEnabled() ? <ConnectionStatus /> : null}
@@ -415,7 +426,7 @@ class NavBar extends Component {
           </Styled.Top>
         )}
         <Styled.Bottom>
-          <h2 class="sr-only">{intl.formatMessage(intlMessages.speakersListLabel)}</h2>
+          <h2 className="sr-only">{intl.formatMessage(intlMessages.speakersListLabel)}</h2>
           {enableTalkingIndicator ? <TalkingIndicator amIModerator={amIModerator} /> : null}
           <TimerIndicatorContainer />
         </Styled.Bottom>

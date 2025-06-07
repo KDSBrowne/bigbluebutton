@@ -47,7 +47,7 @@ class Options extends MultiUsers {
       const currentValuesBySelector = getLocaleValues(selectedKeysBySelector, locale);
 
       await openSettings(this.modPage);
-      await this.modPage.waitForSelector(e.languageSelector);
+      await this.modPage.waitForSelector(e.languageSelector, 5000);
       const langDropdown = await this.modPage.page.$(e.languageSelector);
       await langDropdown.selectOption({ value: locale });
       await this.modPage.waitAndClick(e.modalConfirmButton);
@@ -117,7 +117,6 @@ class Options extends MultiUsers {
 
     if (!CI) {
       const modPageLocator = this.modPage.getLocator('body');
-      await this.modPage.setHeightWidthViewPortSize();
       const screenshotOptions = {
         maxDiffPixels: 1000,
       };
@@ -128,7 +127,6 @@ class Options extends MultiUsers {
 
   async fontSizeTest() {
     await this.modPage.hasElement(e.whiteboard, 'should the whiteboard be display');
-    await this.modPage.setHeightWidthViewPortSize();
     const getFontSizeNumber = (node) => Number(getComputedStyle(node).fontSize.slice(0, -2));
     const [
       presentationTitleLocator,

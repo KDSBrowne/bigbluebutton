@@ -122,6 +122,7 @@ object MsgBuilder {
   def buildStopScreenshareRtmpBroadcastEvtMsg(
       meetingId: String,
       voiceConf: String, screenshareConf: String,
+      userId: String,
       stream: String, vidWidth: Int, vidHeight: Int,
       timestamp: String
   ): BbbCommonEnvCoreMsg = {
@@ -129,7 +130,7 @@ object MsgBuilder {
     val routing = Routing.addMsgToClientRouting(MessageTypes.BROADCAST_TO_MEETING, meetingId, "not-used")
     val envelope = BbbCoreEnvelope(ScreenshareRtmpBroadcastStoppedEvtMsg.NAME, routing)
     val header = BbbClientMsgHeader(ScreenshareRtmpBroadcastStoppedEvtMsg.NAME, meetingId, "not-used")
-    val body = ScreenshareRtmpBroadcastStoppedEvtMsgBody(voiceConf, screenshareConf, stream, vidWidth, vidHeight, timestamp)
+    val body = ScreenshareRtmpBroadcastStoppedEvtMsgBody(voiceConf, screenshareConf, userId, stream, vidWidth, vidHeight, timestamp)
     val event = ScreenshareRtmpBroadcastStoppedEvtMsg(header, body)
     BbbCommonEnvCoreMsg(envelope, event)
   }
@@ -319,10 +320,16 @@ object MsgBuilder {
     BbbCommonEnvCoreMsg(envelope, event)
   }
 
-  def buildDeafUserInVoiceConfSysMsg(meetingId: String, voiceConf: String, voiceUserId: String, deaf: Boolean): BbbCommonEnvCoreMsg = {
+  def buildDeafUserInVoiceConfSysMsg(
+    meetingId: String,
+    voiceConf: String,
+    userId: String,
+    voiceUserId: String,
+    deaf: Boolean
+  ): BbbCommonEnvCoreMsg = {
     val routing = collection.immutable.HashMap("sender" -> "bbb-apps-akka")
     val envelope = BbbCoreEnvelope(DeafUserInVoiceConfSysMsg.NAME, routing)
-    val body = DeafUserInVoiceConfSysMsgBody(voiceConf, voiceUserId, deaf)
+    val body = DeafUserInVoiceConfSysMsgBody(voiceConf, userId, voiceUserId, deaf)
     val header = BbbCoreHeaderWithMeetingId(DeafUserInVoiceConfSysMsg.NAME, meetingId)
     val event = DeafUserInVoiceConfSysMsg(header, body)
 
@@ -553,11 +560,12 @@ object MsgBuilder {
   def buildScreenBroadcastStopSysMsg(
       meetingId: String,
       voiceConf: String,
+      userId:    String,
       streamId:  String
   ): BbbCommonEnvCoreMsg = {
     val routing = collection.immutable.HashMap("sender" -> "bbb-apps-akka")
     val envelope = BbbCoreEnvelope(ScreenBroadcastStopSysMsg.NAME, routing)
-    val body = ScreenBroadcastStopSysMsgBody(meetingId, voiceConf, streamId)
+    val body = ScreenBroadcastStopSysMsgBody(meetingId, voiceConf, userId, streamId)
     val header = BbbCoreBaseHeader(ScreenBroadcastStopSysMsg.NAME)
     val event = ScreenBroadcastStopSysMsg(header, body)
 
@@ -660,6 +668,23 @@ object MsgBuilder {
     val header = BbbClientMsgHeader(UserLeftVoiceConfToClientEvtMsg.NAME, meetingId, userId)
     val body = UserLeftVoiceConfToClientEvtMsgBody(voiceConf, userId, voiceUserId)
     val event = UserLeftVoiceConfToClientEvtMsg(header, body)
+    BbbCommonEnvCoreMsg(envelope, event)
+  }
+
+  def buildAudioFloorChangedEvtMsg(
+    meetingId: String,
+    voiceConf: String,
+    userId: String,
+    voiceUserId: String,
+    floor: Boolean,
+    lastFloorTime: String
+  ): BbbCommonEnvCoreMsg = {
+    val routing = Routing.addMsgToClientRouting(MessageTypes.BROADCAST_TO_MEETING, meetingId, userId)
+    val envelope = BbbCoreEnvelope(AudioFloorChangedEvtMsg.NAME, routing)
+    val header = BbbClientMsgHeader(AudioFloorChangedEvtMsg.NAME, meetingId, userId)
+    val body = AudioFloorChangedEvtMsgBody(voiceConf, userId, voiceUserId, floor, lastFloorTime)
+    val event = AudioFloorChangedEvtMsg(header, body)
+
     BbbCommonEnvCoreMsg(envelope, event)
   }
 }

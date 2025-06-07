@@ -50,7 +50,6 @@
 - `layout: Object` [Type layout](#type-layout)
 - `learningDashboard: Object` [Type meeting_learningDashboard](#type-meeting_learningDashboard)
 - `lockSettings: Object` [Type meeting_lockSettings](#type-meeting_lockSettings)
-- `metadata: Array` [Type meeting_metadata](#type-meeting_metadata)
 - `polls: Array` [Type poll](#type-poll)
 - `recording: Object` [Type meeting_recording](#type-meeting_recording)
 - `recordingPolicies: Object` [Type meeting_recordingPolicies](#type-meeting_recordingPolicies)
@@ -379,12 +378,12 @@ Permission: Restricted to User Viewing Self-Related Data
 - `lastFloorTime`
 - `listenOnly`
 - `muted`
+- `deafened`
 - `spoke`
 - `startTime`
 - `talking`
 - `userId`
 - `voiceConf`
-- `voiceConfCallState`
 - `voiceUserId`
 ### Relationships:
 - `user: Object` [Type User](#type-user)
@@ -742,6 +741,16 @@ Permission: Restricted to User Viewing Self-Related Data
 - `shortName`
 - `userId`
 
+## Type: user_connectionStatusHistory
+Permission: Restricted to Moderators or the User Viewing Self-Related Data
+### Fields:
+- `networkRttInMs`
+- `status`
+- `statusUpdatedAt`
+- `userId`
+### Relationships:
+- `user: Object` [Type User](#type-user)
+
 ## Type: user_connectionStatusReport
 Permission: Restricted to Moderators or the User Viewing Self-Related Data
 ### Fields:
@@ -851,11 +860,6 @@ Permission: Restricted to User Viewing Self-Related Data
 - `messageValues`
 - `notificationType`
 - `role`
-
-## Type: meeting_metadata
-### Fields:
-- `name`
-- `value`
 
 ## Type: user_transcriptionError
 Permission: Restricted to User Viewing Self-Related Data

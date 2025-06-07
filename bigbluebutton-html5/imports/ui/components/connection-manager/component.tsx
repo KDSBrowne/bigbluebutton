@@ -73,13 +73,16 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   }
 
   if (networkError) {
-    connectionStatus.setSubscriptionFailed(true);
+    const isMutation = networkError.message.includes('graphql actions request failed');
+    if (!isMutation) {
+      connectionStatus.setSubscriptionFailed(true);
+    }
     logger.error(`[Network error]: ${networkError}`);
   }
 });
 
 const ConnectionManager: React.FC<ConnectionManagerProps> = ({ children }): React.ReactNode => {
-  const [graphqlUrlApolloClient, setApolloClient] = React.useState<ApolloClient<NormalizedCacheObject> | null>(null);
+  const [apolloClient, setApolloClient] = React.useState<ApolloClient<NormalizedCacheObject> | null>(null);
   const [graphqlUrl, setGraphqlUrl] = React.useState<string>('');
   const loadingContextInfo = useContext(LoadingContext);
   const numberOfAttempts = useRef(20);
@@ -193,6 +196,7 @@ const ConnectionManager: React.FC<ConnectionManagerProps> = ({ children }): Reac
                   errorName: error.name,
                   errorMessage: error.message,
                   errorReason: error.reason,
+                  error,
                 },
               }, 'Connection terminated (4499)');
             } else if (isDetailedError) {
@@ -202,6 +206,7 @@ const ConnectionManager: React.FC<ConnectionManagerProps> = ({ children }): Reac
                   errorName: error.name,
                   errorMessage: error.message,
                   errorReason: error.reason,
+                  error,
                 },
               }, `Connection error (${error.code})`);
             } else {
@@ -211,8 +216,9 @@ const ConnectionManager: React.FC<ConnectionManagerProps> = ({ children }): Reac
                   errorName: 'Error',
                   errorMessage: JSON.stringify(error),
                   errorReason: 'Unknown',
+                  error,
                 },
-              }, `Connection error: ${JSON.stringify(error)}`);
+              }, `Connection error: ${(error as WsError)?.code}`);
             }
 
             if (error && typeof error === 'object' && 'code' in error && error.code === 4403) {
@@ -241,7 +247,10 @@ const ConnectionManager: React.FC<ConnectionManagerProps> = ({ children }): Reac
             closed: (e) => {
               // Check if it's a CloseEvent (which includes HTTP errors during WebSocket handshake)
               if (e instanceof CloseEvent) {
-                logger.error(`WebSocket closed with code ${e.code}: ${e.reason}`);
+                // if the code is 1000, it means the connection was closed normally
+                if (e.code !== 1000) {
+                  logger.error(`WebSocket closed with code ${e.code}: ${e.reason}`);
+                }
                 connectionStatus.setConnectedStatus(false);
               }
             },
@@ -303,10 +312,10 @@ const ConnectionManager: React.FC<ConnectionManagerProps> = ({ children }): Reac
   },
   [graphqlUrl]);
   return (
-    graphqlUrlApolloClient
+    apolloClient
       ? (
         <ApolloProvider
-          client={graphqlUrlApolloClient}
+          client={apolloClient}
         >
           {children}
         </ApolloProvider>

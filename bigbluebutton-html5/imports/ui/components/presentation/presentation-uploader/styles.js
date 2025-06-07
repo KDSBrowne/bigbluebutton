@@ -40,7 +40,6 @@ import {
   colorSuccess,
   colorGrayLightest,
   colorText,
-  colorBlueLight,
   colorOffWhite,
 } from '/imports/ui/stylesheets/styled-components/palette';
 import { smallOnly } from '/imports/ui/stylesheets/styled-components/breakpoints';
@@ -386,7 +385,7 @@ const UploaderModal = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1300;
+  z-index: 900;
 `;
 
 const ModalInner = styled.div`

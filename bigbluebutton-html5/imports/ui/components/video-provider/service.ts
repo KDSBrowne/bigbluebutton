@@ -8,7 +8,6 @@ import VideoPreviewService from '/imports/ui/components/video-preview/service';
 import Storage from '/imports/ui/services/storage/session';
 import { getStorageSingletonInstance } from '/imports/ui/services/storage';
 import logger from '/imports/startup/client/logger';
-import getFromMeetingSettings from '/imports/ui/services/meeting-settings';
 import {
   setVideoState,
   setConnectingStream,
@@ -43,13 +42,11 @@ class VideoService {
 
   private record: boolean | null;
 
-  private hackRecordViewer: boolean | null;
-
   private deviceId: string | null = null;
 
   private activePeers: Record<string, RTCPeerConnection>;
 
-  private readonly clientSessionUUID: string;
+  private clientSessionUUID: string;
 
   constructor() {
     this.userParameterProfile = null;
@@ -57,8 +54,7 @@ class VideoService {
     this.isSafari = browserInfo.isSafari;
     this.numberOfDevices = 0;
     this.record = null;
-    this.hackRecordViewer = null;
-    this.clientSessionUUID = sessionStorage.getItem('clientSessionUUID') || '0';
+    this.clientSessionUUID = '0';
 
     if (navigator.mediaDevices) {
       this.updateNumberOfDevices = this.updateNumberOfDevices.bind(this);
@@ -204,8 +200,8 @@ class VideoService {
   }
 
   static getMediaServerAdapter() {
-    const DEFAULT_VIDEO_MEDIA_SERVER = window.meetingClientSettings.public.kurento.videoMediaServer;
-    return getFromMeetingSettings('media-server-video', DEFAULT_VIDEO_MEDIA_SERVER);
+    const { videoMediaServer } = window.meetingClientSettings.public.kurento;
+    return videoMediaServer;
   }
 
   static getRoleModerator() {
@@ -224,21 +220,12 @@ class VideoService {
     return PAGE_CHANGE_DEBOUNCE_TIME;
   }
 
-  getRecord(myRole?: string) {
-    const ROLE_MODERATOR = VideoService.getRoleModerator();
-
+  getRecord() {
     if (this.record === null) {
       this.record = getFromUserSettings('bbb_record_video', true);
     }
 
-    if (this.hackRecordViewer === null) {
-      const value = getFromMeetingSettings('hack-record-viewer-video', null);
-      this.hackRecordViewer = value ? value.toLowerCase() === 'true' : true;
-    }
-
-    const hackRecord = myRole === ROLE_MODERATOR || this.hackRecordViewer;
-
-    return this.record && hackRecord;
+    return this.record;
   }
 
   static mirrorOwnWebcam(userId: string | null = null) {
@@ -260,8 +247,8 @@ class VideoService {
     return videoStream ? videoStream.stream : null;
   }
 
-  isLocalStream(cameraId = '') {
-    return cameraId.startsWith(this.getPrefix());
+  isLocalStream(cameraId: unknown) {
+    return typeof cameraId === 'string' && cameraId.startsWith(this.getPrefix());
   }
 
   static getCameraProfile() {
@@ -496,8 +483,16 @@ class VideoService {
     });
   }
 
+  getClientSessionUUID() {
+    if (this.clientSessionUUID === '0') {
+      this.clientSessionUUID = sessionStorage.getItem('clientSessionUUID') || '0';
+    }
+
+    return this.clientSessionUUID;
+  }
+
   getPrefix() {
-    return `${Auth.userID}${TOKEN}${this.clientSessionUUID}`;
+    return `${Auth.userID}${TOKEN}${this.getClientSessionUUID()}`;
   }
 
   updateActivePeers(streams: StreamItem[]) {
@@ -605,7 +600,7 @@ export default {
   joinedVideo: () => VideoService.joinedVideo(),
   exitedVideo: () => videoService.exitedVideo(),
   getPreloadedStream: () => videoService.getPreloadedStream(),
-  getRecord: (myRole?: string) => videoService.getRecord(myRole),
+  getRecord: () => videoService.getRecord(),
   getPageChangeDebounceTime: () => VideoService.getPageChangeDebounceTime(),
   getUserParameterProfile: () => videoService.getUserParameterProfile(),
   isMultipleCamerasEnabled: () => videoService.isMultipleCamerasEnabled(),

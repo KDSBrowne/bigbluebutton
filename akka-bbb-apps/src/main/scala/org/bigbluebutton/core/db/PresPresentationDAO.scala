@@ -183,6 +183,7 @@ object PresPresentationDAO {
               whiteboardVision = page._2.whiteboardVision,
               selectedUser = page._2.selectedUser,
               userSharedWithAll = page._2.userSharedWithAll,
+              fitToWidth = page._2.fitToWidth,
             )
           )
         }

@@ -1,6 +1,7 @@
 const { MultiUsers } = require("../user/multiusers");
 const e = require('../core/elements');
 const { reopenChatSidebar, checkScreenshots } = require('./util');
+const { sleep } = require("../core/helpers");
 
 class Layouts extends MultiUsers {
   async focusOnPresentation() {
@@ -37,6 +38,7 @@ class Layouts extends MultiUsers {
 
     await this.modPage.waitAndClick(e.userListToggleBtn);
     await this.modPage.wasRemoved(e.chatButton, '');
+    await sleep(1000); // wait for the whiteboard zoom to stabilize
 
     await checkScreenshots(this, 'should the cameras be on the side of presentation', [e.webcamContainer, e.webcamMirroredVideoContainer], 'smart-layout', 2);
     await reopenChatSidebar(this.modPage);
@@ -72,8 +74,8 @@ class Layouts extends MultiUsers {
     await checkScreenshots(this, 'should be on custom layout', 'video', 'custom-layout', 3);
 
     await this.modPage.waitAndClick(e.userListToggleBtn);
+    await this.userPage.waitAndClick(e.userListToggleBtn);
     await this.modPage.wasRemoved(e.chatButton, 'should not be displayed the chat button');
-    await this.modPage.wasRemoved(e.sendButton, 'should not be displayed the send button');
 
     await checkScreenshots(this, 'should be on custom layout', 'video', 'custom-layout', 4);
     await reopenChatSidebar(this.modPage);

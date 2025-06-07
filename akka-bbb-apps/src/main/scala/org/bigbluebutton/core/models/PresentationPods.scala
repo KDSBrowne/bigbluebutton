@@ -1,7 +1,7 @@
 package org.bigbluebutton.core.models
 
 import org.bigbluebutton.core.util.RandomStringGenerator
-import org.bigbluebutton.core.db.{NotificationDAO, PresPageDAO, PresPresentationDAO}
+import org.bigbluebutton.core.db.{ NotificationDAO, PresPageDAO, PresPresentationDAO }
 import org.bigbluebutton.core2.message.senders.MsgBuilder
 
 object PresentationPodFactory {
@@ -36,6 +36,7 @@ case class PresentationPage(
     whiteboardVision: Boolean        = false,
     selectedUser: String             = "",
     userSharedWithAll: String        = "",
+    fitToWidth:         Boolean      = false
 )
 
 object PresentationInPod {

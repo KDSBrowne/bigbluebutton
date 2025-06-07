@@ -82,6 +82,10 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
         <property name="recordingServiceGW" ref="recordingServiceGW"/>
     </bean>
 
+    <bean id="pluginUtils" class="org.bigbluebutton.api.util.PluginUtils">
+        <property name="html5PluginSdkVersion" value="${html5PluginSdkVersion}"/>
+    </bean>
+
     <bean id="recordingServiceGW" class="org.bigbluebutton.api2.util.RecMetaXmlHelper">
         <constructor-arg index="0" ref="bbbWebApiGWApp"/>
     </bean>
@@ -156,6 +160,7 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
         <property name="disableRecordingDefault" value="${disableRecordingDefault}"/>
         <property name="autoStartRecording" value="${autoStartRecording}"/>
         <property name="allowStartStopRecording" value="${allowStartStopRecording}"/>
+        <property name="presentationConversionCacheEnabled" value="${presentationConversionCacheEnabled}"/>
         <property name="recordFullDurationMedia" value="${recordFullDurationMedia}"/>
         <property name="learningDashboardCleanupDelayInMinutes" value="${learningDashboardCleanupDelayInMinutes}"/>
         <property name="webcamsOnlyForModerator" value="${webcamsOnlyForModerator}"/>
@@ -207,6 +212,12 @@ with BigBlueButton; if not, see <http://www.gnu.org/licenses/>.
         <property name="allowRevealOfBBBVersion" value="${allowRevealOfBBBVersion}"/>
         <property name="allowOverrideClientSettingsOnCreateCall" value="${allowOverrideClientSettingsOnCreateCall}"/>
         <property name="pluginManifests" value="${pluginManifests}"/>
+        <property name="pluginManifestsFetchUrlResponseTimeout" value="${pluginManifestsFetchUrlResponseTimeout}"/>
+        <property name="maxPluginManifestsFetchUrlPayloadSize" value="${maxPluginManifestsFetchUrlPayloadSize}"/>
+        <property name="html5PluginSdkVersion" value="${html5PluginSdkVersion}"/>
+        <property name="pluginUtils" ref="pluginUtils"/>
+        <property name="maxNumPages" value="${maxNumPages}"/>
+        <property name="getJoinUrlUserdataBlocklist" value="${getJoinUrlUserdataBlocklist}"/>
     </bean>
 
     <bean id="presentationService" class="org.bigbluebutton.web.services.PresentationService">

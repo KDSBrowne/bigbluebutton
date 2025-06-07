@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import { defineMessages, useIntl } from 'react-intl';
 import useCurrentUser from '/imports/ui/core/hooks/useCurrentUser';
 import Header from '/imports/ui/components/common/control-header/component';
@@ -17,6 +19,8 @@ import ResponseTypes from './components/ResponseTypes';
 import PollQuestionArea from './components/PollQuestionArea';
 import LiveResultContainer from './components/LiveResult';
 import Session from '/imports/ui/services/storage/in-memory';
+import SessionStorage from '/imports/ui/services/storage/session';
+import { useStorageKey } from '../../services/storage/hooks';
 
 const intlMessages = defineMessages({
   pollPaneTitle: {
@@ -251,6 +255,152 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
   const [isPasting, setIsPasting] = useState(false);
   const [type, setType] = useState<string | null>('');
 
+  const quickPollVariables = useStorageKey('quickPollVariables') as {
+    isMultipleResponse: boolean;
+    pollType: string;
+    question: string;
+    secretPoll: boolean;
+    answers: string[]
+  };
+
+  useEffect(() => {
+    if (quickPollVariables) {
+      const {
+        answers,
+        isMultipleResponse,
+        pollType,
+        question,
+        secretPoll,
+      } = quickPollVariables;
+      const isCustom = pollType === pollTypes.Custom;
+
+      const questionAndOptionsList = isCustom
+        ? [question, ...answers].join('\n')
+        : '';
+
+      setError(null);
+      setWarning(null);
+      setCustomInput(isCustom);
+      setIsMultipleResponse(isMultipleResponse);
+      setQuestionAndOptions(questionAndOptionsList);
+      setQuestion(question);
+      setSecretPoll(secretPoll);
+      setType(
+        pollType.startsWith(pollTypes.Letter)
+          ? pollTypes.Letter
+          : pollType,
+      );
+
+      if (answers.length) {
+        setOptList(answers.map((answer) => ({ val: answer })));
+        return;
+      }
+
+      if (pollType.startsWith(pollTypes.Letter)) {
+        const length = Number(pollType.split('-')[1]) || 4;
+        const optionChars: Record<number, string> = {
+          1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E',
+        };
+        const optList = Array.from({ length }).map((_, idx) => ({
+          val: optionChars[idx + 1],
+        }));
+        setOptList(optList);
+        return;
+      }
+
+      switch (pollType) {
+        case pollTypes.TrueFalse: {
+          setOptList([
+            { val: intl.formatMessage(intlMessages.true) },
+            { val: intl.formatMessage(intlMessages.false) },
+          ]);
+          break;
+        }
+        case pollTypes.YesNo: {
+          setOptList([
+            { val: intl.formatMessage(intlMessages.yes) },
+            { val: intl.formatMessage(intlMessages.no) },
+          ]);
+          break;
+        }
+        case pollTypes.YesNoAbstention: {
+          setOptList([
+            { val: intl.formatMessage(intlMessages.yes) },
+            { val: intl.formatMessage(intlMessages.no) },
+            { val: intl.formatMessage(intlMessages.abstention) },
+          ]);
+          break;
+        }
+        default: {
+          setOptList([]);
+        }
+      }
+    }
+  }, [quickPollVariables]);
+
+  useEffect(() => () => {
+    Session.removeItem('quickPollVariables');
+  }, []);
+
+  const getPollCurrentState = useCallback(() => {
+    return {
+      customInput,
+      question,
+      questionAndOptions,
+      optList,
+      error,
+      isMultipleResponse,
+      secretPoll,
+      warning,
+      type,
+    };
+  }, [
+    customInput, question, questionAndOptions, optList,
+    isMultipleResponse, secretPoll, warning, type, error,
+  ]);
+
+  useEffect(() => () => {
+    SessionStorage.setItem('pollSavedState', getPollCurrentState());
+  }, [getPollCurrentState]);
+
+  useEffect(() => {
+    const pollSavedState = SessionStorage.getItem('pollSavedState') as {
+      customInput: boolean;
+      question: string[] | string;
+      questionAndOptions: string[] | string;
+      optList: { val: string }[];
+      error: string;
+      isMultipleResponse: boolean;
+      secretPoll: boolean;
+      warning: string;
+      type: string;
+    };
+
+    if (pollSavedState) {
+      const {
+        customInput,
+        isMultipleResponse,
+        optList,
+        error,
+        question,
+        questionAndOptions,
+        secretPoll,
+        type,
+        warning,
+      } = pollSavedState;
+
+      setCustomInput(customInput);
+      setIsMultipleResponse(isMultipleResponse);
+      setOptList(optList);
+      setError(error);
+      setQuestion(question);
+      setQuestionAndOptions(questionAndOptions);
+      setSecretPoll(secretPoll);
+      setType(type);
+      setWarning(warning);
+    }
+  }, []);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number,
@@ -365,8 +515,15 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
   };
 
   useEffect(() => {
+    const cps = Session.getItem('customPollShortcut');
+    if (cps) {
+      setType(pollTypes.Custom);
+      setCustomInput(!!cps);
+    }
+
     return () => {
       Session.setItem('secretPoll', false);
+      Session.setItem('customPollShortcut', false);
     };
   }, []);
 
@@ -374,7 +531,7 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
     if (textareaRef.current) {
       textareaRef.current?.focus();
     }
-  }, [textareaRef]);
+  }, [textareaRef, customInput]);
 
   const pollOptions = () => {
     if (hasPoll) return <LiveResultContainer />;
@@ -398,10 +555,11 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
                   <Toggle
                   // @ts-ignore - JS component wrapped by intl
                     icons={false}
-                    defaultChecked={customInput}
+                    checked={customInput}
                     onChange={() => {
+                      const newType = !customInput ? pollTypes.Custom : '';
+                      setType(newType);
                       setCustomInput(!customInput);
-                      setType(pollTypes.Custom);
                     }}
                     ariaLabel={intl.formatMessage(intlMessages.customInputToggleLabel)}
                     showToggleLabel={false}
@@ -446,7 +604,8 @@ const PollCreationPanel: React.FC<PollCreationPanelProps> = ({
           question={question}
           setError={setError}
           setIsPolling={() => {
-            setType(null);
+            const newType = customInput ? pollTypes.Custom : '';
+            setType(newType);
             setOptList([]);
             setQuestion('');
             setQuestionAndOptions('');

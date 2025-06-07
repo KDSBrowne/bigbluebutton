@@ -135,3 +135,25 @@ export function useIsChatMessageReactionsEnabled() {
 export function useIsPrivateChatEnabled() {
   return useDisabledFeatures().indexOf('privateChat') === -1;
 }
+
+export function useIsRaiseHandEnabled() {
+  return useDisabledFeatures().indexOf('raiseHand') === -1;
+}
+
+export function useIsUserReactionsEnabled() {
+  const REACTIONS_BUTTON_ENABLED = window.meetingClientSettings.public.app.reactionsButton.enabled;
+  const USER_REACTIONS_ENABLED = window.meetingClientSettings.public.userReaction.enabled;
+  return useDisabledFeatures().indexOf('userReactions') === -1
+    && REACTIONS_BUTTON_ENABLED
+    && USER_REACTIONS_ENABLED;
+}
+
+/**
+ * This hook returns `true` if the chat input emoji picker is disabled. `false`, otherwise.
+ * @returns {boolean}
+ */
+export function useIsEmojiPickerEnabled() {
+  const EMOJI_PICKER_ENABLED = window.meetingClientSettings.public.chat.emojiPicker.enable;
+  return useDisabledFeatures().indexOf('chatEmojiPicker') === -1
+    && EMOJI_PICKER_ENABLED;
+}

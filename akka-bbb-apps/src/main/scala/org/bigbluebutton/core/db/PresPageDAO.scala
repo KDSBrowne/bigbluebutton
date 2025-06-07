@@ -30,6 +30,7 @@ case class PresPageDbModel(
     whiteboardVision: Boolean,
     selectedUser:    String,
     userSharedWithAll: String,
+    fitToWidth:  Boolean,
 )
 
 class PresPageDbTableDef(tag: Tag) extends Table[PresPageDbModel](tag, None, "pres_page") {
@@ -55,9 +56,10 @@ class PresPageDbTableDef(tag: Tag) extends Table[PresPageDbModel](tag, None, "pr
   val whiteboardVision = column[Boolean]("whiteboardVision")
   val selectedUser = column[String]("selectedUser")
   val userSharedWithAll = column[String]("userSharedWithAll")
+  val fitToWidth = column[Boolean]("fitToWidth")
 
   def * = (
-    pageId, presentationId, num, urlsJson, content, slideRevealed, current, xOffset, yOffset, widthRatio, heightRatio, width, height, viewBoxWidth, viewBoxHeight, maxImageWidth, maxImageHeight, uploadCompleted, infiniteWhiteboard, whiteboardVision, selectedUser, userSharedWithAll
+    pageId, presentationId, num, urlsJson, content, slideRevealed, current, xOffset, yOffset, widthRatio, heightRatio, width, height, viewBoxWidth, viewBoxHeight, maxImageWidth, maxImageHeight, uploadCompleted, infiniteWhiteboard, whiteboardVision, selectedUser, userSharedWithAll, fitToWidth
   ) <> (PresPageDbModel.tupled, PresPageDbModel.unapply)
 }
 
@@ -89,13 +91,18 @@ object PresPageDAO {
           height = page.height,
           viewBoxWidth = 1,
           viewBoxHeight = 1,
+
+          // These values should be kept in sync across all BBB components.
+          // See the values under "process" in bbb-export-annotations/config/settings.json
           maxImageWidth = 1440,
           maxImageHeight = 1080,
+
           uploadCompleted = page.converted,
           infiniteWhiteboard = page.infiniteWhiteboard,
           whiteboardVision = page.whiteboardVision,
           selectedUser = page.selectedUser,
-          userSharedWithAll = page.userSharedWithAll
+          userSharedWithAll = page.userSharedWithAll,
+          fitToWidth = page.fitToWidth
         )
       )
     )
@@ -174,6 +181,18 @@ object PresPageDAO {
     ).onComplete {
       case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated user to share with all on PresPage table")
       case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating user to share with all on PresPage: $e")
+    }
+  }
+
+  def updateFitToWidth(pageId: String, fitToWidth: Boolean): Unit = {
+    DatabaseConnection.db.run(
+      TableQuery[PresPageDbTableDef]
+        .filter(_.pageId === pageId)
+        .map(p => p.fitToWidth)
+        .update(fitToWidth)
+    ).onComplete {
+      case Success(rowsAffected) => DatabaseConnection.logger.debug(s"$rowsAffected row(s) updated fitToWidth on PresPage table")
+      case Failure(e)            => DatabaseConnection.logger.debug(s"Error updating fitToWidth on PresPage: $e")
     }
   }
 }

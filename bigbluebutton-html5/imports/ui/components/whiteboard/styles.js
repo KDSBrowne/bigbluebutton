@@ -1,6 +1,7 @@
 import styled, { createGlobalStyle } from 'styled-components';
 import { colorOffWhite } from '/imports/ui/stylesheets/styled-components/palette';
 import { ScrollboxVertical } from '/imports/ui/stylesheets/styled-components/scrollable';
+import { colorOffWhite, colorWhite } from '/imports/ui/stylesheets/styled-components/palette';
 
 const TldrawV2GlobalStyle = createGlobalStyle`
   ${({ isPresenter, hasWBAccess }) => (!isPresenter && hasWBAccess) && `
@@ -45,16 +46,13 @@ const TldrawV2GlobalStyle = createGlobalStyle`
     display: none !important;
   }
 
-
-
-
   ${({ bgSelected }) => (bgSelected) && `
-      [data-testid="menu-item.toggle-lock"],
-      [data-testid="menu-item.toggle-locked"],
-      [data-testid="menu-item.paste"],
-      [data-testid="menu-item.copy"] {
-        display: none !important;
-      }
+    [data-testid="menu-item.toggle-lock"],
+    [data-testid="menu-item.toggle-locked"],
+    [data-testid="menu-item.paste"],
+    [data-testid="menu-item.copy"] {
+      display: none !important;
+    }
   `}
 
   [data-testid="menu-item.bring-to-front"],
@@ -67,7 +65,7 @@ const TldrawV2GlobalStyle = createGlobalStyle`
   [data-testid="main.page-menu"],
   [data-testid="main.menu"],
   [data-testid="tools.more.laser"],
-  [data-testid="tools.asset"],
+  [data-tool="asset"],
   [data-testid="page-menu.button"],
   [data-testid="menu-item.zoom-to-100"],
   .tlui-menu-zone {
@@ -77,35 +75,127 @@ const TldrawV2GlobalStyle = createGlobalStyle`
   .tl-collaborator__cursor {
     height: auto !important;
     width: auto !important;
+    position: absolute !important;
+    left: -7px !important;
+    top: -6px !important;
   }
 
-    .tl-overlays__item {
+  .tl-overlays__item {
     height: auto !important;
     width: auto !important;
   }
+
   .tlui-popover__content {
     left: -50px !important;
   }
 
-    ${({ isPresenter, isMultiUserActive }) => !isPresenter && !isMultiUserActive && `
+  ${({ isPresenter, isMultiUserActive }) => (!isPresenter && !isMultiUserActive) && `
     .tl-cursor use {
-      transform: scale(0.05)!important;
-    }
-    .tl-collaborator__cursor {
-      position: absolute !important;
-      left: -7px !important;
-      top: -6px !important;
+      transform: scale(0.05) !important;
     }
   `}
 
-    .tl-container:focus-within {
+  .tl-container:focus-within {
     outline: none !important;
   }
 
   .tlui-button__tool {
     height: 40px !important;
     width: 40px !important;
+  }
+
+  .tlui-toolbar__inner {
+    flex-direction: column-reverse !important;
+  }
+
+  .tlui-toolbar__tools {
+    flex-direction: column !important;
+  }
+
+  .tlui-toolbar {
+    align-items: end !important;
+  }
+
+  .tlui-layout__bottom {
+    grid-row: auto / auto !important;
+    position: absolute !important;
+    right: 10px !important;
+  }
+
+  [data-side="bottom"][data-align="end"][data-state="open"][role="dialog"] {
+    right: 3.5rem !important;
+    bottom: 9.5rem !important;
+  }
+
+  [id*="shape:poll-result"] {
+    background-color: white !important;
+  }
+
+  [data-testid="tools.delete-selected-items"] {
+    display: flex;
+  }
+
+  ${({ presentationHeight }) => {
+    const minRange = { height: 345, top: 14 };
+    const maxRange = { height: 1200, top: 384 };
+
+    const interpolateTop = (height) => {
+      if (height <= minRange.height) return `${minRange.top}px`;
+      if (height >= maxRange.height) return `${maxRange.top}px`;
+
+      const slope = (maxRange.top - minRange.top) / (maxRange.height - minRange.height);
+      const interpolatedTop = minRange.top + slope * (height - minRange.height);
+      return `${interpolatedTop}px`;
+    };
+
+    const topValue = interpolateTop(presentationHeight);
+
+    let additionalStyles = '';
+    if (presentationHeight <= 405) {
+      additionalStyles += `
+        .tlui-layout__mobile .tlui-button__tool > .tlui-icon {
+          height: 10px !important;
+          width: 10px !important;
+        }
+
+        .tlui-toolbar__tools {
+          flex-direction: row !important;
+        }
+
+        .tlui-toolbar__inner {
+          flex-direction: row-reverse !important;
+        }
+
+        .tlui-layout__bottom {
+          grid-row: auto / auto !important;
+          position: relative !important;
+          top: 2px !important;
+        }
+
+        .tlui-toolbar__tools.tlui-toolbar__tools__mobile {
+          height: 30px !important;
+        }
+
+        [data-side="top"][role="dialog"]:has(.tlui-style-panel) {
+          left: 10rem !important;
+        }
+      `;
+    }
+
+    return `.tlui-layout__bottom { top: ${topValue} !important; }${additionalStyles}`;
+  }}
+
+  [data-darkreader-scheme="dark"] button[data-testid="mobile.styles"] > div.tlui-icon {
+    color: ${colorWhite};
+  }
+
+  ${({ cursorType }) => (cursorType) && `
+    .tl-canvas {
+      cursor: ${cursorType} !important;
+    }
+  `}
 `;
+
 
 const EditableWBWrapper = styled.div`
   &, & > :first-child {
