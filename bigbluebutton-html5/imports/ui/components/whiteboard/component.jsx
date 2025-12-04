@@ -373,7 +373,7 @@ const Whiteboard = React.memo((props) => {
       initialZoomRef.current = initialZoom;
       prevZoomValueRef.current = zoomValue;
     }
-  }, 200);
+  }, 50);
 
   React.useEffect(() => {
     localStorage.setItem('pageZoomMap', JSON.stringify(pageZoomMap));
@@ -1317,6 +1317,10 @@ const Whiteboard = React.memo((props) => {
 
     editor.store.listen(
       (entry) => {
+        if (entry.source !== 'user') {
+          return;
+        }
+
         const { changes } = entry;
         const { updated } = changes;
         const { 'pointer:pointer': pointers } = updated;
@@ -2052,9 +2056,11 @@ const Whiteboard = React.memo((props) => {
             pages.push(...currentPage);
           }
           const allRecords = tlEditorRef.current.store.allRecords();
-          const cameraRecords = allRecords.filter(
-            (record) => record.typeName === 'camera' && record.id?.split(':').pop() === formattedPageId,
+          const cameraRecords = allRecords.filter((record) =>
+            record.typeName === 'camera' &&
+            record.id?.split(':').pop() === String(formattedPageId),
           );
+
           if (cameraRecords?.length < 1) {
             cameras.push(createCamera(formattedPageId, tlZ));
           }
